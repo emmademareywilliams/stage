@@ -2,8 +2,8 @@
 
 test
 
-![lib](images/test.png)
+![lib](test1.png)
 
 ```
-pip install pdoc
+pip install pdoc3
 ```
