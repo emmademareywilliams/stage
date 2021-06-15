@@ -1,8 +1,6 @@
 # Notice d'utilisation du système THEMIS 
 
-Le système **THEMIS** (...) 
-- permet de collecter les données du bâtiment (température, humidité, caractéristiques des circuits énergétiques, par exemple fonctionnement des pompes, etc.) 
-- 
+Le système **THEMIS** permet de collecter les données du bâtiment (température, humidité, caractéristiques des circuits énergétiques, par exemple fonctionnement des pompes, etc.) et ainsi d'effectuer un suivi de ses performances énergétiques.  
 
 ## Présentation du système 
 
