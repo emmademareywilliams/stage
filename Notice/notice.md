@@ -6,6 +6,7 @@ Le système **THEMIS** (...)
 
 ## Présentation du système 
 
+THEMIS se présente sous la forme d'un coffret, qui comprend tous les éléments nécessaires au traitement des données recueillies par les capteurs. 
 
 ## Installations préalables 
 
@@ -75,6 +76,8 @@ Il est possible que wget ne soit pas encore installé sur votre machine. Dans ce
 Une fois la tâche effectuée, on retrouvera le dossier contenant les données PyFina (les fichiers `.meta` et `.dat`).
 
 > Les fichiers ainis téléchargés se présentent sous la forma 'x.meta' ou 'x.dat' avec x un nombre entier. Ce nombre correspond au "feed number" que l'on pourra retrouver à l'adresse IP de gestion des données collectées, dans l'onglet *Feeds*. 
+
+![lib](feed_nb.png)
 
 
 
