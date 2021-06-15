@@ -6,7 +6,11 @@ Le système **THEMIS** (...)
 
 ## Présentation du système 
 
-THEMIS se présente sous la forme d'un coffret, qui comprend tous les éléments nécessaires au traitement des données recueillies par les capteurs. 
+THEMIS se présente sous la forme d'un coffret, qui comprend tous les éléments nécessaires au traitement des données recueillies par les capteurs. Le système comporte : 
+* un routeur 4G cellulaire auquel l'utilisateur doit se connecter pour avoir accès aux données recueillies ; 
+* un capteur radio qui reçoit les informations venant des différents capteurs ;
+* des blocs d'alimentation ;
+* un appareil qui fait office de base de données en stockant tous les flux entrants.
 
 ## Installations préalables 
 
@@ -23,7 +27,7 @@ python3 --upgrade
 ```
 dans le cas où la version installée ne serait pas la dernière version disponible. 
 
-2 types de données : 
+Les données traitées seront de 2 types : 
 * Les données récoltées par THEMIS sont de type *emoncms PHPFINA* ;
 * Les données prises en charge par Python sont de type *PyFina* (une sous-classe de numpy np.ndarray). 
 
