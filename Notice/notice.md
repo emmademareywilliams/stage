@@ -1,6 +1,6 @@
 # Notice d'utilisation du système THEMIS 
 
-Le système **THEMIS** permet de collecter les données du bâtiment (température, humidité, caractéristiques des circuits énergétiques, par exemple fonctionnement des pompes, etc.) et ainsi d'effectuer un suivi de ses performances énergétiques.  
+Le système **THEMIS** (THermic and Energetic MonItoring System) permet de collecter les données du bâtiment (température, humidité, caractéristiques des circuits énergétiques, par exemple fonctionnement des pompes, etc.) et ainsi d'effectuer un suivi de ses performances énergétiques.  
 
 ## Présentation du système 
 
@@ -59,6 +59,8 @@ On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran 
 * *Graphs* permet d'afficher l'évolution temporelle des grandeurs à différentes échelles et de construire certains graphes selon les besoins et objectifs de l'utilisateur ;
 * *Visualisation* permet entre autre de visualiser les graphes de confort (graphiques psychrométriques). 
 
+Pour afficher les graphes des confort, 
+
 
 ### Importation des données Emoncms sous Python 
 
@@ -77,7 +79,7 @@ Il est possible que wget ne soit pas encore installé sur votre machine. Dans ce
 
 Une fois la tâche effectuée, on retrouvera le dossier contenant les données PyFina (les fichiers `.meta` et `.dat`).
 
-> Les fichiers ainis téléchargés se présentent sous la forma 'x.meta' ou 'x.dat' avec x un nombre entier. Ce nombre correspond au "feed number" que l'on pourra retrouver à l'adresse IP de gestion des données collectées, dans l'onglet *Feeds*. 
+> Les fichiers ainsi téléchargés se présentent sous la forma 'x.meta' ou 'x.dat' avec x un nombre entier. Ce nombre correspond au "feed number" que l'on pourra retrouver à l'adresse IP de gestion des données collectées, dans l'onglet *Feeds*. 
 
 ![lib](feed_nb.png)
 
