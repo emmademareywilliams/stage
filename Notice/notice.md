@@ -59,7 +59,11 @@ On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran 
 * *Graphs* permet d'afficher l'évolution temporelle des grandeurs à différentes échelles et de construire certains graphes selon les besoins et objectifs de l'utilisateur ;
 * *Visualisation* permet entre autre de visualiser les graphes de confort (graphiques psychrométriques). 
 
-Pour afficher les graphes des confort, 
+Pour afficher les graphes de confort, on se place dans l'onglet *Visualisation* puis on règle les paramètres comme suit : 
+
+![lib](visu_psychro.png "paramétrage de la visualisation")
+
+L'utilisateur pourra afficher différents graphes en fonction des zones qu'il souhaitera étudier (ici `TRH_chaufferie`est un exemple qui représente une zone donnée). 
 
 
 ### Importation des données Emoncms sous Python 
