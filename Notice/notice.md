@@ -1,6 +1,8 @@
 # Notice d'utilisation du système THEMIS 
 
-Le système *THEMIS* (...) 
+Le système **THEMIS** (...) 
+- permet de collecter les données du bâtiment (température, humidité, caractéristiques des circuits énergétiques, par exemple fonctionnement des pompes, etc.) 
+- 
 
 ## Présentation du système 
 
@@ -14,10 +16,15 @@ Avant de continuer, il est toujours intéressant de vérifier que le système es
 ```
 python3 --version
 ```
+puis 
+```
+python3 --upgrade
+```
+dans le cas où la version installée ne serait pas la dernière version disponible. 
 
 2 types de données : 
 * Les données récoltées par THEMIS sont de type *emoncms PHPFINA* ;
-* Les données prises en charge par le système sont de type *PyFina* (une sous-classe de numpy np.ndarray) : elles permettent d'importer dans Python les données récoltées. 
+* Les données prises en charge par Python sont de type *PyFina* (une sous-classe de numpy np.ndarray). 
 
 Pour manipuler ces données, il va falloir installer un certain nombre de packages Python. Pour ce faire, il faut ouvrir le terminal de l'ordinateur et y taper la ligne de 
 commande suivante : 
@@ -42,7 +49,7 @@ INSÉRÉR ADRESSE IP
 
 On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran : 
 
-![lib](onglets.png "Figure - onglets disponibles")
+![lib](onglets.png "onglets disponibles")
 
 * *Inputs* correspond aux entrées du système (les différents capteurs et les grandeurs qu'ils mesurent) ;
 * *Feeds* correspond aux données relevées, qui sont du type Emoncms PHPFINA ; 
@@ -52,14 +59,23 @@ On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran 
 
 ### Importation des données Emoncms sous Python 
 
+Afin de manipuler les données relevées par THEMIS sous Python, on procède à leur importation sur la machine en tant que données PyFina. Pour ce faire, on utilise la ligne de commande suivante dans le terminal : 
+
 ```
 wget https://raw.githubusercontent.com/alexandrecuer/smartgrid/master/datasets/emoncms-backup-2020-04-22.tar.gz
-tar -xvf emoncms-backup-2020-04-22.tar.gz
-# seulement un exemple, l'adresse ne sera pas celle-ci 
+# seulement un exemple, l'adresse ne sera pas celle-ci
+```
+puis
+```
+tar -xvf emoncms-backup-2020-04-22.tar.gz 
 ```
 
 Il est possible que wget ne soit pas encore installé sur votre machine. Dans ce cas, il faudra procéder à son installation (pour [Windows](https://builtvisible.com/download-your-website-with-wget/) ou [Mac](https://www.maketecheasier.com/install-wget-mac/)). 
 
-Une fois la tâche effectuée, vous pourrez retrouver le dossier contenant les données PyFina.
+Une fois la tâche effectuée, on retrouvera le dossier contenant les données PyFina (les fichiers `.meta` et `.dat`).
+
+> Les fichiers ainis téléchargés se présentent sous la forma 'x.meta' ou 'x.dat' avec x un nombre entier. Ce nombre correspond au "feed number" que l'on pourra retrouver à l'adresse IP de gestion des données collectées, dans l'onglet *Feeds*. 
+
+
 
 
