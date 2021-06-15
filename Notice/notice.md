@@ -7,8 +7,8 @@ Le système *THEMIS* (...)
 
 ## Installations préalables 
 
-La programmation est faite en Python : assurez-vous dans un premier temps que Python est bien installé sur l'ordinateur que vous utiliserez pour manipuler les données. À défaut, 
-vous pouvez l'installer en suivant [ce lien](https://www.python.org/downloads/) (pour Windows et Mac). À noter que Python est installé par défaut sur les appareils Linux. 
+La programmation est faite en Python : on s'assurera dans un premier temps que Python est bien installé sur l'ordinateur qui sera utilisé pour manipuler les données. À défaut, 
+on peut l'installer en suivant [ce lien](https://www.python.org/downloads/) (pour Windows et Mac). À noter que Python est installé par défaut sur les appareils Linux. 
 
 Avant de continuer, il est toujours intéressant de vérifier que le système est à jour. Pour obtenir la version de Python qui tourne sur la machine, on entrera la ligne de commande suivante dans le terminal : 
 ```
@@ -37,7 +37,17 @@ On pourra tester ce nouveau package en suivant les instructions disponibles à [
 
 ### Manipulation directe des données Emoncms 
 
-![onglets.png](url_de_l'image "texte pour le titre, facultatif")
+Pour accéder directement aux relevés des différentes données, on entre l'adresse suivante dans la barre de recherche d'un navigateur: 
+INSÉRÉR ADRESSE IP  
+
+On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran : 
+
+![lib](onglets.png "Figure - onglets disponibles")
+
+* *Inputs* correspond aux entrées du système (les différents capteurs et les grandeurs qu'ils mesurent) ;
+* *Feeds* correspond aux données relevées, qui sont du type Emoncms PHPFINA ; 
+* *Graphs* permet d'afficher l'évolution temporelle des grandeurs à différentes échelles et de construire certains graphes selon les besoins et objectifs de l'utilisateur ;
+* *Visualisation* permet entre autre de visualiser les graphes de confort (graphiques psychrométriques). 
 
 
 ### Importation des données Emoncms sous Python 
