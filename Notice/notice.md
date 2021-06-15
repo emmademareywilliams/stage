@@ -33,7 +33,7 @@ Pour manipuler ces données, il va falloir installer un certain nombre de packag
 commande suivante : 
 * sur MacOS et Linux : 
 ```
-python3 -m install PyFina 
+python3 -m pip install PyFina 
 ```
 
 * sur Windows : 
@@ -63,10 +63,10 @@ Pour afficher les graphes de confort, on se place dans l'onglet *Visualisation* 
 
 ![lib](visu_psychro.png "paramétrage de la visualisation")
 
-L'utilisateur pourra afficher différents graphes en fonction des zones qu'il souhaitera étudier (ici `TRH_chaufferie`est un exemple qui représente une zone donnée). 
+L'utilisateur pourra afficher différents graphes en fonction des zones qu'il souhaitera étudier (ici `TRHchaufferie`est un exemple qui représente une zone donnée). Pour visualiser le graphe, on appuiera sur le bouton `Full screen`. 
 
 
-### Importation des données Emoncms sous Python 
+### Importation des données Emoncms en données PyFina 
 
 Afin de manipuler les données relevées par THEMIS sous Python, on procède à leur importation sur la machine en tant que données PyFina. Pour ce faire, on utilise la ligne de commande suivante dans le terminal : 
 
@@ -88,5 +88,16 @@ Une fois la tâche effectuée, on retrouvera le dossier contenant les données P
 ![lib](feed_nb.png)
 
 
+### Manipulation des données PyFina sur Python
+
+On ouvre un nouveau fichier où l'on recopiera les instructions ci-jointes. Lors de l'enregistrement, le nom du fichier devra porter l'extension `.py`.  
+
+Le début du code correspond à l'importation des différents packages nécessaires : 
+```
+import numpy as np
+import matplotlib.pylab as plt
+import datetime
+import time
+from PyFina import PyFina, getMeta
 
 
