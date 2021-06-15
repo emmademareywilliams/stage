@@ -35,6 +35,11 @@ On pourra tester ce nouveau package en suivant les instructions disponibles à [
 
 ## Manipulation des données 
 
+### Manipulation directe des données Emoncms 
+
+![onglets.png](url_de_l'image "texte pour le titre, facultatif")
+
+
 ### Importation des données Emoncms sous Python 
 
 ```
