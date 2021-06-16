@@ -4,11 +4,19 @@ Le système **THEMIS** (THermic and Energetic MonItoring System) permet de colle
 
 ## Présentation du système 
 
+### Composantes matérielles 
+
 THEMIS se présente sous la forme d'un coffret, qui comprend tous les éléments nécessaires au traitement des données recueillies par les capteurs. Le système comporte : 
 * un routeur 4G cellulaire auquel l'utilisateur doit se connecter pour avoir accès aux données recueillies ; 
 * un capteur radio qui reçoit les informations venant des différents capteurs ;
 * des blocs d'alimentation ;
 * un appareil qui fait office de base de données en stockant tous les flux entrants.
+
+!
+
+### Réseaux associés
+
+Pour avoir accès aux données récupérées par le système physique, on utilise un certain nombre d'adresses IP et d'outils numériques. 
 
 ## Installations préalables 
 
