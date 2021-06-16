@@ -100,5 +100,8 @@ import matplotlib.pylab as plt
 import datetime
 import time
 from PyFina import PyFina, getMeta
+```
+
+
 
 
