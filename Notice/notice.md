@@ -21,7 +21,8 @@ python3 --version
 ```
 puis 
 ```
-python3 --upgrade
+pip install -U pip (MacOs et Linux)
+python -m pip install -U pip (Windows)
 ```
 dans le cas où la version installée ne serait pas la dernière version disponible. 
 
