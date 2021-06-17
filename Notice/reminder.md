@@ -114,12 +114,16 @@ ssh pi@192.168.2.2
 ```
 
 Pour avoir un aperçu de l'architecture de la base de données : 
+```
 ls -al
+```
 
 Pour se diriger dans la branche contenant les données PHPFINA : 
-cd /var/opt/emoncms/phpfina 
+```
+cd var/opt/emoncms/phpfina 
+```
 
-> Il s'agit du chemin classique d'arborification de telles données. Il faudra néanmoins penser à vérifier le chemin sur sa propre machine. 
+> Il s'agit du chemin classique d'arborescence de telles données. Il faudra néanmoins penser à vérifier le chemin sur sa propre machine. 
 
 pi@emonpi:/var/opt/emoncms/phpfina $ cd /var/www
 pi@emonpi:/var/www $ ls
