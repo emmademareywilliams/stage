@@ -34,8 +34,9 @@ On pourra alors se connecter au système où que l'on se trouve dans le monde.
 > Cette dernière affirmation n'est pas totalement vraie : en effet, selon le réseau depuis lequel on se connecte, il se peut que certaines adresses soient fermées (par exemple, on ne peut pas accéder à Node-RED depuis les serveurs du Cerema pour des raisons de sécurité). 
 
 
+## Initialisation du système 
 
-## Installations préalables 
+### Installations préalables 
 
 La programmation est faite en Python : on s'assurera dans un premier temps que Python est bien installé sur l'ordinateur qui sera utilisé pour manipuler les données. À défaut, 
 on peut l'installer en suivant [ce lien](https://www.python.org/downloads/) (pour Windows et Mac). À noter que Python est installé par défaut sur les appareils Linux. 
@@ -67,6 +68,13 @@ python3 -m pip install PyFina
 py -m pip install PyFina
 ```
 On pourra tester ce nouveau package en suivant les instructions disponibles à [cette adresse](https://github.com/Open-Building-Management/PyFina/blob/main/README.md). 
+
+
+### Configuration du routeur 
+
+Avant de pouvoir accéder aux données récoltées sur un appareil (ordinateur ou smartphone), il faut associer le routeur à l'adresse IP utilisée afin de créer une connexion entre le client (la machine de l'utilisateur) et le serveur (le routeur). Pour créer une telle connexion, on utilisera la bibliothèque `socket` dans Python. Un **socket** est un objet permettant de créer une connexion entre le client et le serveur. On pourra se familiariser avec cette bibliothèque à l'[adresse suivante](https://info.blaisepascal.fr/nsi-sockets-python). 
+
+
 
 
 ## Manipulation des données 
