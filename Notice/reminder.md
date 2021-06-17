@@ -83,7 +83,7 @@ Avant de pouvoir accéder aux données récoltées sur un appareil (ordinateur o
 
 Pour accéder directement aux relevés des différentes données, on entre l'adresse suivante dans la barre de recherche d'un navigateur (si l'on est connecté localement au routeur) : 
 ```
-192.168.2.1
+192.168.2.2
 ```
 
 On se retrouve alors avec un certain nombre d'onglets sur la gauche de l'écran : 
