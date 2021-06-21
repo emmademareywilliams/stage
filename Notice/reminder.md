@@ -22,7 +22,7 @@ Pour avoir accès aux données récupérées par le système physique, on utilis
 
 On peut se connecter directement au routeur via le réseau Wifi ou bien grâce à un port éthernet. On se retrouve alors connecté localement à la machine, et on pourra utiliser les adresses suivantes (chaque adresse permet de se connecter à un élément du système :
 * `http://192.168.2.2/` : retourne le site Emoncms où se fait la visualisation des différentes données collectées (connexion à EmonPI) ;
-* `https://192.168.2.1/`: permet d'accéder au routeur, qui gère l'accessibilité et la sécurité (connexxion au routeur) ;
+* `https://192.168.2.1/`: permet d'accéder au routeur, qui gère l'accessibilité et la sécurité (connexion au routeur) ;
 * `http://192.168.2.2:1880/` : renvoie sur Node-RED, qui sera ensuite utilisé pour mettre en place un certain nombre de requêtes et instructions.   
 
 Une autre possibilité est de se connecter depuis un smartphone ou un ordinateur portable via le réseau mobile à l'adresse suivante : 
@@ -32,6 +32,12 @@ https://ceremaida.ddns.net/
 On pourra alors se connecter au système où que l'on se trouve dans le monde. 
 
 > Cette dernière affirmation n'est pas totalement vraie : en effet, selon le réseau depuis lequel on se connecte, il se peut que certaines adresses soient fermées (par exemple, on ne peut pas accéder à Node-RED depuis les serveurs du Cerema pour des raisons de sécurité). 
+
+
+#### Routeur 
+
+
+
 
 
 ## Initialisation du système 
