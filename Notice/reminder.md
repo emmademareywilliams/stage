@@ -36,7 +36,31 @@ On pourra alors se connecter au système où que l'on se trouve dans le monde.
 
 #### Routeur 
 
+La page de supervision du routeur comprend un certain nombre d'onglets et permet diverses fonctionnalités. 
 
+Le premier onglet (dans l'ordre chronologique d'apparition, de haut en bas de l'écran) est dit onglet **Status** : il permet d'avoir accès aux informations du routeur.
+![lib](status.png "onglet de status")
+
+On notera notamment : 
+* *General* : indormations générales, telles que les différentes adresses IP, la wifi, les données générales sur le système, etc. 
+* *Mobile WAN* : paramètres de la connection 4G avec la carte SIM insérée ;
+* *DynDNS* : s'il est activé, affichage de l'adresse IP et des paramètres de l'accès à THEMIS depuis l'extérieur ; 
+* *System Log* : affichage du log et des messages en provenance du système. 
+
+
+L'onglet **Configuration** comprend plusieurs sous onglets permettant la personnalisation de différentes fonctionnalités. 
+
+![lib](configuration.png "onglet de configuration")
+
+Les onglets les plus utilisés seront : 
+* *Expansion port* : désigne quel port sera utilisé pour établir la connexion TCP/IP et lire les données récupérées sur un ordinateur ; 
+* *Mobile WAN* :  configuration de la connexion 4G. 
+
+On notera également la présence d'un sous onglet *Services* : 
+![lib](services.png "sous onglet des services")
+
+* *DynDNS* permet la configuration de l'accès à THEMIS depuis l'extérieur ;
+* *SMS* permet de lier un numéro de téléphone à la carte SIM. 
 
 
 
