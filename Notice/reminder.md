@@ -138,7 +138,7 @@ L'utilisateur pourra afficher différents graphes en fonction des zones qu'il so
 
 Par défaut, les modules présents dans EmonPI sont les onglets décrits précédemment. En fonction des besoins de l'utilisateur, on pourra être amené à personnaliser l'interface avec de nouveaux onglets spécifiques. 
 
-Cette personnalisation se fait à l'aide d'une succession de lignes de commandes directement dans le terminal de la machine. On trouvera ci-dessous un certain nombre de ces instructions. 
+Cette personnalisation se fait à l'aide d'une succession de lignes de commandes directement dans le terminal de la machine. On trouvera ci-dessous un certain nombre de ces instructions (dans le cas où on veut visualiser un graphe psychrométrique). 
 
 Pour se connecter au visualiseur de données via une connexion sécurisée : 
 ```
@@ -157,45 +157,26 @@ cd var/opt/emoncms/phpfina
 
 > Il s'agit du chemin classique d'arborescence de telles données. Il faudra néanmoins penser à vérifier le chemin sur sa propre machine. 
 
-pi@emonpi:/var/opt/emoncms/phpfina $ cd /var/www
-pi@emonpi:/var/www $ ls
-emoncms  html
-pi@emonpi:/var/www $ em
--bash: em: command not found
-pi@emonpi:/var/www $ cd emoncms
-pi@emonpi:/var/www/emoncms $ ls
-composer.json                index.php             route.php
-COPYRIGHT.txt                Lib                   scripts
-core.php                     LICENSE.txt           settings.env.ini
-default.emonpi.settings.php  locale.php            settings.ini
-default-settings.ini         Modules               tests
-default-settings.php         param.php             Theme
-docs                         php-info.php          version.txt
-example.settings.ini         process_settings.php
-example.settings.php         readme.md
-pi@emonpi:/var/www/emoncms $ git status
-On branch stable
-Your branch is up to date with 'origin/stable'.
+Pour afficher le statut de la branche dans laquelle on se situe : 
+```
+git status
 
-nothing to commit, working tree clean
-pi@emonpi:/var/www/emoncms $ git remote set-url origin https://github.com/alexandrecuer/emoncms.git
-pi@emonpi:/var/www/emoncms $ git pull
-remote: Enumerating objects: 284, done.
-remote: Counting objects: 100% (188/188), done.
-remote: Compressing objects: 100% (31/31), done.
-remote: Total 284 (delta 165), reused 178 (delta 157), pack-reused 96
-Receiving objects: 100% (284/284), 173.91 KiB | 1.05 MiB/s, done.
-Resolving deltas: 100% (202/202), completed with 79 local objects.
-From https://github.com/alexandrecuer/emoncms
- * [new branch]        bios         -> origin/bios
- * [new branch]        psychrograph -> origin/psychrograph
- * [new branch]        themis       -> origin/themis
-Your configuration specifies to merge with the ref 'refs/heads/stable'
-from the remote, but no such ref was fetched.
-pi@emonpi:/var/www/emoncms $ git checkout psychrograph
-Branch 'psychrograph' set up to track remote branch 'psychrograph' from 'origin'.
-Switched to a new branch 'psychrograph'
-pi@emonpi:/var/www/emoncms $ exit
+```
+
+Pour changer l'URL de la commande (?) : 
+```
+git remote set-url origin https://github.com/alexandrecuer/emoncms.git
+```
+
+Pour extraire de l'adresse ci-dessus tous les objets (y compris le graphe psychrométrique, qui nous intéresse) : 
+```
+git pull
+```
+
+Pour ajouter une nouvelle branche à notre graphique psychrométrique : 
+```
+git checkout psychrograph
+```
 
 
 ### Importation des données Emoncms en données PyFina 
