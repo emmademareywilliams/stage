@@ -43,4 +43,9 @@ Le modèle est composé de plusieurs couches :
 Le modèle permet ainsi de connecter un appareil à une adresse IP spécifique et d'établir un transfert de données, dans un sens ou dans l'autre, entre les deux serveurs. 
 
 
+## MQTT 
+
+Le protocole **MQTT** est un protocole de communication très utile lorsque l'on traite de l'Internet des objets. En effet, il s'agit d'un protocole open source de messagerie qui assure des communications non permanentes entre des appareils par le transport de leurs messages. Il est particulièrement intéressant du fait de sa légéreté, qui le rend compatible avec des équipements munis de petits microcontrôleurs. 
+
+
 
