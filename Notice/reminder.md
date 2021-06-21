@@ -39,6 +39,7 @@ On pourra alors se connecter au système où que l'on se trouve dans le monde.
 La page de supervision du routeur comprend un certain nombre d'onglets et permet diverses fonctionnalités. 
 
 Le premier onglet (dans l'ordre chronologique d'apparition, de haut en bas de l'écran) est dit onglet **Status** : il permet d'avoir accès aux informations du routeur.
+
 ![lib](status.png "onglet de status")
 
 On notera notamment : 
@@ -57,6 +58,7 @@ Les onglets les plus utilisés seront :
 * *Mobile WAN* :  configuration de la connexion 4G. 
 
 On notera également la présence d'un sous onglet *Services* : 
+
 ![lib](services.png "sous onglet des services")
 
 * *DynDNS* permet la configuration de l'accès à THEMIS depuis l'extérieur ;
