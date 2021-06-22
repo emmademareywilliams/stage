@@ -48,4 +48,25 @@ Le modèle permet ainsi de connecter un appareil à une adresse IP spécifique e
 Le protocole **MQTT** est un protocole de communication très utile lorsque l'on traite de l'Internet des objets. En effet, il s'agit d'un protocole open source de messagerie qui assure des communications non permanentes entre des appareils par le transport de leurs messages. Il est particulièrement intéressant du fait de sa légéreté, qui le rend compatible avec des équipements munis de petits microcontrôleurs. 
 
 
+## Journalisation avec Python
 
+Il est important de mettre en place un système de journalisation lorsque l'on développer un logiciel ou un service car il nous permet de suivre le déroulé des événements lors de leur fonctionnement. En Python, on utilisera la bibliothèque *logging* dont un tutoriel est disponible à [cette adresse](https://docs.python.org/fr/3/howto/logging.html). 
+
+Les fonctions principales sont les suivantes :
+* `logging.info()` ou `logging.debug()` pour rapporter des événements qui ont lieu lors du fonctionnement ;
+* `logging.warning()` pour émettre un avertissement (sans que le fonctionnement du logiciel soit compromis) ;
+* `logging.error()` ou `logging.critical()` pour rendre compte d'une erreur qui porte préjudice au bon fonctionnement du service. 
+
+Ces fonctions sont associées aux différents niveaux d'importance attribués à un événement : 
+```
+DEBUG --> INFO --> WARNING --> ERROR --> CRITICAL 
+```
+> Par défaut, le niveau d'affichage dans le log est `WARNING`.
+
+Communément, on crée un fichier `.log` qui enregistrera toutes les informations relatives au déroulement du fonctionnement du logiciel. Pour créer ce fichier, on utilisera la fonction suivante : 
+
+```
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
+```
+
+L'utilisation de l'argument `level` permet de choisir le niveau seuil à partir duquel les informations seront affichées dans le log. 
