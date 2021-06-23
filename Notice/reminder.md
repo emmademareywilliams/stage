@@ -29,9 +29,9 @@ Une autre possibilité est de se connecter depuis un smartphone ou un ordinateur
 ```
 https://ceremaida.ddns.net/
 ```
-On pourra alors se connecter au système où que l'on se trouve dans le monde. 
+On pourra alors se connecter au système où que l'on se trouve dans le monde. Cette adresse est fournie par le site [No IP](https://www.noip.com/) qui permet l'allocation d'adresses IP dynamiques pour accéder au système depuis l'extérieur. 
 
-> Cette dernière affirmation n'est pas totalement vraie : en effet, selon le réseau depuis lequel on se connecte, il se peut que certaines adresses soient fermées (par exemple, on ne peut pas accéder à Node-RED depuis les serveurs du Cerema pour des raisons de sécurité). 
+> Cette dernière affirmation n'est pas totalement vraie : en effet, selon le réseau depuis lequel on se connecte, il se peut que certaines adresses soient fermées (par exemple, on ne peut pas accéder à Node-RED depuis les serveurs du Cerema pour des raisons de sécurité). Plus on a de ports fermés, plus le niveau de sécurité est important. 
 
 
 #### Routeur 
@@ -54,7 +54,7 @@ L'onglet **Configuration** comprend plusieurs sous onglets permettant la personn
 ![lib](configuration.png "onglet de configuration")
 
 Les onglets les plus utilisés seront : 
-* *Expansion port* : désigne quel port sera utilisé pour établir la connexion TCP/IP et lire les données récupérées sur un ordinateur ; 
+* *Expansion port* : fait le lien entre les ports physiques du router et la machine : on détermine quel port sera ouvert, de manière à lire les données récupérées sur un ordinateur ; 
 * *Mobile WAN* :  configuration de la connexion 4G. 
 
 On notera également la présence d'un sous onglet *Services* : 
