@@ -17,7 +17,11 @@ Dans l'écriture d'une adresse IP, on peut se retrouver confronté à ces diffé
 * `http` : permet le simple transfert de données du serveur Internet à l'utilisateur, que ce soit dans un sens ou dans l'autre. Le principal problème de ce genre d'adresse est l'absence de toute sécurité : lorsque les données sont envoyées d'un serveur à l'autre, toute personne extérieure à l'échange peut s'y connecter et ainsi avoir accès au contenu. 
 * `https`: le 's' veut dire 'sécurité', et c'est là tout l'intérêt de ce type d'adresse par rapport aux adresses http. Ici, le transfert est sécurisé de part en part car les données sont cryptées tout au long de l'échange grâce à une clé de chiffrement connue des seuls serveurs mis en relation. 
 
-Le protocole **SSH** (Secure SHell) correspond justement à ce processus de cryptage des données qui permet de sécuriser les échanges via Internet. 
+Le protocole **SSH** (Secure SHell) correspond au processus de cryptage des données qui permet de sécuriser les échanges via Internet. Il repose sur l'existance de deux clés de cryptage : 
+* une clé *publique* à laquelle quiconque peut avoir accès et qui est utilisée pour crypter les données ;
+* une clé *privée* connues des seuls client et serveur, qui permet le décryptage des informations. 
+
+Chacun de ces protocoles correspond à un port différent : le port 80 pour `http`, le port 443 pour `https` et le port 22 pour `ssh`. 
 
 ## Protocoles RS485 et RS232
 
@@ -26,10 +30,11 @@ Le protocole **SSH** (Secure SHell) correspond justement à ce processus de cryp
 Critère | RS232 | RS485
 --|--|--
 Nombre de fils | 9 à 25 | 2 (transmission + GND)
-Transmission | Bidirectionnelle | Unidirectionnelle 
+Transmission | Bidirectionnelle | Bidirectionnelle / unidirectionnelle (pour THEMIS)
 Longueur | 15 m | 1200 m 
 
 Ces différences impliquent une utilisation différente pour chacun des deux protocoles, même si ceux-ci peuvent être utilisés de manière simultanés sur un même appareil. 
+En pratique, les deux protocoles se valent. 
 
 
 ## Le modèle TCP/IP 
