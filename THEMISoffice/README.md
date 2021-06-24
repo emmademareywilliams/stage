@@ -14,3 +14,9 @@ suivante dans la barre de recherche d'un navigateur :
 ```
 
 > Il faudra être connecté localement au routeur pour avoir accès à Emoncms de cette manière. 
+
+Il se peut que le service `emoncms_mqtt` ne soit pas actif (pour vérifier s'il l'est, se référer à l'onglet *Admin* dans Emoncms). Si le service n'est pas opérationnel, il faudra le rebooter avec la ligne de commande suivante : 
+```
+sudo systemctl restart emoncms_mqtt
+```
+
