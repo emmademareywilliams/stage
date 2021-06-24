@@ -4,7 +4,7 @@ Dans ce répertoire on trouvera tous les codes relatifs au fonctionnement du sys
 
 * `router_mode.py` permet de lire sur l'ordinateur les données en provenance des capteurs et reçues par le récepteur MBus. On peut choisir le mode 
 de connexion au routeur : en utilisant dans Python soit la bibliothèque `socket` soit la bibliothèque `serial`.
-* etc. 
+* `mqttTools.py` est le fichier qui prend en charge l'envoi des données sur le site Emoncms.  
 
 Pour se connecter à Emoncms et visualiser les entrées (correspondant aux capteurs dont les données sont reçues par le récepteur MBus), on entrera l'adresse 
 suivante dans la barre de recherche d'un navigateur : 
