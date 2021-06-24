@@ -20,20 +20,21 @@ Pour avoir accès à toutes les données des tâches en cours d'exécution (% de
 top
 ```
 
-Pour gérer les systèmes et services de la machines :
-```
-system ctl start --> démarre le service 
-system ctl stop --> arrête le service 
-```
-
 Pour se placer comme super utilisateur :
 ```
 sudo 
 ```
 
+Pour gérer les systèmes et services de la machines :
+```
+sudo systemctl start {nom du service} --> démarre le service 
+sudo systemctl stop {nom du service} --> arrête le service 
+```
+
+
 Pour avoir accès au journal d’un certain service (aka tout ce qu’il a fait depuis un certain temps) :
 ```
-journal ctl 
+sudo journalctl {nom du service} -u -f 
 ```
 
 > Cette ligne de commande, qui peut être assimilée à un log, est pratique lorsqu'il s'agit de débugger un programme.
