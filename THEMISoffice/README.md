@@ -38,10 +38,16 @@ On pourra y trouver entre autres les dernières données reçues sous la forme d
 
 ## Makefile 
 
-Le fichier `makefile` permet de paramétrer le fichier `ota2tcp.py` en tant que service exécutable. Il contient 2 méthodes :
+Le fichier *makefile* permet de paramétrer le fichier `ota2tcp.py` en tant que service exécutable. Il contient 2 méthodes :
 * la méthode `install` qui installe le service, notamment en créant les fichiers log et conf, en les redirigeant vers les fichiers adéquates puis en démarrant l'exécution du système ;
 * la méthode `uninstall` qui permet une désinstallation propre du service (les symlinks sont écrasés). 
 
-> Le fichier `makefile` ainsi que le fichier Python associé doivent être situés dans le même répertoire. 
+> Le fichier *makefile* ainsi que le fichier Python associé doivent être situés dans le même répertoire. 
+
+Ci-dessous quelques remarques par rapport à la syntaxe utilisée dans le fichier `makefile`: 
+* Le document débute avec `.PHONY`: ce qui suit cette commande sera automatiquement exécuté lorsqu'on rentrera l'instruction `make`dans le terminal ;
+* les instructions précédées par le signe `@` ne seront pas affichées lors de l'exécution du fichier *makefile* ; 
+* il faut déclarer les bonnes arborescences pour tous les fichiers que l'on sera amenés à utiliser (par exemple ici, les fichiers créés sont ceux de service, d'exécution, de log et de configuration).  
+
 
 
