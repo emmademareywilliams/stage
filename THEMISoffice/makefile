@@ -15,7 +15,7 @@ help:
 	@echo "to create the conf file, run: make ota2tcp"
 	@echo "make install name=ota2tcp\n"
 	@echo "make uninstall name=ota2tcp\n"
-	
+
 ota2tcp:
 	@echo "creating $@ conf file"
 	@printf '{\n' > $@.conf
@@ -24,8 +24,8 @@ ota2tcp:
 
 install:
 	@sudo chmod +x $(here)/$(name).py
-	@if [ -f $(name).conf]; then\
-	    echo "creating conf dir and populating with a conf file";\
+	@if [ -f $(name).conf ]; then\
+		echo "creating conf dir and populating with a conf file";\
 		sudo mkdir -p $(conf_dir);\
 		sudo cp $(name).conf $(conf_dir)/$(name).conf;\
 		sudo chmod 666 $(conf_dir)/$(name).conf;\
@@ -36,16 +36,16 @@ install:
 	@echo "creating the service file"
 	@printf "[Unit]\n" > $(name).service
 	@printf "Description=$(name)\n" >> $(name).service
-	@printf "Requires=var-log.mount systemd-timesyncd.service\n" >> $(name).service
+	@printf "Requires=systemd-timesyncd.service\n" >> $(name).service
 	@printf "After=network.target redis.service mosquitto.service\n" >> $(name).service
 	@printf "\n" >> $(name).service
 	@printf "[Service]\n" >> $(name).service
 	@printf "User=$(user)\n" >> $(name).service
-	@printf "ExecStart=$(exe_dir)/$(name).py --log=$(log_dir)/$(name).log" >> $(name).service;\
-	@if [ -f $(conf_dir)/$(name).conf]; then\
+	@printf "ExecStart=$(exe_dir)/$(name).py --log=$(log_dir)/$(name).log" >> $(name).service
+	@if [ -f $(conf_dir)/$(name).conf ]; then\
 		printf " --conf=$(conf_dir)/$(name).conf" >> $(name).service;\
 	fi
-	@printf "\n"
+	@printf "\n" >> $(name).service
 	@printf "Type=exec\n" >> $(name).service
 	@printf "Restart=always\n" >> $(name).service
 	@printf "RestartSec=5\n" >> $(name).service
