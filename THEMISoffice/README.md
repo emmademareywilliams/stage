@@ -45,9 +45,9 @@ Le fichier *makefile* permet de paramétrer le fichier `ota2tcp.py` en tant que 
 > Le fichier *makefile* ainsi que le fichier Python associé doivent être situés dans le même répertoire. 
 
 Ci-dessous quelques remarques par rapport à la syntaxe utilisée dans le fichier `makefile`: 
-* Le document débute avec `.PHONY`: ce qui suit cette commande sera automatiquement exécuté lorsqu'on rentrera l'instruction `make`dans le terminal ;
-* les instructions précédées par le signe `@` ne seront pas affichées lors de l'exécution du fichier *makefile* ; 
-* il faut déclarer les bonnes arborescences pour tous les fichiers que l'on sera amenés à utiliser (par exemple ici, les fichiers créés sont ceux de service, d'exécution, de log et de configuration).  
+- Le document débute avec `.PHONY`: ce qui suit cette commande sera automatiquement exécuté lorsqu'on rentrera l'instruction `make`dans le terminal ;
+- les instructions précédées par le signe `@` ne seront pas affichées lors de l'exécution du fichier *makefile* ; 
+- il faut déclarer les bonnes arborescences pour tous les fichiers que l'on sera amenés à utiliser (par exemple ici, les fichiers créés sont ceux de service, d'exécution, de log et de configuration).  
 
 
 
