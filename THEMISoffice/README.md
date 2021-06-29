@@ -42,6 +42,6 @@ Le fichier `makefile` permet de paramétrer le fichier `ota2tcp.py` en tant que 
 * la méthode `install` qui installe le service, notamment en créant les fichiers log et conf, en les redirigeant vers les fichiers adéquates puis en démarrant l'exécution du système ;
 * la méthode `uninstall` qui permet une désinstallation propre du service (les symlinks sont écrasés). 
 
-
+> Le fichier `makefile` ainsi que le fichier Python associé doivent être situés dans le même répertoire. 
 
 
