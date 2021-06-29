@@ -48,6 +48,8 @@ touch {nom du fichier}.{extension}
 Pour changer le groupe d'un fichier :
 ```
 chown 
+OU
+chgrp --> plus simple d'utilisation 
 ```
 
 > Le niveau d'autorisation d'un fichier change en fonction du groupe : par exemple, pour un fichier donné, le propriétaire peut lire et écrire dans ce fichier, alors que le groupe n'a que la possibilité de le lire. 
@@ -56,11 +58,35 @@ Pour changer le mode d'un fichier (exécutable ou non) :
 ```
 chmod 
 ```
+Cette commande peut être suivie par les instructions suivantes : 
+* `+/- {niveau}`: pour changer le niveau d'interaction du groupe avec le fichier 
+* `666`: tous les utilisateurs peuvent lire et écrire, mais pas exécuter 
+* `777`: tous les utilisateurs peuvent effectuer toutes les actions possibles sur les fichiers (y compris l'exécution) 
+
+> Les différents niveaux d'interaction d'un utilisateur avec les fichiers sont les suivants : 
+> - `r` = read 
+> - `w` = write
+> - `x` = execute 
+
 
 Pour effacer un fichier :
 ```
 rm
 ```
 
+Pour copier des fichiers et/ou répertoires :
+```
+cp
+```
+
+Pour créer un répertoire : 
+```
+mkdir
+```
+
+Pour créer des liens / raccourcis entre différents fichiers : 
+```
+ln
+```
 
 
