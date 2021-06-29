@@ -38,7 +38,7 @@ On pourra y trouver entre autres les dernières données reçues sous la forme d
 
 ## Makefile 
 
-Le fichier *makefile* permet de paramétrer le fichier `ota2tcp.py` en tant que service exécutable. Il contient 2 méthodes :
+Le fichier *makefile* permet de paramétrer le fichier `ota2tcp.py` en tant que service exécutable. Il contient 2 méthodes principales :
 * la méthode `install` qui installe le service, notamment en créant les fichiers log et conf, en les redirigeant vers les fichiers adéquates puis en démarrant l'exécution du système ;
 * la méthode `uninstall` qui permet une désinstallation propre du service (les symlinks sont écrasés). 
 
