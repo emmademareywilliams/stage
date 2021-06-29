@@ -2,9 +2,14 @@
 
 Dans ce répertoire on trouvera tous les codes relatifs au fonctionnement du système THEMIS installé dans mon bureau :
 
-* `router_mode.py` permet de lire sur l'ordinateur les données en provenance des capteurs et reçues par le récepteur MBus. On peut choisir le mode 
-de connexion au routeur : en utilisant dans Python soit la bibliothèque `socket` soit la bibliothèque `serial`.
-* `mqttTools.py` est le fichier qui prend en charge l'envoi des données sur le site Emoncms.  
+* `ota2tcp.py` est le fichier finalisé qui permet :
+  - de choisir le mode de connexion au routeur : en utilisant dans Python soit la bibliothèque `socket` soit la bibliothèque `serial`
+  - de lire sur l'ordinateur les données en provenance des capteurs et reçues par le récepteur MBus
+  - d'écrire sur le port série du routeur lorsqu'un nouveau capteur lance une procédeure d'installation 
+  - de filtrer les capteurs à partir de leur numéro de série afin de n'afficher sur Emoncms que les données qui nous intéressent 
+
+* `router_mode.py` est une ancienne version de `ota2tcp.py` (elle ne permet notamment pas le filtrage des capteurs) 
+* `mqttTools.py` est le fichier qui prend en charge l'envoi des données sur le site Emoncms  
 * `makefile` est le fichier qui permet d'automatiser l'exécution du code `ota2tcp.py` en le paramétrant en service exécutable. 
 
 
