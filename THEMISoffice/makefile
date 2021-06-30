@@ -12,7 +12,7 @@ here := $(shell pwd)
 
 help:
 	@echo "to install hardware services\n"
-	@echo "to create the conf file, run: make ota2tcp"
+	@echo "to create the conf file, run: make service_name eg : make ota2tcp"
 	@echo "make install name=ota2tcp\n"
 	@echo "make uninstall name=ota2tcp\n"
 
