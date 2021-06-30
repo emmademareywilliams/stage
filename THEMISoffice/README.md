@@ -39,6 +39,15 @@ On pourra y trouver entre autres les dernières données reçues sous la forme d
 
 ## Maintenance 
 
+On pourra également se connecter au routeur en externe (très utile lorsqu'on est en télétravail). Pour ce faire, il faut entrer dans le terminal la commande suivante :
+```
+ssh pi@192.168.2.2
+```
+Le terminal demande alors un mot de passe, qui est : *emoncms2016*
+On pourra alors avoir accès à tous les répertoires contenus sur le Raspberry. 
+
+> Ces répertoires ne sont accessibles qu'en ligne de commande, il faudra donc être un minimum familiarisé avec la syntaxe de ligne de commande Linux pour pouvoir y naviguer. Les fonctionnalités y sont très restreintes, ainsi que les affichages. 
+
 Pour lancer (respectivement pour arrêter) le service `ota2tcp` depuis l'ordinateur, on exécutera la ligne de commande suivante : 
 
 ```
@@ -50,6 +59,12 @@ Pour contrôler l'état du service (s'il tourne bien, s'est bien arrêté ou si,
 systemctl status ota2tcp
 ```
 
+Pour avoir accès à un fichier directement à partir du terminal (particulièrement utile lorsqu'on est connecté en externe au routeur) : 
+```
+nano {nom du fichier}
+```
+
+> Il faut bien se trouver dans le répertoire où se situe le fichier pour que cette commande puisse s'exécuter. 
 
 
 ## Makefile 
