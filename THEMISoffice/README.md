@@ -29,19 +29,27 @@ Il se peut que le service `emoncms_mqtt` ne soit pas actif (pour vérifier s'il 
 sudo systemctl restart emoncms_mqtt
 ```
 
+L'adresse suivante donne accès à un *buffer*, c'est-à-dire à un tampon entre la machine de l'utilisateur et Emoncms : 
+```
+http://127.0.0.1/phpRedisAdmin
+```
+On pourra y trouver entre autres les dernières données reçues sous la forme d'une base de données SQL, ainsi qu'un système de queue lorsque les flux auront été établis (dans le cas où plusieurs signaux en provenance du même capteur sont reçus en même temps). 
+
+
+
+## Maintenance 
+
 Pour lancer (respectivement pour arrêter) le service `ota2tcp` depuis l'ordinateur, on exécutera la ligne de commande suivante : 
 
 ```
 sudo systemctl start ota2tcp ---> lance l'exécution : les nouvelles valeurs peuvent être lues sur Emoncms 
 sudo systemctl stop ota2tcp ---> stoppe l'exécution 
 ```
-
-
-L'adresse suivante donne accès à un *buffer*, c'est-à-dire à un tampon entre la machine de l'utilisateur et Emoncms : 
+Pour contrôler l'état du service (s'il tourne bien, s'est bien arrêté ou si, au contraire, il y a eu une erreur lors de l'exécution):
 ```
-http://127.0.0.1/phpRedisAdmin
+systemctl status ota2tcp
 ```
-On pourra y trouver entre autres les dernières données reçues sous la forme d'une base de données SQL, ainsi qu'un système de queue lorsque les flux auront été établis (dans le cas où plusieurs signaux en provenance du même capteur sont reçus en même temps). 
+
 
 
 ## Makefile 
