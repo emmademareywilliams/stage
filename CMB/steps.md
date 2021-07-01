@@ -12,7 +12,15 @@ Pour ce faire, il faudra paramétrer l'interface Emoncms afin de créer une nouv
 Pour accéder à l'UI du routeur à distance : 
 ```
 https://chaufferiedlcf.ddns.net 
+  OU
+176.178.161.180
+
+User : root
+Password : Taxo10in2xcw*
 ```
+
+Au besoin, on pourra ouvrir une connexion *ssh* dans l'onglet *Nat* de l'UI du routeur. 
+
 
 ## Step 1 : créer le flux 
 
@@ -40,4 +48,11 @@ Dans un script python, on commence par importer un connecteur :
 import mysql.connector
 ```
 
+## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
   
+Les fichiers qui gèrent l'interface graphique d'Emoncms se trouvent [ici](https://github.com/emoncms/emoncms/tree/master/Modules/vis) (ou bien, sur la machine, au chemin suivant : `opt/openenergymonitor/emoncms/Modules/vis`).
+
+On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création du graphe où seront superposées les courbes de température et de fonctionnement de la pompe. 
+
+Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
+
