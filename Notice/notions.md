@@ -75,3 +75,25 @@ logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBU
 ```
 
 L'utilisation de l'argument `level` permet de choisir le niveau seuil à partir duquel les informations seront affichées dans le log. 
+
+
+## Requêtes synchrones et asynchrones 
+
+Un code **synchrone** s'exécute ligne après ligne en attendant la fin de l'exécution de la ligne précédente : il ne peut donc y avoir de tâches effectuées en parallèle. 
+Au contraire, dans un code **asynchrone**, la ligne suivante n'attendra pas que la ligne asynchrone ait fini son exécution.
+
+Plus généralement, la communication de données peut être synchrone ou asynchrone : 
+* Dans le cas d'une connexion *synchrone*, tous les interlocuteurs sont connectés au même moment et échangent les informations de manière simultanée et instantannée. 
+* Si la communication est *asynchrone*, les échanges se font en mode différé et les interlocuteurs ne doivent pas tous être connectés au même moment. Cette méthode de communication repose sur le mécanisme de dépôt de l'information dans des réservoirs de stockage momentané publics ou privés.
+
+
+## Sites statiques ou dynamiques 
+
+Dans le monde de la programmation web, on rencontre deux types de sites : 
+
+* les sites **statiques** apparaissent tels qu'ils on été conçus, c'est-à-dire que leur contenu ne change pas. Les principaux langages utilisés pour ce genre de site sont HTML5 et CSS3. Ils sont beaucoup plus simples et moins chers à développer.
+* les sites **dynamiques** affichent un contenu et des informations différentes suivant l’interaction et les demandes des visiteurs. Ils résultent d'une combinaison entre un langage (de programmation, comme PHP ou de script, comme JavaScript) et d'une base de données (e.g. MySQL). 
+
+
+Un **CMS** (Content Management System) est un logiciel permettant la création et la gestion d'un site web dynamique. Le plus utilisé à ce jour est WordPress. 
+
