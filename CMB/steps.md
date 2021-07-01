@@ -20,4 +20,4 @@ Pour créer le flux qui correspondra au fonctionnement de la pompe, on doit cré
 * un fichier `.meta` : on copiera le meta de la température de départ du circuit d'eau ;
 * un fichier `.dat` : il sera initialisé via Python pour ne contenir que des 1. Ce sera ce fichier qui par la suite sera modifié pour correspondre au comportement de la pompe. 
 
-POur écrire les données dans le fichier `.dat`, on utilisera la bibliothèque `struct` dans Python (voir ici la documentation de la librairie). 
+POur écrire les données dans le fichier `.dat`, on utilisera la bibliothèque `struct` dans Python (voir [ici](https://docs.python.org/3/library/struct.html) la documentation de la librairie). 
