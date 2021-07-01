@@ -17,5 +17,5 @@ Pour obtenir une estimation des valeurs de R et de C, on utilise le code `convo.
 
 Les résultats ainsi obtenus peuvent être comparés avec les vraies valeurs de température relevées sur le terrain : 
 
-![résultat](images/testRC_1.png) 
+![résultat](images/result_circuit_cellules.png.png) 
 
