@@ -20,4 +20,24 @@ Pour créer le flux qui correspondra au fonctionnement de la pompe, on doit cré
 * un fichier `.meta` : on copiera le meta de la température de départ du circuit d'eau ;
 * un fichier `.dat` : il sera initialisé via Python pour ne contenir que des 1. Ce sera ce fichier qui par la suite sera modifié pour correspondre au comportement de la pompe. 
 
-POur écrire les données dans le fichier `.dat`, on utilisera la bibliothèque `struct` dans Python (voir [ici](https://docs.python.org/3/library/struct.html) la documentation de la librairie). 
+Pour écrire les données dans le fichier `.dat`, on utilisera la bibliothèque `struct` dans Python (voir [ici](https://docs.python.org/3/library/struct.html) la documentation de la librairie). 
+On s'inspirera des fonctions `createMeta`, `createFeed` et `newPHPFina` disponible à [ce lien](https://github.com/alexandrecuer/tf_works/blob/master/BIOS/src/tools/phpfina.py). Ces fonctions permettent de créer un nouvel objet PHPFina, non relié à un flux Emoncms, en utilisant un tableau numpy. 
+
+
+## Step 2 : faire reconnaître le flux par Emoncms 
+
+Emoncms reconnaît des flux FINA associés à des métadonnées SQL : aussi, il faudra associer notre flux créé de toutes pièces à de telles métadonnées afin qu'il soit reconnu par Emoncms et apparaisse dans la liste des flux. 
+
+Pour installer mysql pour python : 
+
+```
+sudo apt-get install -y python3-mysql.connector
+```
+
+Dans un script python, on commence par importer un connecteur :
+
+```
+import mysql.connector
+```
+
+  
