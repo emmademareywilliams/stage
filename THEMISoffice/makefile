@@ -4,17 +4,17 @@ user := $(shell id -u -n)
 
 service_dir := /etc/systemd/system
 
-exe_dir := /usr/local/bin/bios/hardware
+exe_dir := /usr/local/bin/bios_hardware
 log_dir := /var/log/bios
 conf_dir := /etc/bios
 
 here := $(shell pwd)
 
 help:
-	@echo "to install hardware services\n"
+	@echo "THIS MAKEFILE PERMITS TO INSTALL HARDWARE SERVICES"
 	@echo "to create the conf file, run: make service_name eg : make ota2tcp"
-	@echo "make install name=ota2tcp\n"
-	@echo "make uninstall name=ota2tcp\n"
+	@echo "make install name=ota2tcp"
+	@echo "make uninstall name=ota2tcp"
 
 ota2tcp:
 	@echo "creating $@ conf file"

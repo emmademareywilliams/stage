@@ -28,49 +28,40 @@ def decodeFrame(frame, length):
     
     frame : message mbus wireless sans l'octet de start, la longueur et l'octet de fin
     
-    retourne :
-    - le payload à publier sur le broker MQTT
-    - un message pour le log
+    retourne le payload à publier sur le broker MQTT
     """
     payload = {}
-    message = None
     sensorID = sensorTypes[frame[18]] # on détermine le type de capteur
-    log.debug('le capteur détecté est de type : {}'.format(sensorID))
     
     if sensorID in ['temp', 'tempRH', 'PT100'] and len(frame)>=23:
-        tempData = int.from_bytes(frame[21:23], byteorder = 'little', signed = True)/10
-        payload['temp'] = tempData
-        message = 'température : {} °C'.format(tempData)
+        temp = int.from_bytes(frame[21:23], byteorder = 'little', signed = True)/10
+        payload['temp'] = temp
     
     if sensorID == 'tempRH' and len(frame)>=25:
-        rhData = int.from_bytes(frame[23:25], byteorder = 'little')/10
-        payload['rh'] = rhData
-        message = 'HR : {} %'.format(rhData)
+        rh = int.from_bytes(frame[23:25], byteorder = 'little')/10
+        payload['rh'] = rh
     
     if sensorID == 'CO2' and len(frame)>=27:
-        co2Data = int.from_bytes(frame[21:23], byteorder = 'little')
-        tempData = int.from_bytes(frame[23:25], byteorder = 'little', signed = True)/10
-        rhData = int.from_bytes(frame[25:27], byteorder = 'little')/10
-        payload['CO2'] = co2Data
-        payload['temp'] = tempData
-        payload['rh'] = rhData
-        message = 'taux de CO2 : {} ppm \n température : {} °C \n HR : {} %'.format(co2Data, tempData, rhData)
+        co2 = int.from_bytes(frame[21:23], byteorder = 'little')
+        temp = int.from_bytes(frame[23:25], byteorder = 'little', signed = True)/10
+        rh = int.from_bytes(frame[25:27], byteorder = 'little')/10
+        payload['CO2'] = co2
+        payload['temp'] = temp
+        payload['rh'] = rh
     
     if sensorID == '4_20mA' and len(frame)>=23:
-        currData = int.from_bytes(frame[21:23], byteorder = 'little')/100
-        payload['current'] = currData
-        message = 'valeur du courant : {} mA'.format(currData)
+        curr = int.from_bytes(frame[21:23], byteorder = 'little')/100
+        payload['current'] = curr
     
     if sensorID in ['0_5V', '0_10V'] and len(frame)>=23:
-        voltData = int.from_bytes(frame[21:23], byteorder = 'little')/100
-        payload['voltage'] = voltData
-        message = 'valeur de tension : {} V'.format(voltData)
+        volt = int.from_bytes(frame[21:23], byteorder = 'little')/100
+        payload['voltage'] = volt
     
     if len(frame) == length :
         payload["rssi"] = frame[-1]/2
         payload["battery status"] = frame[-2]
     
-    return payload, message
+    return payload
 
 
 class DataFlow:
@@ -140,9 +131,9 @@ class DataFlow:
                             # on décode et on publie les infos du capteur dans Emoncms :        
                             if publish:
                                 self._log.debug('mesure à décoder')
-                                payload, message = decodeFrame(frame, length)
-                                if message:
-                                    self._log.debug(message)
+                                payload = decodeFrame(frame, length)
+                                if payload:
+                                    self._log.debug(payload)
                                 payload['repeated'] = repeated
                                 msg = publishToMQTT(sensorNbstr, payload)
                                 if msg["success"]:
@@ -205,18 +196,25 @@ class DataFlow:
             start = None
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
                 self.s.connect((url, port))
-                start = self.s.recv(1)
-                if start and start[0] == 0x68:
-                    #self._log.debug("MBUS flag detected")
-                    length = self.s.recv(1)[0]
-                    frame = self.s.recv(length)
-                    stop = self.s.recv(1)[0]
-                    if stop == 0x16:
-                        self._log.debug("0x16 détecté - paquet complet")
-                    if frame:
-                        self._log.debug(binascii.b2a_hex(frame))
-                        self.analysePaquet(frame, length)
-                        self._log.debug("******************")
+                self.s.settimeout(5)
+                try:
+                    start = self.s.recv(1)
+                except Exception as e:
+                    self._log.warning(e)
+                else:
+                    if start and start[0] == 0x68:
+                        #self._log.debug("MBUS flag detected")
+                        length = self.s.recv(1)[0]
+                        frame = self.s.recv(length)
+                        stop = self.s.recv(1)[0]
+                        if stop == 0x16:
+                            self._log.debug("0x16 détecté - paquet complet")
+                        if frame:
+                            self._log.debug(binascii.b2a_hex(frame))
+                            self.analysePaquet(frame, length)
+                            self._log.debug("******************")
+                finally:
+                    self.s.close()
             time.sleep(0.1)
 
 
