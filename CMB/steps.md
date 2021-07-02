@@ -1,6 +1,6 @@
 # Travail sur les données du Collège Marc Bloch 
 
-Les données récoltées au collège Marc Bloch consistent essentiellement en les températures intérieures et extérieures dans les différentes zones du bâtiment. Or, aucun capteur
+Les données récoltées au collège Marc Bloch consistent essentiellement en les températures intérieures et extérieures, ainsi que des températures de chauffe, dans les différentes zones du bâtiment. Or, aucun capteur
 n'a été installé qui puisse mesurer le fonctionnement de la pompe. Cependant, on peut déduire, à partir des données de température, à quels moments le chauffage est activé ou non :
 il va donc s'agir de créer manuellement un flux pour le fonctionnement de la pompe, puis de le modifier afin qu'il corresponde au comportement réel du chauffage. 
 
