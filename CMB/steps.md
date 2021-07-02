@@ -47,6 +47,8 @@ Dans un script python, on commence par importer un connecteur :
 ```
 import mysql.connector
 ```
+> C.f fichier `mysql_test.py`
+
 
 ## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
   
