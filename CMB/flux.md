@@ -9,7 +9,7 @@ Numéro du flux | Grandeur mesurée | Unité
 11 | Température intérieure salle de technologie Nord | °C
 14 | Température intérieure salle de cours Sud | °C
 17 | Température intérieure salle d’art plastique Sud | °C
-**Ciruits d'eau**
+**Circuits d'eau**
 19 | Température de départ circuit Sud | °C
 20 | Température de retour circuit Sud | °C
 21 | Température de départ circuit Nord | °C
