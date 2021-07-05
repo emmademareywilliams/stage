@@ -23,6 +23,7 @@ Numéro du flux | Grandeur mesurée | Unité
 > Dans la plupart des cas, les flux d'Emoncms ne correspondent pas aux numéros des fichiers PHPFina associés (en effet, le numéro des flux sur le site est fonction de l'ordre d'ajour des noeuds sur Emoncms). 
 
 Numéro du flux | Grandeur mesurée | Tag
+--|--|--
 6 | Température de départ circuit Sud | PT100_1_depSUD
 7 | Température de retour circuit Sud | PT100_2_retSUD
 10 | Température de départ circuit Nord | PT100_3_depNORD
