@@ -49,6 +49,7 @@ import mysql.connector
 ```
 > C.f fichier `mysql_test.py`
 
+--> https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees
 
 ## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
   
