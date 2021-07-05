@@ -20,7 +20,7 @@ Numéro du flux | Grandeur mesurée | Unité
 
 ## Sur Emoncms 
 
-> Dans la plupart des cas, les flux d'Emoncms ne correspondent pas aux numéros des fichiers PHPFina associés (en effet, le numéro des flux sur le site est fonction de l'ordre d'ajour des noeuds sur Emoncms). 
+Dans la plupart des cas, les flux d'Emoncms ne correspondent pas aux numéros des fichiers PHPFina associés (en effet, le numéro des flux sur le site est fonction de l'ordre d'ajour des noeuds sur Emoncms). 
 
 Numéro du flux | Grandeur mesurée | Tag
 --|--|--
