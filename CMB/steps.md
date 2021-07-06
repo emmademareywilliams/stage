@@ -75,6 +75,8 @@ size | 17662216 | Taille du flux
 unit | None | 
 userid | 1 | Pour donner un flux à un user (ici user unique = Emoncms) 
 value | 25,9 | Dernière valeur envoyée par le capteur associé 
+time | 1623159590 | Temps Unix
+tag | sofrel_Vantage | Famille du flux 
 
 
 On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
