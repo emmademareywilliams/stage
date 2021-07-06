@@ -47,9 +47,10 @@ Dans un script python, on commence par importer un connecteur :
 ```
 import mysql.connector
 ```
+
 > C.f fichier `mysql_test.py`
 
-Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à la [documentation officielle](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38). 
+Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38) : on se retrouve sur la page de Redis, qui est un système de gestion de base de données et qui nous permet d'avoir accès à la structure de la base SQL `emoncms`. 
 
 On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
 
