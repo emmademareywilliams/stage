@@ -73,7 +73,7 @@ name | VAN_Text | Nom du flux
 public | None | 
 size | 17662216 | Taille du flux 
 unit | None | 
-userid | 1 | 
+userid | 1 | Pour donner un flux à un user (ici user unique = Emoncms) 
 value | 25,9 | Dernière valeur envoyée par le capteur associé 
 
 
