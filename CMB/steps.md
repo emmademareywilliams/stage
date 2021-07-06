@@ -52,6 +52,31 @@ import mysql.connector
 
 Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38) : on se retrouve sur la page de Redis, qui est un système de gestion de base de données et qui nous permet d'avoir accès à la structure de la base SQL `emoncms`. 
 
+### Base de données `input`
+
+Clé | Valeur | Description 
+--|--|--
+description | None | 
+id | 145 | Numéro de l'input dans Emoncms 
+name | battery status | Nom de la valeur retournée par l'input 
+nodeid | 12211135 | Numéro du capteur 
+processList | None | 
+
+### Base de données `feeds`
+
+Clé | Valeur | Description 
+--|--|--
+datatype | 1 | Type *feed realtime* 
+engine | 5 | Type *PHPFina* (cf. [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php) pour un descriptif des différents *engines*)
+id | 1 | Numéro du flux (attribué selon l'ordre chronologique d'ajout) 
+name | VAN_Text | Nom du flux 
+public | None | 
+size | 17662216 | Taille du flux 
+unit | None | 
+userid | 1 | 
+value | 25,9 | Dernière valeur envoyée par le capteur associé 
+
+
 On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
 
 
