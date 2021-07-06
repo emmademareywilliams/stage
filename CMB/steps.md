@@ -49,7 +49,10 @@ import mysql.connector
 ```
 > C.f fichier `mysql_test.py`
 
---> https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees
+Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à la [documentation officielle](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38). 
+
+On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
+
 
 ## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
   
