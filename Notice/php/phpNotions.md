@@ -87,6 +87,8 @@ First, we need to set up an HTML form which enables the user to interact with th
   * `type="text"` creates a textbox 
   * `type="submit"` creates a submit button 
 
+> In the declaration of the form, we can also put `step=0.0..01` if we want the HTML code to handle a floating number with a given number of decimals. By default, `type="number"` only handles integers. 
+
 Then, we must get the information from the user in the PHP script: 
 ```
 <?php $_GET["name"] ?>
@@ -171,5 +173,64 @@ It will return the value associated to the key n°1.
 
 
 ## Function 
+
+A **function** in PHP is just like in Python or any other language: it is a part of code that is designed to execute one particular task. 
+
+First we define the function and what it does: 
+```
+  function nameFunction($parameters){
+    // insert task // 
+    // we can return the result of the function :
+    return $returnParam
+  }
+```
+Then we must call it so that it executes:
+```
+nameFunction($parameters);
+```
+
+> The *return* keyword MUST be put at the very end of the function, otherwise the instructions written after it won't be executed! 
+
+
+## IF statement 
+
+The PHP syntax for an IF statement is the following: 
+
+```
+if (condition1){
+  // task to be executed //
+} elseif (condition2){
+  // task to be executed 
+} else {
+  // task to be executed otherwise //
+}
+```
+
+In the condition, we can put `&&` which corresponds to AND, or `|| which signifies OR. 
+
+> The `!` is the negative sign: if we declare a variable `$bool = true` and type in `$bool = !$bool` then `$bool` has become false.
+
+
+## Switch statements 
+
+A **switch statement** is used when we want to compare a variable to a certain set of possible values. 
+
+```
+switch($val){
+  case "case1":
+    // task //
+    break;
+  case "case2":
+    // task //
+    break;
+  default:
+    // task to execute when none of the cases are true //
+}
+```
+
+## While loop
+
+
+
 
 
