@@ -72,6 +72,8 @@ echo $phrase[0];
 
 ## Getting user input 
 
+#### get
+
 First, we need to set up an HTML form which enables the user to interact with the code:
 ```
 <form action="nameFile.php" method="get> 
@@ -93,5 +95,81 @@ Then, we must get the information from the user in the PHP script:
 The method `$_GET` is populated by the value that the user submitted on the web page. 
 
 > The information given by the user can be seen in the URL : 
+> 
 >    `localhost:4000/www/site.php?name="John"`
+>    
+> This is called a **URL variable**. We can directly add variables in the URL and manipulate it in the PHP code. 
+> The problem with this method is that it lacks security (the user can see AND change the values of the variables. 
+
+
+#### post 
+
+In the HTML, we can change the methode from *get* to *post*. 
+This way, the value submitted by the user does not show up in the url. It is quite interesting in the case of passwords for instance: 
+
+```
+<form action="site.php" method="post">
+  <input type="password" name="password">
+</form>
+
+THEN 
+
+<?php echo $_POST["password"]; ?>
+```
+
+## Arrays 
+
+An array is quite similar to a variable, but contrary to it, it can store numerous values. 
+
+To create an array:
+
+```
+$arrayName = array(a, b, c, d);
+```
+with a, b, d and d being whatever variable type we want. 
+
+Just like strings, the elements in an array are indexed and can be accessed by the following instruction:
+
+```
+$arrayName[x]  // x ranging from 0 to len($arrayName)
+```
+To access the number of elements contained in a given array : `count($arrayName)`
+
+
+#### Checkboxes 
+
+This is a great way to interact with the user and gather some information. 
+
+```
+<form action="site.php" method="post">
+  Val1: <input type="checkbox" name="array[]" value="val1"><br>
+  Val2: <input type="checkbox" name="array[]" value="val2"><br>
+  Val3: <input type="checkbox" name="array[]" value="val3"><br>
+</form>
+```
+
+To get the information in the PHP script:
+```
+<?php $array = $_POST["array"]; ?> 
+```
+
+#### Associative arrays 
+
+This is quite similar to a dictionary in Python: we can store key values pairs in such an array. 
+
+```
+$dict = array(key1=>val1, key2=>val2);
+```
+
+To access to an element:
+```
+$dict[key1];
+```
+It will return the value associated to the key n°1. 
+
+> We need to make sure that each key is unique. 
+
+
+## Function 
+
 
