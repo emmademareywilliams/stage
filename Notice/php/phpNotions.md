@@ -93,5 +93,5 @@ Then, we must get the information from the user in the PHP script:
 The method `$_GET` is populated by the value that the user submitted on the web page. 
 
 > The information given by the user can be seen in the URL : 
-> `localhost:4000/www/site.php?num1=20&num2=10`
+>    `localhost:4000/www/site.php?name="John"`
 
