@@ -228,9 +228,85 @@ switch($val){
 }
 ```
 
-## While loop
+## Loops
+
+#### While loop
+
+The **while loop** is used to loop over a certain block of code while a certain condition is true. 
+
+```
+while(loop condition){
+  // loop body //
+  // task to execute //
+}
+```
+
+An alternative while loop is the following:
+
+```
+do{
+  // task to execute //
+}while (loop condition)
+```
+
+The main difference is that the order is reversed: first the loop body is executed, then the loop condition is checked. 
+
+#### For loop 
+
+The **for loop** is similar to other for loops in other languages. The PHP syntax is quite the same as the one for the while loop:
+
+```
+for(loop condition){
+  // loop body //
+  // task to execute //
+}
+```
+
+In the parentheses of the loop declaration, we put:
+* the initial value of the indexing parameter (e.g. `$i=1`);
+* the looping condition (e.g `$i <= 5`);
+* the code that we want to be executed at each iteration of the loop (in most cases, incrementation of the index).
+
+The syntax is therefore as follows:
+```
+for($i=1; $i <= 5; $i++){...}
+```
 
 
+## Including HTML and PHP
+
+The keyword **include** is used when we want to use another file within the PHP script. 
+
+To include an HTML or PHP file, we use the following instruction:
+```
+include "nameFile.html" OR "nameFile.php";
+```
+
+The files that are included this way must be located in the same folder as the main PHP file. 
+
+When we include other files in the main PHP script, we can use the same variables in the different files, as long as they *have the same name* in all the files. 
 
 
+## Classes and objects 
+
+The idea behind **classes** is that some objects cannot be represented just by a simple variable; in this case, we can create our own custom data type in order to model an object that we will manipulate. 
+
+For instance, if we ant to create a class *Book*:
+
+```
+class Book {
+  var $title;
+  var $author;
+  var $pages; 
+}
+```
+
+Then, to create an **object** belonging to the *Book* class:
+
+```
+$book1 = new Book; 
+$book1->title = "Harry Potter";
+$book1->author = "JK Rowling";
+$book1->pages = 532;
+```
 
