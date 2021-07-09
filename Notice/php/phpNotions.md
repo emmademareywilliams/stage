@@ -310,6 +310,8 @@ $book1->author = "JK Rowling";
 $book1->pages = 532;
 ```
 
+#### Constructor 
+
 A **constructor** is a function that is called whenever we create an object of the class. It is usually used to initiate the class parameters. It must be defined within the class script: 
 
 ```
@@ -322,12 +324,16 @@ function __construct($aTitle, $aAuthor, $aPages){
 
 `this` is a key word that refers to the current object. 
 
+#### Object function
+
 An **object function** is a function that is defined inside of a class and that can be used by the objects belonging to the class. 
 
 To call an object function, we use the following instruction: 
 ```
 $object->nameFunction($attributes);
 ```
+
+#### Accessibility of the attributes 
 
 In other words, we want to be able to control the attributes declared by a user when creating a new object, so that they belong to an acceptable set of values. 
 
@@ -351,4 +357,18 @@ function setAttribute($value){
 ```
 
 Inside of the setter function, we can implement rules so that the value of the attribute belongs to an acceptable range of values. 
+
+#### Inheritance 
+
+The concept of **inheritance** means that a class can inherit all of the functionality and attributes of another class in PHP . 
+
+```
+class SpecialisedClass extends Class {
+  // new functions of the specialised class //
+}
+```
+
+If an object of the SpecialisedClass is created, it can access all the functions of the Class, plus the functions defined in the SpecialisedClass. 
+
+It is also possible to *override* a function from one class to another: by using the same function name in SpecialisedClass than in Class, we can update the definition of the function in the case of the SpecialisedClass. 
 
