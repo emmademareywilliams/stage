@@ -291,7 +291,7 @@ When we include other files in the main PHP script, we can use the same variable
 
 The idea behind **classes** is that some objects cannot be represented just by a simple variable; in this case, we can create our own custom data type in order to model an object that we will manipulate. 
 
-For instance, if we ant to create a class *Book*:
+For instance, if we want to create a class *Book*:
 
 ```
 class Book {
@@ -309,4 +309,46 @@ $book1->title = "Harry Potter";
 $book1->author = "JK Rowling";
 $book1->pages = 532;
 ```
+
+A **constructor** is a function that is called whenever we create an object of the class. It is usually used to initiate the class parameters. It must be defined within the class script: 
+
+```
+function __construct($aTitle, $aAuthor, $aPages){
+ $this->title = $aTitle; 
+ $this->author = $aAuthor;
+ $this->pages = $aPages; 
+}
+```
+
+`this` is a key word that refers to the current object. 
+
+An **object function** is a function that is defined inside of a class and that can be used by the objects belonging to the class. 
+
+To call an object function, we use the following instruction: 
+```
+$object->nameFunction($attributes);
+```
+
+In other words, we want to be able to control the attributes declared by a user when creating a new object, so that they belong to an acceptable set of values. 
+
+In order to do so, we can use the followings:
+* *Visibility modifiers* are keywords that define whether or not a user have access to the attributes:
+  * `public` means that it is visible to anyone using the PHP script (it is similar to `var`);
+  * `private` means that any code outside of the class code cannot have access to the attribute. 
+
+* *Getters and setters* are functions that allow us to control the accessibilty of the attributes: 
+
+```
+// A getter enables the user to have access to the value of an attribute //
+function getAttribute(){
+  return $this->attribute;
+}
+
+// A setter allows the user to change the value of an attribute //
+function setAttribute($value){
+  $this->attribute = $value
+}
+```
+
+Inside of the setter function, we can implement rules so that the value of the attribute belongs to an acceptable range of values. 
 
