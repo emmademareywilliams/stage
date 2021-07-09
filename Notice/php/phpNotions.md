@@ -2,6 +2,8 @@
 
 PHP is one of the most commonly used languages to generate dynamic websites.
 
+!["PHP logo"](php.jpg)
+
 Here are some basic notions about the PHP language, to which I am totally 
 new. For more information, see [this lecture](https://youtu.be/OK_JCtrrv-c)
 about the PHP language. 
