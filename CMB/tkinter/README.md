@@ -1,6 +1,8 @@
-For step 2: 
+Sources :
 
-https://youtu.be/Zw6M-BnAPP0 
+* [Tutoriel](https://youtu.be/Zw6M-BnAPP0) pour utiliser Matplotlib et les fonctionnalités Tkinter 
+* [Page Wikibooks](https://fr.wikibooks.org/wiki/Programmation_Python/Tkinter) qui décrit les principes de base de Tkinter
+* [Page Wikibooks](https://fr.wikibooks.org/wiki/Programmation_Python/Et_pour_quelques_widgets_de_plus...) qui explicite des fonctionnalités Tkinter plus avancées (notamment au nveau des widgets)
 
 
 À améliorer : 
