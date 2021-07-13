@@ -51,7 +51,7 @@ else:
     print("This circuit does not exist. ")
 
 """
-on commence la simulation au start time maximal de toutes nos donnees : 
+on commence la simulation au start time maximal de toutes nos donnees :
 """
 
 start_array = [getMeta(nb_Text, dir)["start_time"], getMeta(nb_Tint, dir)["start_time"],
@@ -88,7 +88,7 @@ mois = input(message_mois)
 message_jour = "then the number of the day :\n"
 jour = input(message_jour)
 
-""" 
+"""
 on choisit la date a laquelle on veut commencer la simulation :
 """
 
@@ -117,8 +117,8 @@ heating = heating / upper
 Tdepart = Tdepart * heating
 Tretour = Tretour * heating
 #Qc = flow_rate * Cw * (Tdepart - Tretour)
-""" 
-loi de l'eau : on remarque que le delta de temperature est toujours plus ou moins de 15 
+"""
+loi de l'eau : on remarque que le delta de temperature est toujours plus ou moins de 15
 """
 Qc = flow_rate * Cw * 15 * heating
 
@@ -210,7 +210,7 @@ popt = res["x"]*p0
 print(popt)
 
 xr_sec = np.arange(0, nb*step, step)
-xr_hour = xr_sec/3600
+xr_hour = xr_sec/step
 Tint_sim = sim(step, popt[0], popt[1], Qc, Text, Tint[0])
 
 localstart = datetime.datetime.fromtimestamp(start)
@@ -252,7 +252,3 @@ plt.legend(loc='upper right')
 
 plt.show()
 plt.close()
-
-"""
-Je voudrais qu'il me le mette sur GitHub svp...
-"""
