@@ -2,25 +2,6 @@ import datetime
 import time
 from dateutil import tz
 
-LOCTZ = tz.gettz('Europe/Paris')
-
-
-def secondToHumanTime(sec, start, fmt="%Y-%m-%d %H: %M :%S: %z", tz=LOCTZ):
-    """
-    equivalent between number of seconds and date readable by a human
-
-    sec: number of seconds since the beginning of the experiment (here the pump operation)
-    start: unix number giving the starting time of the experiment
-    tz: time zone object
-    returns the corresponding date (format dd/ mm/ yyyy  h: m: s)
-    """
-    now = sec + start  # gives a Unix time
-    return datetime.date.fromtimestamp(now).strftime(fmt)
-
-#print(secondToHumanTime(38400000, 1578930000))
-
-
-
 from tkinter import *
 import Pmw
 
@@ -29,6 +10,7 @@ def changeCoul(col):
 
 def changeLabel():
     lab.configure(text = combo.get())
+
 
 couleurs = ('navy', 'royal blue', 'steelblue1', 'cadet blue',
               'lawn green', 'forest green', 'dark red',
@@ -45,6 +27,77 @@ combo = Pmw.ComboBox(fen, labelpos = NW,
                        scrolledlist_items = couleurs,
                        listheight = 150,
                        selectioncommand = changeCoul)
-combo.grid(row =2, columnspan =2, padx =10, pady =10)
+combo.grid(row =2, column =2, padx =10, pady =10)
+
+start = 1600900000
+localstart = str(datetime.datetime.fromtimestamp(start))
+date, clock = localstart.split(' ')
+year, month, day = date.split('-')
+hour, minute, second = clock.split(':')
+
+#print(year, month, day)
+#print(hour, minute, second)
+
+monthDict = {}
+for k in range(1,13):
+    if k<=7:
+        if k%2 == 1:
+            monthDict[k] = 31
+        else:
+            monthDict[k] = 30
+    if k>=8:
+        if k%2 == 1:
+            monthDict[k] = 30
+        else:
+            monthDict[k] = 31
+monthDict[2] = 28
+#print(monthDict)
+
+limitday = monthDict[int(month)]
+months = [int(month)]
+days = [int(day)]
+i = 0
+for k in range(1,10):
+    if int(day)+k == limitday +1:
+        i=1
+        days.append(i)
+        months.append(int(month)+1)
+    else:
+        i = i+1
+        if int(day)+k > limitday:
+            days.append(i)
+        else:
+            days.append(int(day)+i)
+#print(days, months)
+hours = (k for k in range(1,25))
+
+
+texte1 = Label(fen, text="Pump not in operation from:")
+texte2 = Label(fen, text="to:")
+
+dayCombo = Pmw.ComboBox(fen, labelpos = NW,
+                       label_text = 'day',
+                       scrolledlist_items = days,
+                       listheight = 150)
+
+monthCombo = Pmw.ComboBox(fen, labelpos = NW,
+                       label_text = 'month',
+                       scrolledlist_items = months,
+                       listheight = 150)
+
+hourCombo = Pmw.ComboBox(fen, labelpos = NW,
+                       label_text = 'hour',
+                       scrolledlist_items = hours,
+                       listheight = 150)
+
+# we must add selectioncommand = function in the arguments of the combo box so that a task is executed when
+# we choose one of the values from the menu
+
+texte1.grid(row =3, column =1)
+dayCombo.grid(row =4, columnspan =1, padx=5)
+monthCombo.grid(row =4, column =2, padx=0)
+hourCombo.grid(row =4, column =3, padx=0)
+
+#texte2.grid(row =4, column =1, padx =8)
 
 fen.mainloop()
