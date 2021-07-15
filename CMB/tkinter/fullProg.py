@@ -66,12 +66,14 @@ def resetPumpOff():
     """
     pumpOff = {"startday": None, "startmonth": None, "starthour": None, "endday": None, "endmonth": None, "endhour": None}
 
+#resetPumpOff()
+
 
 ######################## PREMIER POINT #########################
 
 # on récupère les données du fichier meta sous forme affichable
 
-def graphPyfina(feednb, frame):
+def graphPyfina(feednb, frame, Text=False):
     """
     creates the matplotlib graph representing the data corresponding to the feed number
 
@@ -88,6 +90,9 @@ def graphPyfina(feednb, frame):
         window = length
     nbpts = window // step
     data = PyFina(feednb, dir, start, step, nbpts)
+    if Text:
+        dataText = PyFina(5, dir, start, step, nbpts)
+        # we want to print the outter temperature in the same graph
 
 
 ######################## DEUXIÈME POINT #########################
@@ -108,8 +113,11 @@ def graphPyfina(feednb, frame):
     plt.xticks(xrange, xhuman, rotation=0, fontsize=5)
     a.xaxis.set_major_locator(plt.MaxNLocator(10))
     a.plot(xrange, data)
+    if Text:
+        a.plot(xrange, dataText, label="Text")
+        plt.legend(loc='upper right', bbox_to_anchor=(1, 1.2), ncol=3)
     # pb: if we plot (xhuman, temp), we only get values of the temperature corresponding to the given dates
-    # I should be able to plot (xrange, temp) BUT print xhuman for the x axis scale
+    # I should be able to plot (xrange, temp) BUT print xhuman for the x axis scale --> SOLVED
 
     canvas = FigureCanvasTkAgg(f, root)
     canvas.draw()
@@ -138,23 +146,27 @@ def quitter():
     root.destroy()
 
 # gets the informations
-def getStartDay():
-    pumpOff['startday'] = startdayCombo.get()
+def getStartDay(day):
+    """
+    day is the value (int) returned by the combobox once the user has entered the day they want
+    updates the dictionnary pumpOff according to those values
+    """
+    pumpOff['startday'] = day
 
-def getStartMonth():
-    pumpOff['startmonth'] = startmonthCombo.get()
+def getStartMonth(month):
+    pumpOff['startmonth'] = month
 
-def getStartHour():
-    pumpOff['starthour'] = starthourCombo.get()
+def getStartHour(hour):
+    pumpOff['starthour'] = hour
 
-def getEndDay():
-    pumpOff['endday'] = enddayCombo.get()
+def getEndDay(day):
+    pumpOff['endday'] = day
 
-def getEndMonth():
-    pumpOff['endmonth'] = endmonthCombo.get()
+def getEndMonth(month):
+    pumpOff['endmonth'] = month
 
-def getEndHour():
-    pumpOff['endhour'] = endhourCombo.get()
+def getEndHour(hour):
+    pumpOff['endhour'] = hour
 
 
 # on crée la fenêtre tkinter qui accueillera le graphe des données meta :
@@ -192,58 +204,65 @@ for k in range(1,10):
             days.append(int(day)+i)
 hours = (k for k in range(1,25))
 
-graphPyfina(11, frame)
+graphPyfina(11, frame, Text=True)
 graphPyfina(42, frame)
 
 
 ################  PARAMETRAGE FENETRE MENUS DEROULANTS ##############
 
 fen = Pmw.initialise(root)
-texte1 = tk.Label(fen, text="Pump not in operation from:")
-texte2 = tk.Label(fen, text="to:")
+texte1 = tk.Label(fen, text="Pump not in operation / start time:")
+texte2 = tk.Label(fen, text="End time:")
 
 startdayCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'day',
                        scrolledlist_items = days,
                        listheight = 150,
-                       command = getStartDay)
+                       selectioncommand = getStartDay)
+#startdayCombo.bind("<<ComboboxSelected>>", getStartDay)
 
 startmonthCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'month',
                        scrolledlist_items = months,
                        listheight = 150,
-                       command = getStartMonth)
+                       selectioncommand = getStartMonth)
+startmonthCombo.bind("<<ComboboxSelected>>", getStartMonth)
 
 starthourCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'hour',
                        scrolledlist_items = hours,
                        listheight = 150,
-                       command = getStartHour)
+                       selectioncommand = getStartHour)
+starthourCombo.bind("<<ComboboxSelected>>", getStartHour)
 
 enddayCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'day',
                        scrolledlist_items = days,
                        listheight = 150,
-                       command = getEndDay)
+                       selectioncommand = getEndDay)
+enddayCombo.bind("<<ComboboxSelected>>", getEndDay)
 
 endmonthCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'month',
                        scrolledlist_items = months,
                        listheight = 150,
-                       command = getEndMonth)
+                       selectioncommand = getEndMonth)
+endmonthCombo.bind("<<ComboboxSelected>>", getEndMonth)
 
 endhourCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'hour',
                        scrolledlist_items = hours,
                        listheight = 150,
-                       command = getEndHour)
+                       selectioncommand = getEndHour)
+endhourCombo.bind("<<ComboboxSelected>>", getEndHour)
+
 
 texte1.grid(row =3, column =1)
 startdayCombo.grid(row =4, column =1, padx=5)
 startmonthCombo.grid(row =4, column =2, padx=0)
 starthourCombo.grid(row =4, column =3, padx=0)
 
-texte2.grid(row =5, column =2)
+texte2.grid(row =5, column =1)
 enddayCombo.grid(row =6, column =1, padx=5)
 endmonthCombo.grid(row =6, column =2, padx=0)
 endhourCombo.grid(row =6, column =3, padx=0)
@@ -251,6 +270,7 @@ endhourCombo.grid(row =6, column =3, padx=0)
 bouton = tk.Button(fen, text="quitter", command=quitter)
 bouton.grid(column=2, row=7)
 
+print(pumpOff)
 
 ##################### combo box will replace what is below #################
 
