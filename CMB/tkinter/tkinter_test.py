@@ -75,7 +75,7 @@ class RadioDemo(tk.Frame):
                                command = self.changePolice)
             bout.pack(side=tk.LEFT, padx=5)
         quitter = tk.Button(self, text='quitter', command=self.destroy)
-        quitter.pack()
+        quitter.pack()r
 
     def changePolice(self):
         """Remplacement du style de la police actuelle"""
