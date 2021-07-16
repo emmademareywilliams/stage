@@ -87,14 +87,7 @@ interval, starttime = getMetas(19) # température de départ circuit Sud
 now = time.time()
 duration = now - starttime
 nb_pt = int(duration / interval)
+print(nb_pt)
 
 pompe = np.ones(nb_pt)
 newPHPFina(42, starttime, interval, pompe, dir)
-
-
-## Test pour voir s'il crée bien un fichier ne contenant que des 1 :
-#init = np.ones(10)  # à la place de 10, mettre la size du fichier meta
-#createFeed(42, init, dir)
-#f=open("{}/42.dat".format(dir),"r")
-#f.close()
-#print(lecture)

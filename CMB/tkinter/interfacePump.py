@@ -2,6 +2,8 @@ import tkinter as tk
 import Pmw
 
 from PyFina import getMeta, PyFina
+import struct
+import numpy as np
 import matplotlib.pylab as plt
 import matplotlib
 import datetime
@@ -29,6 +31,9 @@ for k in range(1,13):
             monthDict[k] = 31
 monthDict[2] = 28
 
+monthDictLit = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5:'May', 6:'June', 7: 'July',
+                8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+
 pumpOff = {}
 
 # premier point = créer un graphe matplotlib comprenant des données PHPFina
@@ -38,6 +43,21 @@ pumpOff = {}
 # cinquième pont = mettre plusieurs graphes (pompe + températures) dans une même fenêtre tkinter pour enfin
 #                   pouvoir modifier les valeurs de fonctionnement de la pompe qui vont bien
 
+
+def getMetas(nb,dir=dir):
+    """
+    read meta given a feed number
+    print (interval,starting timestamp)
+    """
+    f=open("{}/{}.meta".format(dir,nb),"rb")
+    f.seek(8,0)
+    hexa = f.read(8)
+    aa= bytearray(hexa)
+    if len(aa)==8:
+      decoded=struct.unpack('<2I', aa)
+    print(decoded)
+    f.close()
+    return decoded
 
 
 def secondToHumanTime(sec, fmt="%m-%d \n %H: %M: %z", tz=LOCTZ):
@@ -68,6 +88,56 @@ def resetPumpOff():
 
 #resetPumpOff()
 
+# fonction qui permet de modifier les valeurs contenues dans le fichier dat:
+
+def modifyData(feednb, data):
+    """
+    used to change the values of the pump operation
+
+    feednb: feed number (will be 42 since we only want to modify the pump operation data)
+    data: dict as defined by pumpOff, which corresponds to the period of time during which
+    the pump is not functionning
+    """
+    datetimeOn = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["startmonth"], data["startday"], data["starthour"]), '%Y %m %d %I:%M')
+    datetimeOff = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["endmonth"], data["endday"], data["endhour"]), '%Y %m %d %I:%M')
+    starttimeoff = HumanTimetoUnix(datetimeOn)
+    endtimeoff = HumanTimetoUnix(datetimeOff)
+
+    interval = getMetas(feednb)[0]
+    duration = int(endtimeoff - starttimeoff)
+    nbpoints = int(duration / interval)
+    newvalues = np.zeros(nbpoints)
+
+    #on écrit dans le fichier dat concerné:
+    f = open("{}/{}.dat".format(dir,feednb),"wb")
+    f.seek(starttimeoff, 0)
+    format = "<{}".format("f"*len(newvalues))
+    bin = struct.pack(format,*newvalues)
+    f.write(bin)
+    f.close()
+
+
+#exampleData = {"startday": 9, "startmonth": 2, "starthour": 10, "endday": 11, "endmonth": 2, "endhour": 4}
+#modifyData(42, exampleData)
+
+def resetData(feednb):
+    """
+    resets the data in its original state
+    feednb: feed number (will be 42)
+    """
+    interval, starttime = getMetas(feednb) # température de départ circuit Sud
+    now = time.time()
+    duration = now - starttime
+    nbpoints = int(duration / interval)
+    oldvalues = np.ones(nbpoints)
+
+    f=open("{}/{}.dat".format(dir,feednb),"wb")
+    format="<{}".format("f"*len(oldvalues))
+    bin=struct.pack(format,*oldvalues)
+    f.write(bin)
+    f.close()
+
+resetData(42)
 
 ######################## PREMIER POINT #########################
 
@@ -204,7 +274,7 @@ for k in range(1,10):
             days.append(int(day)+i)
 hours = (k for k in range(1,25))
 
-graphPyfina(11, frame, Text=True)
+graphPyfina(19, frame, Text=True)
 graphPyfina(42, frame)
 
 
@@ -259,39 +329,17 @@ endhourCombo.bind("<<ComboboxSelected>>", getEndHour)
 
 texte1.grid(row =3, column =1)
 startdayCombo.grid(row =4, column =1, padx=5)
-startmonthCombo.grid(row =4, column =2, padx=0)
+startmonthCombo.grid(row =4, column =2, padx=5)
 starthourCombo.grid(row =4, column =3, padx=0)
 
 texte2.grid(row =5, column =1)
 enddayCombo.grid(row =6, column =1, padx=5)
-endmonthCombo.grid(row =6, column =2, padx=0)
+endmonthCombo.grid(row =6, column =2, padx=5)
 endhourCombo.grid(row =6, column =3, padx=0)
 
 bouton = tk.Button(fen, text="quitter", command=quitter)
 bouton.grid(column=2, row=7)
 
 print(pumpOff)
-
-##################### combo box will replace what is below #################
-
-#canvas2 = tk.Frame(root, bg ='white', bd =2, relief = tk.GROOVE)
-#canvas2.pack(side = tk.RIGHT, padx =5, fill=tk.BOTH)
-#texte1 = tk.Label(canvas2, bg='white', text="Pump not in operation from: ")
-#texte1.grid(column=0, row=0)
-# 'grid' permet de mettre plusieurs widgets sur la même ligne
-
-#day = tk.Entry(canvas2)
-#day.grid(column=1, row=0)
-#month = tk.Entry(canvas2)
-#month.grid(column=2, row=0)
-
-# ce serait quand même plus ergonomique de faire un menu déroulant
-#   --> dans ce cas, la liste des jours serait fonction de la date de départ que choisit l'utilisateur
-
-#texte2 = tk.Label(canvas2, bg='white', text="to:")
-#texte2.grid(column=0, row=1)
-
-#bouton = tk.Button(canvas2, text="quitter", command=quitter)
-#bouton.grid(column=1, row=2)
 
 root.mainloop()
