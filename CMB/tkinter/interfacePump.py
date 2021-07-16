@@ -17,6 +17,11 @@ from matplotlib.figure import Figure
 LOCTZ = tz.gettz('Europe/Paris')
 dir = "/home/ludivine/github/stage/CMB/Data/phpfina"
 
+"""
+Global variables
+"""
+
+# monthDict = {month: number of days}
 monthDict = {}
 for k in range(1,13):
     if k<=7:
@@ -36,13 +41,10 @@ monthDictLit = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5:'May', 6:
 
 pumpOff = {}
 
-# premier point = créer un graphe matplotlib comprenant des données PHPFina
-# deuxième point = faire afficher un graphe de données PHPFina dans une fenêtre tkinter
-# troisième point = créer le graphe de fonctionnement de la pompe vierge
-# quatrième point = avec l'interface tkinter, modifier (au pif) les données de fonctionnement de la pompe + les enregistrer
-# cinquième pont = mettre plusieurs graphes (pompe + températures) dans une même fenêtre tkinter pour enfin
-#                   pouvoir modifier les valeurs de fonctionnement de la pompe qui vont bien
 
+"""
+General functions used later on
+"""
 
 def getMetas(nb,dir=dir):
     """
@@ -70,6 +72,7 @@ def secondToHumanTime(sec, fmt="%m-%d \n %H: %M: %z", tz=LOCTZ):
     """
     return datetime.date.fromtimestamp(sec).strftime(fmt)
 
+
 def HumanTimetoUnix(datetime):
     """
     inverse function of secondToHumanTime, aka gives the Unix time stamp associated with a given dates
@@ -78,6 +81,16 @@ def HumanTimetoUnix(datetime):
     returns a Unix number (int)
     """
     return int(time.mktime(datetime.timetuple()))
+
+
+def getStart(feednb):
+    """
+    returns the starting timestamp associated with a given feed number
+    """
+    meta = getMeta(feednb,dir)
+    start = meta["start_time"]
+    return start
+
 
 def resetPumpOff():
     """
@@ -88,11 +101,10 @@ def resetPumpOff():
 
 #resetPumpOff()
 
-# fonction qui permet de modifier les valeurs contenues dans le fichier dat:
 
 def modifyData(feednb, data):
     """
-    used to change the values of the pump operation
+    used to change the values of the pump operation (modification of the .dat file)
 
     feednb: feed number (will be 42 since we only want to modify the pump operation data)
     data: dict as defined by pumpOff, which corresponds to the period of time during which
@@ -108,7 +120,7 @@ def modifyData(feednb, data):
     nbpoints = int(duration / interval)
     newvalues = np.zeros(nbpoints)
 
-    #on écrit dans le fichier dat concerné:
+    # the new values (null) are written in the .dat file:
     f = open("{}/{}.dat".format(dir,feednb),"wb")
     f.seek(starttimeoff, 0)
     format = "<{}".format("f"*len(newvalues))
@@ -116,16 +128,16 @@ def modifyData(feednb, data):
     f.write(bin)
     f.close()
 
-
 #exampleData = {"startday": 9, "startmonth": 2, "starthour": 10, "endday": 11, "endmonth": 2, "endhour": 4}
 #modifyData(42, exampleData)
+
 
 def resetData(feednb):
     """
     resets the data in its original state
     feednb: feed number (will be 42)
     """
-    interval, starttime = getMetas(feednb) # température de départ circuit Sud
+    interval, starttime = getMetas(feednb)
     now = time.time()
     duration = now - starttime
     nbpoints = int(duration / interval)
@@ -139,9 +151,10 @@ def resetData(feednb):
 
 resetData(42)
 
-######################## PREMIER POINT #########################
-
-# on récupère les données du fichier meta sous forme affichable
+"""
+FIRST STEP
+    --> the data from the dat file are retrieved and plotted in a matplotlib graph
+"""
 
 def graphPyfina(feednb, frame, Text=False):
     """
@@ -151,7 +164,6 @@ def graphPyfina(feednb, frame, Text=False):
     frame: object tk.Frame aka frame in which the graphs are going to be printed
     """
     meta = getMeta(feednb,dir)
-    # print(meta)
     step = 3600
     start = meta["start_time"]
     window = 10*24*3600  # duration of the plotting (here 1 week)
@@ -164,16 +176,11 @@ def graphPyfina(feednb, frame, Text=False):
         dataText = PyFina(5, dir, start, step, nbpts)
         # we want to print the outter temperature in the same graph
 
-
-######################## DEUXIÈME POINT #########################
-
-# on affiche les données meta via une fenêtre tkinter
     f = matplotlib.pyplot.figure(figsize=(4,2), dpi=100)
     a = f.add_subplot(111)
     xrange = data.timescale()
     xhour = xrange /step
     xhuman = [secondToHumanTime(x + start) for x in xrange]
-    #plt.subplot(111)
     if feednb == 42:
         plt.ylabel("pump operation")
         plt.ylim(0,2)
@@ -186,8 +193,6 @@ def graphPyfina(feednb, frame, Text=False):
     if Text:
         a.plot(xrange, dataText, label="Text")
         plt.legend(loc='upper right', bbox_to_anchor=(1, 1.2), ncol=3)
-    # pb: if we plot (xhuman, temp), we only get values of the temperature corresponding to the given dates
-    # I should be able to plot (xrange, temp) BUT print xhuman for the x axis scale --> SOLVED
 
     canvas = FigureCanvasTkAgg(f, root)
     canvas.draw()
@@ -203,19 +208,16 @@ def graphPyfina(feednb, frame, Text=False):
     #toolbar.update()
     canvas._tkcanvas.grid()
 
-
-############## FONCTIONS DES WIDGETS ###############
-
-def getStart(feednb):
-    meta = getMeta(feednb,dir)
-    start = meta["start_time"]
-    return start
+"""
+WIDGET FUNCTIONS
+    --> commands that are called when the widgets are been used
+"""
 
 def quitter():
     root.quit()     # stops mainloop
     root.destroy()
 
-# gets the informations
+
 def getStartDay(day):
     """
     day is the value (int) returned by the combobox once the user has entered the day they want
@@ -239,7 +241,11 @@ def getEndHour(hour):
     pumpOff['endhour'] = hour
 
 
-# on crée la fenêtre tkinter qui accueillera le graphe des données meta :
+"""
+SECOND STEP
+    --> the tkinter interface is created and configured
+"""
+
 root = tk.Tk()
 root.title("visualisation")
 root.geometry("1900x1000")
@@ -252,7 +258,17 @@ utcstart = datetime.datetime.utcfromtimestamp(start)
 title = tk.Label(root, text="starting on :\nUTC {}\n{} {}".format(utcstart, time.tzname[0], localstart))
 title.grid(row=0, column=2)
 
+graphPyfina(19, frame, Text=True)
+graphPyfina(42, frame)
 
+
+# Widgets configuration:
+
+fen = Pmw.initialise(root)
+texte1 = tk.Label(fen, text="Pump not in operation / start time:")
+texte2 = tk.Label(fen, text="End time:")
+
+# configuration of the comboboxes
 date, clock = str(localstart).split(' ')
 year, month, day = date.split('-')
 hour, minute, second = clock.split(':')
@@ -273,16 +289,6 @@ for k in range(1,10):
         else:
             days.append(int(day)+i)
 hours = (k for k in range(1,25))
-
-graphPyfina(19, frame, Text=True)
-graphPyfina(42, frame)
-
-
-################  PARAMETRAGE FENETRE MENUS DEROULANTS ##############
-
-fen = Pmw.initialise(root)
-texte1 = tk.Label(fen, text="Pump not in operation / start time:")
-texte2 = tk.Label(fen, text="End time:")
 
 startdayCombo = Pmw.ComboBox(fen, labelpos = 'nw',
                        label_text = 'day',
