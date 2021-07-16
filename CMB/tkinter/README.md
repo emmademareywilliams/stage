@@ -18,3 +18,12 @@ Dans ce dossier, on trouvera les fchiers Python permettant de mettre à jour le 
 * [Page Wikibooks](https://fr.wikibooks.org/wiki/Programmation_Python/Et_pour_quelques_widgets_de_plus...) qui explicite des fonctionnalités Tkinter plus avancées (notamment au nveau des widgets)
 
 
+#### Updates :
+
+* mettre en place les boutons suivants :
+  * `Apply`: permet de redessinner le graphe de fonctionnement après avoir rentré les valeurs de dates
+  * `Reset`: remet à zéro le fichier .dat 
+
+* faire tourner le modèle RC avec les nouvelles données
+* *in fine*, créer une nouvelle fenêtre où l'utilisateur pourrait rentrer la date de début du plot, ainsi que le circuit choisi (il faudrait alors créer d'autres fichiers .dat et .meta pour chaque circuit d'eau) 
+
