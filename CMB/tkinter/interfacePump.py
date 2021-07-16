@@ -110,10 +110,10 @@ def modifyData(feednb, data):
     data: dict as defined by pumpOff, which corresponds to the period of time during which
     the pump is not functionning
     """
-    datetimeOn = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["startmonth"], data["startday"], data["starthour"]), '%Y %m %d %I:%M')
-    datetimeOff = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["endmonth"], data["endday"], data["endhour"]), '%Y %m %d %I:%M')
-    starttimeoff = HumanTimetoUnix(datetimeOn)
-    endtimeoff = HumanTimetoUnix(datetimeOff)
+    datetimeStart = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["startmonth"], data["startday"], data["starthour"]), '%Y %m %d %I:%M')
+    datetimeEnd = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["endmonth"], data["endday"], data["endhour"]), '%Y %m %d %I:%M')
+    starttimeoff = HumanTimetoUnix(datetimeStart)
+    endtimeoff = HumanTimetoUnix(datetimeEnd)
 
     interval = getMetas(feednb)[0]
     duration = int(endtimeoff - starttimeoff)
@@ -121,15 +121,22 @@ def modifyData(feednb, data):
     newvalues = np.zeros(nbpoints)
 
     # the new values (null) are written in the .dat file:
-    f = open("{}/{}.dat".format(dir,feednb),"wb")
+    # WARNING: when opening a file with the "r+" mode, we delete the data of the file! Thus we must rewrite
+    # the information contained in the file
+    f = open("{}/{}.dat".format(dir,feednb),"r+")
+    d = f.readlines()
+    f.seek(0)
+    for i in d:
+        if i != "line you want to remove...":
+            f.write(i)
     f.seek(starttimeoff, 0)
     format = "<{}".format("f"*len(newvalues))
     bin = struct.pack(format,*newvalues)
     f.write(bin)
     f.close()
 
-#exampleData = {"startday": 9, "startmonth": 2, "starthour": 10, "endday": 11, "endmonth": 2, "endhour": 4}
-#modifyData(42, exampleData)
+exampleData = {"startday": 10, "startmonth": 2, "starthour": 10, "endday": 10, "endmonth": 2, "endhour": 14}
+modifyData(42, exampleData)
 
 
 def resetData(feednb):
@@ -143,7 +150,7 @@ def resetData(feednb):
     nbpoints = int(duration / interval)
     oldvalues = np.ones(nbpoints)
 
-    f=open("{}/{}.dat".format(dir,feednb),"wb")
+    f=open("{}/{}.dat".format(dir,feednb),"r+")
     format="<{}".format("f"*len(oldvalues))
     bin=struct.pack(format,*oldvalues)
     f.write(bin)
@@ -343,7 +350,7 @@ enddayCombo.grid(row =6, column =1, padx=5)
 endmonthCombo.grid(row =6, column =2, padx=5)
 endhourCombo.grid(row =6, column =3, padx=0)
 
-bouton = tk.Button(fen, text="quitter", command=quitter)
+bouton = tk.Button(fen, text="Exit", command=quitter)
 bouton.grid(column=2, row=7)
 
 print(pumpOff)
