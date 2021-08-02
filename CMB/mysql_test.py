@@ -22,17 +22,22 @@ finally:
             #   - le flux existe déjà, donc on le met à jour
             query = 'INSERT INTO feeds(datatype,engine,name,public,userid,tag)VALUES(1,5,"pompe","",1,"pompe_fonct")'
             #query = 'UPDATE feeds SET engine=5 WHERE id={}'.format(feedId)
-            #cursor.execute(query)
-            #print(query)
+            cursor.execute(query)
+            print(query)
             query_nb = 'SELECT * FROM feeds'
             cursor.execute(query_nb)
             records = cursor.fetchall()
             print(records)
         else :
-            query = 'SELECT * FROM feeds where id={}'.format(feedId)
+            #query = 'SELECT * FROM feeds where id={}'.format(feedId)
+            #query = "DELETE from feeds where id=27"
+            #cursor.execute(query)
+
+            query = 'SELECT * from feeds'
             cursor.execute(query)
             records = cursor.fetchall()
             print(records)
+
 
 
 # structure du dictionnaire de feeds :

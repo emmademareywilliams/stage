@@ -110,26 +110,33 @@ def modifyData(feednb, data):
     data: dict as defined by pumpOff, which corresponds to the period of time during which
     the pump is not functionning
     """
-    datetimeStart = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["startmonth"], data["startday"], data["starthour"]), '%Y %m %d %I:%M')
-    datetimeEnd = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["endmonth"], data["endday"], data["endhour"]), '%Y %m %d %I:%M')
+    datetimeStart = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["startmonth"], data["startday"], data["starthour"]), '%Y %m %d %H:%M')
+    datetimeEnd = datetime.datetime.strptime('2021 {} {} {}:00'.format(data["endmonth"], data["endday"], data["endhour"]), '%Y %m %d %H:%M')
     starttimeoff = HumanTimetoUnix(datetimeStart)
     endtimeoff = HumanTimetoUnix(datetimeEnd)
 
-    interval = getMetas(feednb)[0]
-    duration = int(endtimeoff - starttimeoff)
-    nbpoints = int(duration / interval)
-    newvalues = np.zeros(nbpoints)
+    interval, beginning = getMetas(feednb)
+    newvalues = []
+    firststepoff = int((starttimeoff - beginning)/interval)
+    laststepoff = int((endtimeoff - beginning)/interval)
+    currentstep = int((time.time()- beginning)/interval)
+    for i in range(firststepoff):
+        newvalues.append(1)
+    for i in range(firststepoff, laststepoff):
+        newvalues.append(0)
+    for i in range(laststepoff, currentstep):
+        newvalues.append(1)
 
     # the new values (null) are written in the .dat file:
     # WARNING: when opening a file with the "r+" mode, we delete the data of the file! Thus we must rewrite
     # the information contained in the file
-    f = open("{}/{}.dat".format(dir,feednb),"r+")
-    d = f.readlines()
-    f.seek(0)
-    for i in d:
-        if i != "line you want to remove...":
-            f.write(i)
-    f.seek(starttimeoff, 0)
+    f = open("{}/{}.dat".format(dir,feednb),"wb")
+    #d = f.readlines()
+    #f.seek(0)
+    #for i in d:
+        #if i != "line you want to remove...":
+            #f.write(i)
+    #f.seek(0)
     format = "<{}".format("f"*len(newvalues))
     bin = struct.pack(format,*newvalues)
     f.write(bin)
@@ -150,13 +157,13 @@ def resetData(feednb):
     nbpoints = int(duration / interval)
     oldvalues = np.ones(nbpoints)
 
-    f=open("{}/{}.dat".format(dir,feednb),"r+")
+    f=open("{}/{}.dat".format(dir,feednb),"wb")
     format="<{}".format("f"*len(oldvalues))
     bin=struct.pack(format,*oldvalues)
     f.write(bin)
     f.close()
 
-resetData(42)
+#resetData(42)
 
 """
 FIRST STEP
@@ -225,20 +232,20 @@ def quitter():
     root.destroy()
 
 
-def getStartDay(day):
+def getStartDay():
     """
     day is the value (int) returned by the combobox once the user has entered the day they want
     updates the dictionnary pumpOff according to those values
     """
-    pumpOff['startday'] = day
+    pumpOff['startday'] = startdayCombo.get()
 
-def getStartMonth(month):
-    pumpOff['startmonth'] = month
+def getStartMonth():
+    pumpOff['startmonth'] = startmonthCombo.get()
 
-def getStartHour(hour):
-    pumpOff['starthour'] = hour
+def getStartHour():
+    pumpOff['starthour'] = starthourCombo.get()
 
-def getEndDay(day):
+def getEndDay():
     pumpOff['endday'] = day
 
 def getEndMonth(month):
@@ -272,7 +279,7 @@ graphPyfina(42, frame)
 # Widgets configuration:
 
 fen = Pmw.initialise(root)
-texte1 = tk.Label(fen, text="Pump not in operation / start time:")
+texte1 = tk.Label(fen, text="Start time:")
 texte2 = tk.Label(fen, text="End time:")
 
 # configuration of the comboboxes
@@ -350,9 +357,13 @@ enddayCombo.grid(row =6, column =1, padx=5)
 endmonthCombo.grid(row =6, column =2, padx=5)
 endhourCombo.grid(row =6, column =3, padx=0)
 
+apply = tk.Button(fen, text='Apply')
+apply.grid(column=1, row=7)
+
 bouton = tk.Button(fen, text="Exit", command=quitter)
 bouton.grid(column=2, row=7)
 
 print(pumpOff)
 
 root.mainloop()
+time.sleep(10)

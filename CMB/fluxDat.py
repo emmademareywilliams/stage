@@ -5,7 +5,7 @@ import numpy as np
 import os.path
 
 # if want to work on the active directory, just use dir="."
-dir="./Data/phpfina"
+dir="/var/opt/emoncms/phpfina"
 
 
 def getMetas(nb,dir=dir):
@@ -83,6 +83,7 @@ création du tableau numpy initial pour le fonctionnement de la pompe :
 #   - on le convertit en secondes
 #   - on calcule combien de points sur cette durée (nb pts = durée / interval)
 
+"""
 interval, starttime = getMetas(19) # température de départ circuit Sud
 now = time.time()
 duration = now - starttime
@@ -91,3 +92,6 @@ print(nb_pt)
 
 pompe = np.ones(nb_pt)
 newPHPFina(42, starttime, interval, pompe, dir)
+"""
+getMetas(25)
+getMetas(1)
