@@ -27,3 +27,15 @@ Dans ce dossier, on trouvera les fchiers Python permettant de mettre à jour le 
 * faire tourner le modèle RC avec les nouvelles données
 * *in fine*, créer une nouvelle fenêtre où l'utilisateur pourrait rentrer la date de début du plot, ainsi que le circuit choisi (il faudrait alors créer d'autres fichiers .dat et .meta pour chaque circuit d'eau) 
 
+
+#### Version finale : 
+
+L'aventure tkinter ne s'étant pas révélée fructueuse, on laissera de côté cette solution, même si elle reste encore en cours de développement. Il peut être intéressant de profiter des bibliothèques GUI (Graphic User Interface) sur Python pour des applications simples et dans certains cas de figures ; or,  ici, toute l'interface graphique est déjà fournie par Emoncms, d'autant plus que c'est une interface travaillée et ergonomique. Aussi, Python ne fait pas le poids face à une application web de ce genre. 
+
+Ci-dessous, un aperçu de la version finale de l'interface : 
+
+![interface tkinter](interface.png)
+
+À ce stade de développement, elle ne permet pas encore de modifier les données de fonctionnement de la pompe lorsque l'on change les valeurs des jours, mois et heures via les menus déroulants. 
+
+
