@@ -82,6 +82,12 @@ tag | sofrel_Vantage | Famille du flux
 
 On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
 
+> Si l'on veut tester un programme PHP, il faut ouvrir une fenêtre dans un navigateur web. Pour ce faire, on crée un fichier `test.php` dans le répertoire /var/www/html, qui contiendra le code à tester. On ouvre ensuite une fenêtre web à l'adresse suivante : 
+> ```
+> 127.0.0.1/test.php
+> ```
+
+
 Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms. Pour y accéder, il faudra tapper l'adresse `127.0.0.1/emoncms` dans un navigateur de recherche, puis se connecter avec le compte utilisateur `verdi` :
 
 ![nouveau flux reconnu](newflux.png)
