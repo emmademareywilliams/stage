@@ -30,7 +30,7 @@ Dans ce dossier, on trouvera les fchiers Python permettant de mettre à jour le 
 
 #### Version finale : 
 
-L'aventure tkinter ne s'étant pas révélée fructueuse, on laissera de côté cette solution, même si elle reste encore en cours de développement. Il peut être intéressant de profiter des bibliothèques GUI (Graphic User Interface) sur Python pour des applications simples et dans certains cas de figures ; or,  ici, toute l'interface graphique est déjà fournie par Emoncms, d'autant plus que c'est une interface travaillée et ergonomique. Aussi, Python ne fait pas le poids face à une application web de ce genre. 
+L'aventure tkinter ne s'étant pas révélée fructueuse, on laissera de côté cette solution, même si elle reste encore en cours de développement. Il peut être intéressant de profiter des bibliothèques GUI (*Graphical User Interface*) sur Python pour des applications simples et dans certains cas de figures ; or,  ici, toute l'interface graphique est déjà fournie par Emoncms, d'autant plus que c'est une interface travaillée et ergonomique. Aussi, Python ne fait pas le poids face à une application web de ce genre. 
 
 Ci-dessous, un aperçu de la version finale de l'interface : 
 
