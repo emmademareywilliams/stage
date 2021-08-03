@@ -50,9 +50,7 @@ import mysql.connector
 
 > C.f fichier `mysql_test.py`
 
-Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38) : on se retrouve sur la page de Redis, qui est un système de gestion de base de données et qui nous permet d'avoir accès à la structure de la base SQL `emoncms`. 
-
-Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms. Pour y accéder, il faudra tapper l'adresse `127.0.0.1/emoncms` dans un navigateur de recherche, puis se connecter avec le compte utilisateur `verdi`.   
+Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38) : on se retrouve sur la page de Redis, qui est un système de gestion de base de données et qui nous permet d'avoir accès à la structure de la base SQL `emoncms`.   
 
 
 ### Base de données `input`
@@ -84,6 +82,10 @@ tag | sofrel_Vantage | Famille du flux
 
 On pourra également se référer à ce [cours en ligne]( https://openclassrooms.com/fr/courses/918836-concevez-votre-site-web-avec-php-et-mysql/914508-ecrivez-des-donnees) afin de se familiariser avec la syntaxe PHP et la manipulation des bases de données. 
 
+Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms. Pour y accéder, il faudra tapper l'adresse `127.0.0.1/emoncms` dans un navigateur de recherche, puis se connecter avec le compte utilisateur `verdi` :
+
+![nouveau flux reconnu](newflux.png)
+
 
 ## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
   
@@ -92,4 +94,6 @@ Les fichiers qui gèrent l'interface graphique d'Emoncms se trouvent [ici](https
 On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création du graphe où seront superposées les courbes de température et de fonctionnement de la pompe. 
 
 Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
+
+![nouveau graphe pompe](editrealtime2.png)
 
