@@ -52,6 +52,9 @@ import mysql.connector
 
 Lors de cette étape, on sera amené à manipuler la base de données d'Emoncms. Pour plus de détails sur la structure de cette base, on se référera à [ce lien](https://github.com/emoncms/emoncms/blob/master/default.emonpi.settings.php#L38) : on se retrouve sur la page de Redis, qui est un système de gestion de base de données et qui nous permet d'avoir accès à la structure de la base SQL `emoncms`. 
 
+Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms. Pour y accéder, il faudra tapper l'adresse `127.0.0.1/emoncms` dans un navigateur de recherche, puis se connecter avec le compte utilisateur `verdi`.   
+
+
 ### Base de données `input`
 
 Clé | Valeur | Description 
