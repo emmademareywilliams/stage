@@ -77,6 +77,10 @@ logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBU
 L'utilisation de l'argument `level` permet de choisir le niveau seuil à partir duquel les informations seront affichées dans le log. 
 
 
+
+# Notions sur la programmation Web 
+
+
 ## Requêtes synchrones et asynchrones 
 
 Un code **synchrone** s'exécute ligne après ligne en attendant la fin de l'exécution de la ligne précédente : il ne peut donc y avoir de tâches effectuées en parallèle. 
@@ -96,4 +100,16 @@ Dans le monde de la programmation web, on rencontre deux types de sites :
 
 
 Un **CMS** (Content Management System) est un logiciel permettant la création et la gestion d'un site web dynamique. Le plus utilisé à ce jour est WordPress. 
+
+
+## Langages de programmation web 
+
+Dans le cadre de la programmation web, plusieurs langages sont utilisés selon les tâches à effectuer, ces langages étant le plus souvent entremêlés et utilisés en même temps dans un même programme. Les plus courants sont les suivants : 
+
+* **HTML** : comme vu ci-dessus, HTML permet la création de sites statiques. Plus généralement, ce qui est codé en HTML est ce qui apparaît *in fine* sur la page web : ainsi, il gère la structure et l'affichage de la page, sans rien stocker. 
+* **JavaScript** et **PHP** : ce sont deux langages de développement web très répandus, utilisés par les sites dynamiques car capables de stocker dynamiquement des données. Il existe de nombreuses différences entre ces deux langages, par exemple le fait que PHP permette des requêtes synchrones, contre des requêtes asynchrones pour JavaScript (d'autres différences à [cette adresse](https://www.javatpoint.com/javascript-vs-php)). 
+
+> **Attention** : il ne faut pas confondre *langage* et *format* ! 
+> 
+> Un format répandu est **JSON** : cet acronyme signifie *JavaScript Object Notation*, ce qui correspond au fait que tout est représenté comme un objet. Ce format permet le transfert de données d'un browser à un autre selon un système de correspondance des valeurs clés. Les données transférées suivent des routes. 
 
