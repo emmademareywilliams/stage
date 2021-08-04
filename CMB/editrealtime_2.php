@@ -25,7 +25,7 @@
 <?php } ?>
 
 <div id="graph_bound" style="height:350px; width:100%; position:relative;">
-    <div id="graph"></div>
+
 <!-- copié : création d'un nouvel objet, qui sera le graphe de référence : -->
     <div id="reference"></div>
     <div id="graph-buttons" style="position:absolute; top:18px; right:32px; opacity:0.5;">
@@ -42,8 +42,8 @@
             <button class='btn graph-nav' id='left'><</button>
             <button class='btn graph-nav' id='right'>></button>
         </div>
-
     </div>
+    <div id="graph"></div>
     <h3 style="position:absolute; top:0px; left:32px;"><span id="stats"></span></h3>
 </div>
 
@@ -82,11 +82,12 @@
   $('#graph').height($('#graph_bound').height()/2);
 
 // copié : pour fixer la hauteur et la largeur du nouveau graphe :
-// (on divise la hauteur (qui est fixée) par 2 pour que les 2 graphes rentrent bien) 
+// (on divise la hauteur (qui est fixée) par 2 pour que les 2 graphes rentrent bien)
   $('#reference').width($('#graph_bound').width());
   $('#reference').height($('#graph_bound').height()/2);
 
   var feedid = "<?php echo $feedid; ?>";
+  var ref = "<?php echo $ref; ?>";
   var feedname = "<?php echo $feedidname; ?>";
   var type = "<?php echo $type; ?>";
   var apikey = "<?php echo $write_apikey; ?>";
@@ -147,7 +148,7 @@
 
     var graph_data = get_feed_data(feedid,start,end,interval,1,0);
 // copié : pour récupérer les données liées à un feed :
-    var reference_data = get_feed_data(feedid,start,end,interval,1,0);
+    var reference_data = get_feed_data(ref,start,end,interval,1,0);
     var stats = power_stats(graph_data);
     //$("#stats").html("Average: "+stats['average'].toFixed(0)+"W | "+stats['kwh'].toFixed(2)+" kWh");
 
@@ -229,6 +230,7 @@
   $('#multiply-submit').click(function () {
 
     var multiplyvalue = $("#multiplyvalue").val();
+    console.log(multiplyvalue);
 
     $.ajax({
       url: path+'feed/scalerange.json',
