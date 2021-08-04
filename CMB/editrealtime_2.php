@@ -115,6 +115,34 @@
       }
     });
 
+    function plot_feed(feednb, str_graph)
+    /*
+    feednb: number of the feed that we want to plot
+    str_graph: name of the graph (string) associated with the feed number, defined at the beginning
+    */
+    {
+        var graph_data = get_feed_data(feednb,start,end,interval,1,0);
+        var stats = power_stats(graph_data);
+        var plotdata = {data: graph_data, lines: { show: true, fill: true }};
+        if (type == 2) plotdata = {data: graph_data, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}};
+        var plot = $.plot($(str_graph), [plotdata], {
+          canvas: true,
+          //grid: { show: true, clickable: true},
+          grid: { show: true, hoverable: true, clickable: true },
+          xaxis: { mode: "time", timezone: "browser", min: start, max: end },
+          legend: { show: true, noColumns: 1, position: "se", backgroundColor: "white", lineWidth: 0},
+          selection: { mode: "x" },
+          touch: { pan: "x", scale: "x" }
+        });
+
+        $(str_graph).bind("plotclick", function (event, pos, item) {
+          if (item != null) {
+            $("#time").val(item.datapoint[0]/1000);
+            $("#newvalue").val(item.datapoint[1]);
+          }
+        });
+      }
+
     var npoints = 800;
     interval = Math.round(((end - start)/npoints)/1000);
 
@@ -146,63 +174,49 @@
     start = Math.floor((start*0.001) / interval) * interval * 1000;
     end = Math.ceil((end*0.001) / interval) * interval * 1000;
 
-    var graph_data = get_feed_data(feedid,start,end,interval,1,0);
-// copié : pour récupérer les données liées à un feed :
-    var reference_data = get_feed_data(ref,start,end,interval,1,0);
-    var stats = power_stats(graph_data);
-    //$("#stats").html("Average: "+stats['average'].toFixed(0)+"W | "+stats['kwh'].toFixed(2)+" kWh");
-
-    var plotdata = {data: graph_data, lines: { show: true, fill: true }};
-    if (type == 2) plotdata = {data: graph_data, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}};
-
-// copié : pour ploter les données reference_data :
-    var plotdata_2 = {data: reference_data, lines: { show: true, fill: true }};
-    if (type == 2) plotdata_2 = {data: reference_data, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}};
-
-    var plot = $.plot($("#graph"), [plotdata], {
-      canvas: true,
-      //grid: { show: true, clickable: true},
-      grid: { show: true, hoverable: true, clickable: true },
-      xaxis: { mode: "time", timezone: "browser", min: start, max: end },
-      selection: { mode: "x" },
-      touch: { pan: "x", scale: "x" }
-    });
-
-// copié : bloc pour afficher les données de plotdata_2 dans le graphe 'reference' :
-    var plot_2 = $.plot($("#reference"), [plotdata_2], {
-      canvas: true,
-      //grid: { show: true, clickable: true},
-      grid: { show: true, hoverable: true, clickable: true },
-      xaxis: { mode: "time", timezone: "browser", min: start, max: end },
-      selection: { mode: "x" },
-      touch: { pan: "x", scale: "x" }
-    });
+    plot_feed(feedid, "#graph");
+    plot_feed(ref, "#reference");
 
   }
 
-  $("#graph").bind("plotclick", function (event, pos, item) {
-    if (item != null) {
-      $("#time").val(item.datapoint[0]/1000);
-      $("#newvalue").val(item.datapoint[1]);
-      //$("#stats").html("Value: "+item.datapoint[1]);
-    }
-  });
 
-// j'ai aussi copié ce bloc-ci mais il ne semble pas y avoir eu de changement :
-  $("#reference").bind("plotclick", function (event, pos, item) {
-    if (item != null) {
-      $("#time").val(item.datapoint[0]/1000);
-      $("#newvalue").val(item.datapoint[1]);
-      //$("#stats").html("Value: "+item.datapoint[1]);
-    }
-  });
+ function zoom_toolbox(str_graph)
+ /*
+ str_graph: name of the graph (string) associated with the feed number, defined at the beginning
+ */
+ {
+   $(str_graph).bind("plotselected", function (event, ranges) { start = ranges.xaxis.from; end = ranges.xaxis.to; vis_feed_data(); });
+
+   // the buttons appear when the mouse pointer passes over the graph:
+   $(str_graph).mouseenter(function(){
+     $("#graph-navbar").show();
+     $("#graph-buttons").stop().fadeIn();
+     $("#stats").stop().fadeIn();
+   });
+ // the buttons disappear when the mouse is out of the frame:
+   $(str_graph).bind("touchstarted", function (event, pos)
+   {
+     $("#graph-navbar").hide();
+     $("#graph-buttons").stop().fadeOut();
+     $("#stats").stop().fadeOut();
+   });
+
+  // action:
+   $(str_graph).bind("touchended", function (event, ranges)
+   {
+     $("#graph-buttons").stop().fadeIn();
+     $("#stats").stop().fadeIn();
+     start = ranges.xaxis.from; end = ranges.xaxis.to;
+     vis_feed_data();
+   });
+ }
 
   //--------------------------------------------------------------------------------------
-  // Graph zooming
+  // Graph zooming toolbox
   //--------------------------------------------------------------------------------------
-  $("#graph").bind("plotselected", function (event, ranges) { start = ranges.xaxis.from; end = ranges.xaxis.to; vis_feed_data(); });
+
   //----------------------------------------------------------------------------------------------
-  // Operate buttons
+  // Operate buttons --> do not change, whatever the graph
   //----------------------------------------------------------------------------------------------
   $("#zoomout").click(function () {inst_zoomout(); vis_feed_data();});
   $("#zoomin").click(function () {inst_zoomin(); vis_feed_data();});
@@ -263,30 +277,14 @@
     $('#myModal').modal('hide');
   });
 
+// Call to the zoom_toolbox function:
+ zoom_toolbox("#reference");
+ zoom_toolbox("#graph");
 
-  // Graph buttons and navigation efects for mouse and touch
-  $("#graph").mouseenter(function(){
-    $("#graph-navbar").show();
-    $("#graph-buttons").stop().fadeIn();
-    $("#stats").stop().fadeIn();
-  });
-  $("#graph_bound").mouseleave(function(){
-    $("#graph-buttons").stop().fadeOut();
-    $("#stats").stop().fadeOut();
-  });
-  $("#graph").bind("touchstarted", function (event, pos)
-  {
-    $("#graph-navbar").hide();
-    $("#graph-buttons").stop().fadeOut();
-    $("#stats").stop().fadeOut();
-  });
+ $("#graph_bound").mouseleave(function(){
+   $("#graph-buttons").stop().fadeOut();
+   $("#stats").stop().fadeOut();
+ });
 
-  $("#graph").bind("touchended", function (event, ranges)
-  {
-    $("#graph-buttons").stop().fadeIn();
-    $("#stats").stop().fadeIn();
-    start = ranges.xaxis.from; end = ranges.xaxis.to;
-    vis_feed_data();
-  });
 
 </script>
