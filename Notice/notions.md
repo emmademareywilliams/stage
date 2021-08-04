@@ -86,6 +86,8 @@ L'utilisation de l'argument `level` permet de choisir le niveau seuil à partir 
 Un code **synchrone** s'exécute ligne après ligne en attendant la fin de l'exécution de la ligne précédente : il ne peut donc y avoir de tâches effectuées en parallèle. 
 Au contraire, dans un code **asynchrone**, la ligne suivante n'attendra pas que la ligne asynchrone ait fini son exécution.
 
+![requêtes synchrone et asynchrone](synchrone-vs-asynchrone.png)
+
 Plus généralement, la communication de données peut être synchrone ou asynchrone : 
 * Dans le cas d'une connexion *synchrone*, tous les interlocuteurs sont connectés au même moment et échangent les informations de manière simultanée et instantannée. 
 * Si la communication est *asynchrone*, les échanges se font en mode différé et les interlocuteurs ne doivent pas tous être connectés au même moment. Cette méthode de communication repose sur le mécanisme de dépôt de l'information dans des réservoirs de stockage momentané publics ou privés.
