@@ -90,7 +90,7 @@ On pourra également se référer à ce [cours en ligne]( https://openclassrooms
 
 Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms. Pour y accéder, il faudra tapper l'adresse `127.0.0.1/emoncms` dans un navigateur de recherche, puis se connecter avec le compte utilisateur `verdi` :
 
-![nouveau flux reconnu](newflux.png)
+![nouveau flux reconnu](images/newflux.png)
 
 
 ## Step 3 : visualiser le nouveau flux dans un graphe Emoncms
@@ -101,5 +101,5 @@ On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisati
 
 Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
 
-![nouveau graphe pompe](editrealtime2.png)
+![nouveau graphe pompe](image/interface.png)
 
