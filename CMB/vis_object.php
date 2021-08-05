@@ -93,7 +93,8 @@
 // dupliqué et modifié :
         'editrealtime_2'=> array('label'=>dgettext('vis_messages','EditRealtime_2'), 'options'=>array(
             array('feedid',dgettext('vis_messages','feed'),1),
-            array('ref',dgettext('vis_messages','reference'),1)
+            array('ref',dgettext('vis_messages','reference 1'),1),
+            array('temp',dgettext('vis_messages','reference 2 (temp)'),1)
         )),
 
         'editdaily'=> array('label'=>dgettext('vis_messages','EditDaily'), 'options'=>array(
