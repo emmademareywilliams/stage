@@ -101,5 +101,5 @@ On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisati
 
 Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
 
-![nouveau graphe pompe](image/interface.png)
+![nouveau graphe pompe](images/interface.png)
 
