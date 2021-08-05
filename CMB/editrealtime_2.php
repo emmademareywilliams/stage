@@ -88,6 +88,7 @@
 
   var feedid = "<?php echo $feedid; ?>";
   var ref = "<?php echo $ref; ?>";
+  var temp = "<?php echo $temp; ?>";
   var feedname = "<?php echo $feedidname; ?>";
   var type = "<?php echo $type; ?>";
   var apikey = "<?php echo $write_apikey; ?>";
@@ -115,33 +116,74 @@
       }
     });
 
-    function plot_feed(feednb, str_graph)
+    function plot_pump(feednb)
     /*
-    feednb: number of the feed that we want to plot
-    str_graph: name of the graph (string) associated with the feed number, defined at the beginning
+    plots the pump operation graph in the bottom graph
+    feednb: number of the feed that we want to plot --> will be the pump feed nb
     */
     {
         var graph_data = get_feed_data(feednb,start,end,interval,1,0);
         var stats = power_stats(graph_data);
-        var plotdata = {data: graph_data, lines: { show: true, fill: true }};
-        if (type == 2) plotdata = {data: graph_data, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}};
-        var plot = $.plot($(str_graph), [plotdata], {
+        // if line graph:
+        var plotdata = {label: "pompe", data: graph_data, lines: { show: true, fill: true }};
+        // if bar graph:
+        if (type == 2) plotdata = {data: graph_data, yaxis: yaxisnb, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}};
+        var plot = $.plot($("#graph"), [plotdata], {
           canvas: true,
-          //grid: { show: true, clickable: true},
           grid: { show: true, hoverable: true, clickable: true },
           xaxis: { mode: "time", timezone: "browser", min: start, max: end },
-          legend: { show: true, noColumns: 1, position: "se", backgroundColor: "white", lineWidth: 0},
+          legend: { show: true, noColumns: 0, position: "se", backgroundColor: "white", lineWidth: 0},
           selection: { mode: "x" },
           touch: { pan: "x", scale: "x" }
         });
 
-        $(str_graph).bind("plotclick", function (event, pos, item) {
+        $("#graph").bind("plotclick", function (event, pos, item) {
           if (item != null) {
             $("#time").val(item.datapoint[0]/1000);
             $("#newvalue").val(item.datapoint[1]);
           }
         });
       }
+
+      function plot_reference(feed1, feed2)
+      /*
+      plots the references in the top graph
+      feed1: first reference feed (will be North circuit departure temperature)
+      feed2: second reference feed (will be North indoor temperature)
+      */
+      {
+          var graph_data1 = get_feed_data(feed1,start,end,interval,1,0);
+          var graph_data2 = get_feed_data(feed2,start,end,interval,1,0);
+          //var stats = power_stats(graph_data);
+          // if line graph:
+          var plotdata = [
+            {label: "circuit temp", data: graph_data1, yaxis: 1, color: "pink", lines: { show: true, fill: true }},
+            {label: "indoor temp", data: graph_data2, yaxis: 2, color: "yellow", lines: { show: true, fill: false }}
+          ];
+          // if bar graph:
+          if (type == 2) {
+            plotdata = [
+              {label: "label1", data: graph_data1, yaxis: 1, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}},
+              {label: "label2", data: graph_data2, yaxis: 2, bars: { show: true, align: "center", barWidth: 3600*18*1000, fill: true}}
+            ];
+          }
+          var plot = $.plot($("#reference"), plotdata, {
+            canvas: true,
+            grid: { show: true, hoverable: true, clickable: true },
+            xaxis: { mode: "time", timezone: "browser", min: start, max: end },
+            yaxes: [ { position: "left" }, { position: "right" } ],
+            legend: { show: true, noColumns: 1, position: "se", backgroundColor: "white", lineWidth: 0},
+            selection: { mode: "x" },
+            touch: { pan: "x", scale: "x" }
+          });
+
+          $("#reference").bind("plotclick", function (event, pos, item) {
+            if (item != null) {
+              $("#time").val(item.datapoint[0]/1000);
+              $("#newvalue").val(item.datapoint[1]);
+            }
+          });
+        }
 
     var npoints = 800;
     interval = Math.round(((end - start)/npoints)/1000);
@@ -174,8 +216,8 @@
     start = Math.floor((start*0.001) / interval) * interval * 1000;
     end = Math.ceil((end*0.001) / interval) * interval * 1000;
 
-    plot_feed(feedid, "#graph");
-    plot_feed(ref, "#reference");
+    plot_pump(feedid);
+    plot_reference(ref, temp);
 
   }
 
