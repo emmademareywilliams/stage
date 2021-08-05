@@ -4,7 +4,7 @@ Les données récoltées au collège Marc Bloch consistent essentiellement en le
 n'a été installé qui puisse mesurer le fonctionnement de la pompe. Cependant, on peut déduire, à partir des données de température, à quels moments le chauffage est activé ou non :
 il va donc s'agir de créer manuellement un flux pour le fonctionnement de la pompe, puis de le modifier afin qu'il corresponde au comportement réel du chauffage. 
 
-Pour ce faire, il faudra paramétrer l'interface Emoncms afin de créer une nouvelle visualisation et de modifier les données directement sur le site. 
+Pour ce faire, il faudra paramétrer l'interface Emoncms afin de créer une nouvelle visualisation et de modifier les données directement sur la page web. 
 
 
 ## Au préalable 
