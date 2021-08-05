@@ -97,9 +97,23 @@ Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms
   
 Les fichiers qui gèrent l'interface graphique d'Emoncms se trouvent [ici](https://github.com/emoncms/emoncms/tree/master/Modules/vis) (ou bien, sur la machine, au chemin suivant : `opt/openenergymonitor/emoncms/Modules/vis`).
 
-On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création du graphe où seront superposées les courbes de température et de fonctionnement de la pompe. 
+On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création des graphes où, d'une part, seront superposées les courbes de température intérieure et de tempérture de départ du circuit d'eau, et d'autre part, la courbe de fonctionnement de la pompe. 
 
 Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
 
 ![nouveau graphe pompe](images/interface.png)
+
+
+
+## Step 4 : modifier le flux de fonctionnement de la pompe
+
+Grâce à l'interface graphique nouvellement créée sur Emoncms, on pourra manuellement ajuster les valeurs de fonctionnement de la pompe. Pour ce faire, on s'appuiera sur le graphe supérieur : lorsqu'il y a corrélation entre la diminution de la température de chauffe et celle de la température intérieure, on peut en déduire que la pompe est à l'arrêt. 
+
+On abtient via cette méthode le résultat suivant : 
+
+![resultat pompe](images/result_pompe.png)
+
+
+
+
 
