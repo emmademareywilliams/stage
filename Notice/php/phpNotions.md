@@ -2,7 +2,14 @@
 
 [Getting started](#Getting-started)
 | [Some basic functions](#Some-basic-functions)
-| 
+| [Getting user input](#Getting-user-input)
+| [Arrays](#Arrays)
+| [Function](#Function)
+| [IF statement](#F-statement)
+| [Switch statements](#Switch-statements)
+| [Loops](#Loops)
+| [Including HTML and PHP](#Including-HTML-and-PHP)
+| [Classes and objects](#Classes-and-objects)
 
 #  
 
