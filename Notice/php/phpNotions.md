@@ -1,5 +1,11 @@
 # PHP programming language 
 
+[Getting started](#Getting-started)
+| [Some basic functions](#Some-basic-functions)
+| 
+
+#  
+
 PHP is one of the most commonly used languages to generate dynamic websites.
 
 !["PHP logo"](php.jpg)
