@@ -21,4 +21,7 @@ Date de début | R | C | Poids
 
 **Observations pour cette fenêtre** :
 * si la fenêtre correspond uniquement à une période de vacances, la température simulée sera toujours constante (cf. figure ci-dessous). En effet, l'absence des variations caractéristiques pour la température de départ en semaine ne permet pas d'obtenir une convolution satisfaisante. 
+
+![12 février](12_02_10days.png)
+
 * À certaines dates (c'est notamment le cas de la première moitié de mars), il a fallu changer les paramètres des poids afin que l'exponentielle contenue dans le calcul de la convolution ne tende pas vers l'infini. 
