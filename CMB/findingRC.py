@@ -43,7 +43,7 @@ heating = PyFina(28, dir, start, step, nb)
 # on sait que la valeur minimale dans l'autopilot représente l'arrêt du système de chauffage
 # c'est ainsi sur presque tous les systèmes --> pour savoir quand on chauffe
 
-deltatemp = 1  # approximation
+deltatemp = 10  # approximation
 Qc = flow_rate * Cw * deltatemp * heating
 
 from scipy import signal
