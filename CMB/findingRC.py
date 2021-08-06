@@ -6,37 +6,44 @@ import time
 
 from PyFina import PyFina
 
-flow_rate = 5 #m3/h  ==> où le trouver ??
+flow_rate = 5 #m3/h  ==> première approximation
 Cw = 1162.5 #Wh/m3/K
 
-dir = "/var/opt/emoncms/phpfina"
-start = 1613876400
+
+def HumanTimetoUnix(datetime):
+    """
+    inverse function of secondToHumanTime, aka gives the Unix time stamp associated with a given dates
+
+    datetime: datetime object corresponding to a date (yyyy - mm - dd)
+    returns a Unix number (int)
+    """
+    return int(time.mktime(datetime.timetuple()))
+
+
+message_month = "Please choose the month (number of the month) \n"
+month = input(message_month)
+message_day = "then the number of the day :\n"
+day = input(message_day)
+
+date = datetime.datetime.strptime('2021 {} {} 04:00'.format(month, day), '%Y %m %d %H:%M')
+start = HumanTimetoUnix(date)
+
+dir = "/var/opt/emoncms/phpfina"  # attention erreur bête : aller chercher les données modifiées sur emoncms !
+#start = 1613876400
 step = 3600
 
-nb = 10*24*3600//step
+window = 10  # number of days
+nb = window*24*3600//step
 
 Text = PyFina(9, dir, start, step, nb)
 Tint = PyFina(29, dir, start, step, nb)
-
-# pour le circuit Nord :
-#Tdepart = PyFina(21, dir, start, step, nb)
-#Tretour = PyFina(22, dir, start, step, nb)
 heating = PyFina(28, dir, start, step, nb)
-print(Text)
+
+# print(Text)
 # on sait que la valeur minimale dans l'autopilot représente l'arrêt du système de chauffage
 # c'est ainsi sur presque tous les systèmes --> pour savoir quand on chauffe
-"""
-lower = np.min(autopilot)
-tmp = lower * np.ones(nb)
-heating = (autopilot - tmp)
-upper = np.max(heating)
-heating = heating / upper
-"""
 
-#Tdepart = Tdepart * heating
-#Tretour = Tretour * heating
-#Qc = flow_rate * Cw * (Tdepart - Tretour)  --> obtenir la valeur sur les graphes Emoncms
-deltatemp = 10
+deltatemp = 1  # approximation
 Qc = flow_rate * Cw * deltatemp * heating
 
 from scipy import signal
