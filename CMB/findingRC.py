@@ -32,7 +32,7 @@ dir = "/var/opt/emoncms/phpfina"  # attention erreur bête : aller chercher les 
 #start = 1613876400
 step = 3600
 
-window = 10  # number of days
+window = 20  # number of days
 nb = window*24*3600//step
 
 Text = PyFina(9, dir, start, step, nb)
@@ -106,7 +106,7 @@ if wanatest == True:
     T = sim(step, R, C, Qc, Text, Tint[0], check=True)
     input("press a key or abort")
 
-p0=np.array([1e-5,1e8])
+p0=np.array([1e-5,1e9])
 # weights
 w0=np.array([2.0,7.0])
 
