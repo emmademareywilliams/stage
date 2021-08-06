@@ -19,5 +19,6 @@ Date de début | R | C | Poids
 18/03 | 3.14307842e-04 | 5.15186005e+08 | [1e-5, 1e8]
 05/04 | 2.47025473e-04 | 1.09630532e+09 | [1e-5, 1e8]
 
-Observations pour cette fenêtre :
-* si la fenêtre correspond uniquement à une période de vacances, la température simulée sera toujours constante (cf. figure ci-dessous). En effet, l'absence des variations
+**Observations pour cette fenêtre** :
+* si la fenêtre correspond uniquement à une période de vacances, la température simulée sera toujours constante (cf. figure ci-dessous). En effet, l'absence des variations caractéristiques pour la température de départ en semaine ne permet pas d'obtenir une convolution satisfaisante. 
+* À certaines dates (c'est notamment le cas de la première moitié de mars), il a fallu changer les paramètres des poids afin que l'exponentielle contenue dans le calcul de la convolution ne tende pas vers l'infini. 
