@@ -25,3 +25,18 @@ Date de début | R | C | Poids
 ![12 février](12_02_10days.png)
 
 * À certaines dates (c'est notamment le cas de la première moitié de mars), il a fallu changer les paramètres des poids afin que l'exponentielle contenue dans le calcul de la convolution ne tende pas vers l'infini. 
+
+
+### Durée de la simulation : 20 jours 
+
+On augmente le temps de la simulation à 20 jours, toutes choses égales par ailleurs. On pourra mettre à jour la valeur des poids au besoin. 
+
+Date de début | R | C | Poids 
+---|---|---|---
+20/02 | 3.08814171e-04 | 8.63446560e+08 | [1e-5, 1e8]
+04/03 | 3.19412465e-04 | 8.87378799e+08 | [1e-5, **1e9**]
+29/03 | 1.37565505e-05 | 1.08216951e+11 | [1e-5, 1e8]
+
+
+
+
