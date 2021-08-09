@@ -80,18 +80,18 @@ def newPHPFina(nb,start,step,data,dir=dir):
 Creation of the initial numpy array corresponding to the pump operation:
 """
 
-def newFeed(refFeed, newFeed):
+def newFeed(refFeed, newNb):
     """
     creates a new PHPFina blank feed (.dat and .meta files)
-    refFeed: number of the reference feed (used to get the interval and the starting time)
-    newFeed: number of the new feed
+    refFeed: number (int) of the reference feed (used to get the interval and the starting time)
+    newNb: number (int) of the new feed
     """
     interval, starttime = getMetas(refFeed)
     now = time.time()
     duration = now - starttime
     nb_pts = int(duration / interval)
     data = np.ones(nb_pts)
-    newPHPFina(newFeed, starttime, interval, data, dir)
+    newPHPFina(newNb, starttime, interval, data, dir)
 
 
 """
@@ -110,7 +110,7 @@ def feedIntoSQL(mode, feedId=None, name=None, tag=None):
         - if mode = 'read', the information about the feed corresponding to feedId is read
         - if mode = 'readall', the information of ALL the feeds is read
         - if mode = 'delete', the feed corresponding to feedId is deleted from the database
-    prints what is contained into the database 
+    prints what is contained into the database
 
     mode: string that specifies the operation done to the database
     feedId: number of the feed, used in mode 'read' and 'delete'
@@ -130,17 +130,35 @@ def feedIntoSQL(mode, feedId=None, name=None, tag=None):
     finally:
         if connection.is_connected():
             if mode == 'insert':
-                query = 'INSERT INTO feeds(datatype,engine,name,public,userid,tag)VALUES(1,5,{},"",1,{})'.format(name, tag)
+                query = 'INSERT INTO feeds(datatype,engine,name,public,userid,tag)VALUES(1,5,"{}","",1,"{}")'.format(name, tag)
 
-            else if mode == 'read':
+            elif mode == 'read':
                 query = 'SELECT * FROM feeds where id={}'.format(feedId)
 
-            else if mode == 'readall':
+            elif mode == 'readall':
                 query = 'SELECT * from feeds'
 
-            else if mode == 'delete':
+            elif mode == 'delete':
                 query = 'DELETE from feeds where id={}'.format(feedId)
 
             cursor.execute(query)
             records = cursor.fetchall()
             print(records)
+
+refFeed = 1
+newNb = 30
+#newFeed(refFeed, newNb)
+
+mode = 'readall'
+feedId = 30
+feedIntoSQL(mode, feedId, name='test', tag='Test_newFeed')
+
+"""
+Reset the database using Redis:
+(needs to be done so that the new feed gets detected and inserted)
+"""
+
+import redis
+
+r = redis.Redis(host='localhost', port=6379, db=0) # db = database number (here 0 <--> feed (?))
+r.flushdb()  # Flush database: clear old entries
