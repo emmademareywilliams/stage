@@ -3,6 +3,8 @@ import math
 import struct
 import numpy as np
 import os.path
+import redis
+import mysql.connector
 
 # if want to work on the active directory, just use dir="."
 dir="/var/opt/emoncms/phpfina"
@@ -94,29 +96,15 @@ def newFeed(refFeed, newNb):
     newPHPFina(newNb, starttime, interval, data, dir)
 
 
-"""
-Insertion of the new feed into the SQL database:
-"""
 
-import mysql.connector
-
-mode = 'read'
-feedId = 25
-
-def feedIntoSQL(mode, feedId=None, name=None, tag=None):
+def newFeedEmoncms(refFeed, name, tag, verif=False):
     """
-    sends a query to the database according to what the user wants to do:
-        - if mode = 'insert', a feed is inserted into the database
-        - if mode = 'read', the information about the feed corresponding to feedId is read
-        - if mode = 'readall', the information of ALL the feeds is read
-        - if mode = 'delete', the feed corresponding to feedId is deleted from the database
-    prints what is contained into the database
-
-    mode: string that specifies the operation done to the database
-    feedId: number of the feed, used in mode 'read' and 'delete'
-    name: name (string) of the new feed, used in mode 'insert'
-    tag: tag (string) of the new feed, used in mode 'insert'
+    creates the new feed and inserts it into EmonCMS
+    refFeed: number (int) of the reference feed
+    name: string, name of the feed
+    tag: string, tag for the feed
     """
+
     try:
         connection = mysql.connector.connect(host='localhost',database='emoncms',user='emoncms',password='emonpiemoncmsmysql2016')
         if connection.is_connected():
@@ -126,39 +114,35 @@ def feedIntoSQL(mode, feedId=None, name=None, tag=None):
             # on utilise l'option dictionnary pour avoir un retour similaire à celui de fetch_object() en PHP
             cursor = connection.cursor(dictionary=True)
     except Error as e:
-            message = "Error while connecting to MySQL {}".format(e)
+        message = "Error while connecting to MySQL {}".format(e)
     finally:
         if connection.is_connected():
-            if mode == 'insert':
-                query = 'INSERT INTO feeds(datatype,engine,name,public,userid,tag)VALUES(1,5,"{}","",1,"{}")'.format(name, tag)
-
-            elif mode == 'read':
-                query = 'SELECT * FROM feeds where id={}'.format(feedId)
-
-            elif mode == 'readall':
-                query = 'SELECT * from feeds'
-
-            elif mode == 'delete':
-                query = 'DELETE from feeds where id={}'.format(feedId)
-
+            """
+            insertion of the new feed into the SQL database:
+            """
+            query = 'INSERT INTO feeds(datatype,engine,name,public,userid,tag)VALUES(1,5,"{}","",1,"{}")'.format(name, tag)
             cursor.execute(query)
-            records = cursor.fetchall()
-            print(records)
 
-refFeed = 1
-newNb = 30
-#newFeed(refFeed, newNb)
+            """
+            the feed number is retrieved so that the associated .dat and .meta files can be created:
+            """
+            query = 'SELECT MAX(id) FROM feeds'
+            cursor.execute(query)
+            newNb = int(cursor.fetchall()[0]['MAX(id)'])
+            print(newNb)
+            newFeed(refFeed, newNb)
 
-mode = 'readall'
-feedId = 30
-feedIntoSQL(mode, feedId, name='test', tag='Test_newFeed')
+            """
+            Redis is reset so that the new feed can be recognised by Emoncms
+            """
+            r = redis.Redis(host='localhost', port=6379, db=0) # db = database number
+            r.flushdb()  # Flush database: clear old entries
 
-"""
-Reset the database using Redis:
-(needs to be done so that the new feed gets detected and inserted)
-"""
+            if verif:
+                query = "SELECT * from feeds"
+                cursor.execute(query)
+                records = cursor.fetchall()
+                print(records)
 
-import redis
 
-r = redis.Redis(host='localhost', port=6379, db=0) # db = database number (here 0 <--> feed (?))
-r.flushdb()  # Flush database: clear old entries
+newFeedEmoncms(1, "test", "Test_newfeed", verif=True)
