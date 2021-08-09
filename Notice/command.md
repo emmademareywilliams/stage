@@ -89,4 +89,9 @@ Pour créer des liens / raccourcis entre différents fichiers :
 ln
 ```
 
+Pour lister tous les fichiers contenus dans le répertoire courant :
+```
+ls 
+```
 
+> Cette commande peut être suivie de `-l` afin d'avoir accès aux autorisations accordées aux différents groupes pour chacun des fichiers. 
