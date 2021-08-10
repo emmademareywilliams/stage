@@ -9,7 +9,7 @@ Pour tous les résultats ci-dessous, on a pris :
 * une capacité calorifique de l'eau de *1162.5 Wh/m3/K* ;
 * une fenêtre de *10 jours* ; 
 * un débit de *5 m3/h* ; 
-* un delta T (entre les température de départ et d'arrivée) de *10*. 
+* un delta T (entre les températures de départ et d'arrivée) de *10*. 
 
 Date de début | R | C | Valeurs initiales 
 ---|---|---|---
@@ -79,8 +79,14 @@ Débit (m3/h) | R | C | Valeurs initiales
 --|--|--|--
 2 | 7.85771008e-04 | 2.06071802e+08 | [1e-5, 1e9]
 5 | 3.14307842e-04 | 5.15186005e+08 | [1e-5, 1e8]
-10 | 
+10 | 1.57154238e-04 | 1.03036626e+09 | [1e-5, 1e8] 
 
+On note de la même manière une dépendance linéaire entre les valeurs de R et C et celle du débit. 
 
+> À noter que, quelles que soient les valeurs de débit et de delta T, la courbe obtenue a toujours la même allure, telle que représentée ci-dessous : 
+> 
+> ![résultat 18 mars](18_03_10days.png)
+> 
+> Pour aboutir à une meilleure précision, en d'autres termes si l'on veut que la température simulée soit plus proche de la température réelle mesurée, le seul paramètre vraiment impactant est la fenêtre de simulation : plus le temps de simulation est important, mieux sera la précision. 
 
 
