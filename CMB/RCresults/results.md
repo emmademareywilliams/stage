@@ -88,5 +88,7 @@ On note de la même manière une dépendance linéaire entre les valeurs de R et
 > ![résultat 18 mars](18_03_10days.png)
 > 
 > Pour aboutir à une meilleure précision, en d'autres termes si l'on veut que la température simulée soit plus proche de la température réelle mesurée, le seul paramètre vraiment impactant est la fenêtre de simulation : plus le temps de simulation est important, mieux sera la précision. 
+> 
+> ![10 vs 20 jours](precision.png)
 
 
