@@ -5,8 +5,8 @@ Pour faire tourner le modèle RC, on s'est basé sur les valeurs de débit suiva
 Circuit | Débit (m3/h)  
 --|--
 Cellules | 5.19
-Nord |
-Sud | 
+Nord | 6.5
+Sud | 4.2 
 
 Or, ces valeurs ont été mesurées par des prestataires externes il y a de cela quelques années. Il est donc intéressant de procéder nous-même à une vérification de ces valeurs 
 et à un suivi dans le temps (sur quelques semaines). Les objectifs de cette campagne de mesure sont les suivants :
