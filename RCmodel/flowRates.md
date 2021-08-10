@@ -16,6 +16,10 @@ des années. Il est donc important, pour pouvoir modéliser au mieux le comporte
 * *Effectuer un suivi temporel des valeurs de débit* : les mesures seront menées sur plusieurs semaines, à raison de 2 à 3 fois par semaine, afin de constater l'évolution des
 différents débits (si évolution il y a). On pourra ainsi se rendre compte du comportement des pompes entre leur redémarrage et la stabilisation de leur fonctionnement en été. 
 
+L'instrument de mesure de débit utilisé est un débitmètre à ultrasons portable de la marque Prisma Instruments : 
+
+![débitmètre Prisma](prisma.jpg)
+
 Ci-dessous, les données récoltées pour chaque circuit et à chaque date de mesure :
 
 Date mesure // Circuit | Cellules | Nord | Sud | Est
