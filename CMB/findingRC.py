@@ -6,7 +6,7 @@ import time
 
 from PyFina import PyFina
 
-flow_rate = 5 #m3/h  ==> première approximation
+flow_rate = 50 #m3/h  ==> première approximation
 Cw = 1162.5 #Wh/m3/K
 
 
@@ -106,7 +106,7 @@ if wanatest == True:
     T = sim(step, R, C, Qc, Text, Tint[0], check=True)
     input("press a key or abort")
 
-p0=np.array([1e-5,1e9])
+p0=np.array([1e-5,1e8])
 # weights
 w0=np.array([2.0,7.0])
 
