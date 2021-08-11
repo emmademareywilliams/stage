@@ -14,12 +14,9 @@ Pour accéder à l'UI du routeur à distance :
 https://chaufferiedlcf.ddns.net 
   OU
 176.178.161.180
-
-User : root
-Password : Taxo10in2xcw*
 ```
 
-Au besoin, on pourra ouvrir une connexion *ssh* dans l'onglet *Nat* de l'UI du routeur. 
+Au besoin, on pourra autoriser une connexion *ssh* dans l'onglet *Nat* de l'UI du routeur. 
 
 
 ## Step 1 : créer le flux 
