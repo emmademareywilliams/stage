@@ -104,7 +104,7 @@ Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'on
 
 ## Step 4 : modifier le flux de fonctionnement de la pompe
 
-Grâce à l'interface graphique nouvellement créée sur Emoncms, on pourra manuellement ajuster les valeurs de fonctionnement de la pompe. Pour ce faire, on s'appuiera sur le graphe supérieur : lorsqu'il y a corrélation entre la diminution de la température de chauffe et celle de la température intérieure, on peut en déduire que la pompe est à l'arrêt. 
+Grâce à l'interface graphique nouvellement créée sur Emoncms, on pourra manuellement ajuster les valeurs de fonctionnement de la pompe. Pour ce faire, on s'appuiera sur le graphe supérieur : lorsqu'il y a corrélation entre la diminution de la température de chauffe et celle de la température intérieure, on peut en déduire qu'il n'y a pas de distribution de chaleur. 
 
 On obtient via cette méthode le résultat suivant : 
 
