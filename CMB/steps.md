@@ -94,7 +94,7 @@ Une fois le flux créé et reconnu, il apparaît dans l'onglet *Feeds* d'Emoncms
   
 Les fichiers qui gèrent l'interface graphique d'Emoncms se trouvent [ici](https://github.com/emoncms/emoncms/tree/master/Modules/vis) (ou bien, sur la machine, au chemin suivant : `opt/openenergymonitor/emoncms/Modules/vis`).
 
-On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création des graphes où, d'une part, seront superposées les courbes de température intérieure et de tempérture de départ du circuit d'eau, et d'autre part, la courbe de fonctionnement de la pompe. 
+On dupliquera le fichier `EditRealtime.php` pour ne pas casser cette visualisation : le nouveau fichier, appelé `EditRealtime2.php`, permettra la création des graphes où, d'une part, seront superposées les courbes de température intérieure et de température de départ du circuit d'eau, et d'autre part, la courbe de fonctionnement de la pompe. 
 
 Il faudra ensuite faire afficher `EditRealtime2` dans le menu déroulant de l'onglet visualisation d'Emoncms. 
 
