@@ -32,7 +32,7 @@ dir = "/var/opt/emoncms/phpfina"  # attention erreur bête : aller chercher les 
 #start = 1613876400
 step = 3600
 
-window = 20  # number of days
+window = 30  # number of days
 nb = window*24*3600//step
 
 Text = PyFina(9, dir, start, step, nb)
