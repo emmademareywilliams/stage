@@ -36,10 +36,6 @@ GAMMA = 0.099
 
 graphe = True
 verbose = False
-# non utilisé - pourrait servir à applatir un historique de plusieurs paramètres (tenseur > vecteur)
-# si d est le tenseur > d.flatten(flattenOrder)
-# ce type d'applatissement est dit de type Fortran
-flattenOrder = "F"
 
 dir = "/var/opt/emoncms/phpfina"
 
@@ -81,7 +77,7 @@ history = 12*3600//interval
 # - occupation O/N,
 # - nombre d'intervalles d'ici le changement d 'occupation, sorte de time of flight,
 # - température de consigne
-numPar = 6
+numPar = 3
 # nombre d'actions possibles  : 2 = on chauffe ou pas
 # pour l'instant, on reste simple
 numAct = 2
@@ -89,7 +85,7 @@ numAct = 2
 # nombre d'intervalles sur lequel la simulation sera menée
 # 60 correspond à un weekend
 goto = 60*3600//interval
-goto = 8*24*3600//interval
+#goto = 8*24*3600//interval
 
 # taille de la fenêtre
 wsize = history + goto + 1
@@ -104,7 +100,7 @@ inputs_size = 2
 # cas 2 : on fournit au réseau Tint[-1], Text[0], Tc*occupation[0], tof[0]
 # tof représente le nombre d'intervalles d'içi le changement d'occupation
 # Tc est la température de consigne
-inputs_size = 4
+#inputs_size = 4
 
 import os
 import sys
@@ -171,8 +167,7 @@ def visNN(agent):
     visualisation des poids du réseau
     """
     agent.summary()
-    if verbose :
-        print(agent.get_weights())
+    print(agent.get_weights())
 
 def setStart(ts=None, wsize = wsize):
     """
@@ -574,6 +569,7 @@ def CP(dline):
     dline = une ligne du tenseur datas
     """
     confortPenalty = abs(dline[2] - Tc)
+    return confortPenalty
 
 def CPA(dline):
     """
@@ -719,7 +715,8 @@ class Training:
             labelModel = "modèle"
         else:
             #result = industryPlayReductions(copy.deepcopy(datas), history)
-            result = industryPlayHystNRed(copy.deepcopy(datas), history)
+            #result = industryPlayHystNRed(copy.deepcopy(datas), history)
+            result = industryPlayHysteresis(copy.deepcopy(datas), history)
             labelModel = "réduits nuit/week-end"
         mConso = int(np.sum(result["datas"][history:,0]) / 1000)
         """
@@ -962,8 +959,6 @@ class Training:
         apred = 0
         train = False
         if self._mem.size() > BATCH_SIZE * 3:
-            if args.cloud == 0:
-                barre = ProgressBar(goto,"training")
             train = True
         conso = 0
         for i in range(goto):
@@ -981,7 +976,7 @@ class Training:
             datas[index,0] = action * max_power
             datas[index,2] = getR1C1(datas, index)
             nextstate = formatForNetwork(datas, index+1)
-            reward = evaluateReward(datas[index,:], mode='C')
+            reward = evaluateReward(datas[index,:], mode='HH')
             if isinstance(reward, list) == 1:
                 self._mem.addSample((state,action,reward[0],nextstate))
             else:
@@ -989,8 +984,6 @@ class Training:
             rewardTab.append(reward)
             if train:
                 self.trainOnce()
-                if args.cloud == 0:
-                    barre.update(i)
             npreds = self._steps * goto + i
             self._eps = MIN_EPS + (MAX_EPS - MIN_EPS) * math.exp(-LAMBDA * npreds)
 
@@ -1044,6 +1037,8 @@ class Training:
                     self.train()
                 self._steps += 1
 
+            time.sleep(0.1)
+
 
     def close(self):
         """
@@ -1080,15 +1075,9 @@ class Training:
                         plt.legend()
                     if len(self._rewards.shape) == 1:
                         plt.plot(self._rewards)
-                    if args.cloud != 0:
-                        plt.savefig("{}".format(name[0:-3]))
-                        ax1.set_xlim(0, 200)
-                        plt.savefig("{}_begin".format(name[0:-3]))
-                        ax1.set_xlim(MAX_EPISODES-200, MAX_EPISODES-1)
-                        plt.savefig("{}_end".format(name[0:-3]))
-                    else :
-                        plt.show()
-                        self.play(ts=self._episodes_ts[0])
+
+                    plt.show()
+                    self.play(ts=self._episodes_ts[0])
 
                 if not savedModel :
                     agent.save(name)
@@ -1105,7 +1094,7 @@ class Training:
 if __name__ == "__main__":
 
     mode = input("train/play ?")
-    """
+
     readline.set_completer_delims('\t')
     readline.parse_and_bind("tab: complete")
     readline.set_completer(simplePathCompleter)
@@ -1142,7 +1131,7 @@ if __name__ == "__main__":
         agent = initializeNN(inputs_size, name)
 
     visNN(agent)
-    """
+
 
     # on cale les métadonnées sur le flux de température intérieure
     # c'est celui dont l'enregistrement a été déclenché en dernier
