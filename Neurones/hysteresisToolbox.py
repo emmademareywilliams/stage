@@ -9,7 +9,7 @@ import numpy as np
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 900
+MAX_EPISODES = 500
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -51,9 +51,8 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"cellules", "Text":1, "Tint":3, "flow_rate":5.19, "pompe":4, "Tdep":2, "Tret":5}
-# numéro de flux sur le serveur de terrain
-themis = {"name":"cellules", "Text":18, "Tint":56, "flow_rate":5.19, "pompe":26, "Tdep":25, "Tret":29}
+circuit = {"name":"Nord", "Text":9, "Tint":29, "flow_rate":5, "pompe":28, "Tdep":10, "Tret":11}
+
 Cw = 1162.5 #Wh/m3/K
 max_power = circuit["flow_rate"] * Cw * 15
 # la loi d'eau du circuit
@@ -63,22 +62,11 @@ coeffs = np.array([[-10,20],
 # température de consigne en °C
 # confort temperature set point
 Tc = 20
-# entrainement sur température de consigne variable ?
-# non fonctionnel
-randomTc = False
 
 # le modèle qui va décrire l'évolution de la température intérieure
 # un modèle électrique équivalent de type R1C1
-# params empile divers jeux de paramètres représentant divers fonctionnements de circuits
-# ligne 0 : circuit cellules
-# ligne 1 : circuit cellules, seconde optimisation sur des données plus froides
-# ligne 2 : circuit nord
-params = np.array([[2.54061406e-04, 9.01650468e+08],
-                   [3.44509725e-04, 6.42706955e+08],
-                   [9.42088404e-04, 2.16898605e+09]])
-i = 0
-R = params[i,0]
-C = params[i,1]
+R = 3.08814171e-04
+C = 8.63446560e+08
 
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
@@ -146,77 +134,7 @@ def simplePathCompleter(text,state):
 
     return [x for x in glob.glob(text+'*')][state]
 
-# pour télécharger les flux directement depuis un serveur de terrain
-from urllib import request, parse
-import json
-from contextlib import closing
-import struct
 
-def createMeta(nb,start,step):
-    """
-    create meta given :
-
-    - a feed number
-    - a unixtimestamp as start
-    - a step
-    """
-    f=open("{}.meta".format(nb),"wb")
-    data=np.array([0,0,step,start])
-    format="<{}".format("I"*len(data))
-    bin=struct.pack(format,*data)
-    f.write(bin)
-    f.close()
-
-def phpfina_download(remote, feed, apikey):
-    """
-    download a single PHPfina feed, with both meta and dat files
-
-    goal : provide datas in view of a cloud session neural network training
-    """
-    url = "{}/feed/getmeta.json?apikey={}&id={}".format(remote, apikey, feed)
-    req = request.Request(url)
-    with closing(request.urlopen(req)) as result:
-        meta = json.loads(result.read())
-        createMeta(feed,meta["start_time"],meta["interval"])
-        url = "{}/feed/export.json?apikey={}&id={}&start=0".format(remote, apikey, feed)
-        request.urlretrieve(url, "{}.dat".format(feed))
-
-def circuit_download(circuit):
-    """
-    connect to the API and download all the feeds given a feeds'numbers dictionnary
-
-    The circuit dictionnary must include the followings keys : Text, Tint, pompe, Tdep, Tret
-    """
-    # fetch the API keys
-    remote = "http://allierhab.ddns.net"
-    data = {'username': "alexandrecuer", 'password': "bbz2xcw"}
-
-    url = "{}/user/auth.json".format(remote)
-    data = parse.urlencode(data).encode()
-
-    req = request.Request(url, data=data)
-    with closing(request.urlopen(req)) as result:
-        mykeys = json.loads(result.read())
-
-    # download the feeds one by one and stores them in the current directory
-    for label in "Text", "Tint", "pompe", "Tdep", "Tret":
-        print("téléchargement du flux {} numéro {}".format(label, circuit[label]))
-        phpfina_download(remote, circuit[label], mykeys["apikey_write"])
-
-def tflite_output(model, state, verbose=False):
-    """
-    prédiction du modèle .tflite sur l'état state
-    """
-    state = state.astype('float32')
-    output_index = model.get_output_details()[0]["index"]
-    input_index = model.get_input_details()[0]["index"]
-    model.allocate_tensors()
-    model.set_tensor(input_index,state.reshape(1,state.shape[0]))
-    model.invoke()
-    out = model.get_tensor(output_index)
-    if verbose:
-        print(model.get_tensor(input_index))
-    return out
 
 def initializeNN(inputs_size, name, init_mode=-1):
     """
@@ -794,16 +712,17 @@ class Training:
         labelAgent = "agent IA"
         if playWithModel == 1:
             # le modèle joue l'épisode et produit son scénario
-            #result = modelPlayNonOccupation(copy.deepcopy(datas), history, Tc, max_power)
             #result = modelPlayHysteresys(copy.deepcopy(datas), history, Tc, max_power)
-            result = modelPlayHysteresys(copy.deepcopy(datas), history, Tc, max_power)
+            #result = modelPlayNonOccupation(copy.deepcopy(datas), history, Tc, max_power)
+            result = modelPlayWeekInHysteresys(copy.deepcopy(datas), history, Tc, max_power,pos)
+
             labelModel = "modèle"
         else:
             #result = industryPlayReductions(copy.deepcopy(datas), history)
             result = industryPlayHystNRed(copy.deepcopy(datas), history)
             labelModel = "réduits nuit/week-end"
         mConso = int(np.sum(result["datas"][history:,0]) / 1000)
-
+        """
         # l'agent joue l'épisode
         for i in range(goto):
             index = history+i
@@ -815,9 +734,9 @@ class Training:
             datas[index,0] = action * max_power
             datas[index,2] = getR1C1(datas, index)
         aConso = int(np.sum(datas[history:,0]) / 1000)
-
+        """
         title = "épisode {} - {} {}".format(self._steps,tsvrai, tsToHuman(tsvrai))
-        title = "{}\n conso {} {}".format(title, labelAgent, aConso)
+        title = "{}\n".format(title)
         if result["heating"]:
             title = "{}\n conso {} {}".format(title, labelModel, mConso)
             if "index" in result:
@@ -827,6 +746,60 @@ class Training:
         else:
             title = "{}\n modèle - chauffage pas nécessaire".format(title)
 
+        # matérialisation de la zone de confort par un hystéréris de 2 degrés autour de la température de consigne
+        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
+        Tint = np.array([datas[:-1,2],result["datas"][:-1,2]])
+        Tintmin = np.amin(Tint)
+        Tintmax = np.amax(Tint)
+        Textmin = np.amin(datas[:-1,1])
+        Textmax = np.amax(datas[:-1,1])
+        if datas.shape[1] >= 5:
+            # on extrait tous les indices pour lesquels datas[:,4] prend sa valeur minimale = 0
+            # le vecteur résultant compilera les indices indiquant un changement d'occupation
+            changes = np.where(datas[:,4] == datas[:,4].min())[0]
+            zonesOcc=[]
+            zonesOccText=[]
+            #print(changes)
+            for i in changes:
+                if datas[i,3] == 0:
+                    imin = i
+                    break
+            for i in changes:
+                if datas[i,3] == 0:
+                    if i < datas.shape[0]-1:
+                        l = datas[i+1,4]
+                        h = Tintmax - Tintmin
+                        w = l*interval
+                        #print("{} vs {}".format(i,imin))
+                        v = Rectangle((xr[i],Tintmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
+                        zonesOcc.append(v)
+                        h = Textmax - Textmin
+                        if i == imin:
+                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="occupation")
+                        else:
+                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
+                        zonesOccText.append(v)
+
+        ax1 = plt.subplot(211)
+        plt.title(title)
+        plt.ylabel("Temp. extérieure °C")
+        plt.plot(xr, datas[:-1,1], color="blue", label="Text")
+        if datas.shape[1] >= 5:
+            for v in zonesOccText:
+                ax1.add_patch(v)
+        plt.legend(loc='upper left')
+        ax2 = ax1.twinx()
+        ax2.add_patch(zoneconfort)
+        plt.ylabel("Temp. intérieure °C")
+        plt.plot(xr, result["datas"][:-1,2], color="orange", label="Tint {}".format(labelModel))
+        plt.legend(loc='upper right')
+        plt.subplot(212, sharex=ax1)
+        plt.ylabel("Consommation W")
+        plt.plot(xr, result["datas"][:-1,0], color="orange", label=labelModel)
+        plt.legend()
+        plt.show()
+
+        """
         nb = 211
         if datas.shape[1] >= 5 or playWithModel == 0 :
             nb = 311
@@ -909,6 +882,7 @@ class Training:
             plt.plot(xr,datas[:-1,4],'o', markersize=1, color="red")
         plt.xlabel("Temps en secondes")
         plt.show()
+        """
 
     def trainOnce(self):
         """
@@ -1051,9 +1025,7 @@ class Training:
         signal.signal(signal.SIGTERM, self._sigint_handler)
 
         if not self._exit:
-            if args.cloud == 0:
-                self.play(ts=1606132200)
-                self.play(ts=1582620600)
+            pass
 
         # Until asked to stop
         while not self._exit:
@@ -1132,67 +1104,23 @@ class Training:
 
 if __name__ == "__main__":
 
-    # arguments ligne de commande pour le mode cloud
-    import argparse
-    # le mode cloud sert à lancer plusieurs entrainement de réseaux successivement
-    # en effet, la convergence vers la politique optimale n'est pas garantie et dépend de l'initialisation initiale
-    parser = argparse.ArgumentParser(description='Building RL Training Box')
-
-    parser.add_argument("--cloud", action="store", help="1=enforce cloud mode", default=0)
-    parser.add_argument("--net-name", action="store", help="network name", type=str)
-    parser.add_argument("--tss", action="store", help="starting timestamp", type=int)
-    parser.add_argument("--tse", action="store", help="ending timestamp", type=int)
-    parser.add_argument("--nb", action="store", help="nombre d'entrainements successifs", type=int, default=1)
-    parser.add_argument("--get-feeds", action="store", help="1=rapatrie flux depuis le serveur de terrain", type=int, default=0)
-
-    args = parser.parse_args()
-
-    # tous les fichiers de données nécessaires sont-ils dans le répertoire courant ?
-    current_dir = True
-    for label in "Text", "Tint", "pompe", "Tdep", "Tret":
-        if not os.path.isfile("{}.dat".format(themis[label])):
-            current_dir = False
-        if not os.path.isfile("{}.meta".format(themis[label])):
-            current_dir = False
-
-    if current_dir:
-        circuit = themis
-        dir ="."
-
-    if args.cloud != 0 :
-        mode = "train"
-        if args.net_name:
-            name = args.net_name
-        else:
-            name = "RLcontrol.h5"
-    else :
-        mode = input("train/play ?")
-        readline.set_completer_delims('\t')
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(simplePathCompleter)
-        name = input("nom du réseau ?")
-        if not name:
-            name = "RLcontrol.h5"
+    mode = input("train/play ?")
     """
-    vérification de la présence d'une extension dans le nom du réseau
-    """
-    if ".h5" not in name and ".tflite" not in name:
+    readline.set_completer_delims('\t')
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(simplePathCompleter)
+    name = input("nom du réseau ?")
+    if not name:
+        name = "RLcontrol.h5"
+
+    if ".h5" not in name:
         name = "{}.h5".format(name)
 
     savedModel = False
     if os.path.isfile(name):
         savedModel = True
 
-    if ".tflite" in name:
-        if savedModel and mode=="play":
-            lite = True
-            import tensorflow.lite as tf
-        else:
-            print("impossible de continuer - le modèle tensorflow lite doit exister et le mode doit être play")
-            exit()
-    else:
-        lite = False
-        import tensorflow as tf
+    import tensorflow as tf
 
     exit = "Pour continuer, pressez une touche ou CTRL-C pour sortir"
     message = ""
@@ -1204,30 +1132,17 @@ if __name__ == "__main__":
         message = "Aucun réseau sous ce nom. On va procéder à une initialisation aléatoire."
 
     if message != "":
-        if args.cloud != 0 :
-            print("{} {}".format(message, exit))
-        else :
-            input("{} {}".format(message,exit))
+        input("{} {}".format(message,exit))
 
     if savedModel == True:
-        if not lite:
-            agent = tf.keras.models.load_model(name)
-            test=agent.get_layer(name="states")
-            inputs_size = test.get_config()["batch_input_shape"][1]
-        else:
-            agent = tf.Interpreter(name)
-            inputs_size = agent.get_input_details()[0]["shape"][1]
+        agent = tf.keras.models.load_model(name)
+        test=agent.get_layer(name="states")
+        inputs_size = test.get_config()["batch_input_shape"][1]
     else :
         agent = initializeNN(inputs_size, name)
 
-    if not lite:
-        visNN(agent)
-
-    if args.get_feeds != 0:
-        # il faut indiquer les numéros de flux de la machine THEMIS distante
-        circuit = themis
-        dir = "."
-        circuit_download(circuit)
+    visNN(agent)
+    """
 
     # on cale les métadonnées sur le flux de température intérieure
     # c'est celui dont l'enregistrement a été déclenché en dernier
@@ -1250,31 +1165,21 @@ if __name__ == "__main__":
     # on peut retenir de travailler sur toute la durée du flux
     # ou bien de de se restreindre à un intervalle
     # en effet, celà permet de faire opérer/réentrainer un réseau sur des données qu'il ne connait pas
-    if args.cloud != 0 :
-        if args.tss :
-            _tss=args.tss
-        else :
-            _tss = meta["start_time"]
-        if args.tse :
-            _tse=args.tse
-        else :
-            _tse = meta["start_time"]+fullLength
-    else :
-        tsMessage = "Saisissez votre timestamp de démarrage"
-        tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"])
-        _tss=input(tsMessage)
-        if not _tss:
-            _tss = meta["start_time"]
-        else:
-            _tss = int(_tss)
+    tsMessage = "Saisissez votre timestamp de démarrage"
+    tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"])
+    _tss=input(tsMessage)
+    if not _tss:
+        _tss = meta["start_time"]
+    else:
+        _tss = int(_tss)
 
-        tsMessage = "Saisissez votre timestamp de fin"
-        tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"]+fullLength)
-        _tse=input(tsMessage)
-        if not _tse:
-            _tse = meta["start_time"]+fullLength
-        else:
-            _tse = int(_tse)
+    tsMessage = "Saisissez votre timestamp de fin"
+    tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"]+fullLength)
+    _tse=input(tsMessage)
+    if not _tse:
+        _tse = meta["start_time"]+fullLength
+    else:
+        _tse = int(_tse)
 
     if _tse <= _tss :
         sys.exit()
@@ -1289,8 +1194,7 @@ if __name__ == "__main__":
     print("Vous allez travailler sur une durée de {} secondes".format(length))
     print("au pas de {} secondes, le nombre de points sera de {}".format(interval,npoints))
     print("pour information, la durée d'un épisode est de {} intervalles".format(wsize))
-    if args.cloud == 0:
-        input("pressez une touche pour continuer")
+    input("pressez une touche pour continuer")
 
     Text = PyFina(circuit["Text"], dir, _tss, interval, npoints)
     Tint = PyFina(circuit["Tint"], dir, _tss, interval, npoints)
@@ -1298,43 +1202,25 @@ if __name__ == "__main__":
     # on utilisera le flux de fonctionnement de la pompe
     # pour produire un historique de chauffage "réaliste"
     pompe = PyFina(circuit["pompe"], dir, _tss, interval, npoints)
-    Tdep = PyFina(circuit["Tdep"], dir, _tss, interval, npoints)
-    Tret = PyFina(circuit["Tret"], dir, _tss, interval, npoints)
-    # QcTrue est uniquement informatif, il n'est pas utilisé en pratique
-    QcTrue = (Tdep - Tret) * pompe * Cw * circuit["flow_rate"]
-    # on ne garde que les valeurs de deltaT positives !!
-    QcTrue = np.maximum(np.zeros(QcTrue.shape[0]),QcTrue)
     # on construit un flux simplifié
     Qc = pompe * max_power
 
     agenda = basicAgenda(npoints,interval, _tss,-1,-1,schedule=schedule)
 
     # affichage de toutes les données chargées
-    if args.cloud == 0:
-        plt.figure(figsize=(20, 10))
-        ax1=plt.subplot(211)
-        plt.plot(Text.timescale(),Text)
-        plt.plot(Tint.timescale(),Tint)
-        ax2=ax1.twinx()
-        plt.plot(pompe.timescale(),Qc, color="yellow")
-        plt.plot(pompe.timescale(),QcTrue, color="red")
-        ax3 = plt.subplot(212,  sharex=ax1)
-        plt.plot(Text.timescale(),agenda)
-        plt.show()
+    plt.figure(figsize=(20, 10))
+    ax1=plt.subplot(211)
+    plt.plot(Text.timescale(),Text, label='Text')
+    plt.plot(Tint.timescale(),Tint, label='Tint')
+    ax2=ax1.twinx()
+    plt.plot(pompe.timescale(),Qc, color="yellow", label='heating')
+    plt.legend()
+    ax3 = plt.subplot(212,  sharex=ax1)
+    plt.plot(Text.timescale(),agenda, label='occupation')
+    plt.legend()
+    plt.show()
 
-    if args.cloud == 0 or args.nb == 1:
-        sandbox = Training(5)
-        sandbox.run()
-        sandbox.close()
-        plt.close()
-    else :
-        suffix = name
-        for i in range(args.nb):
-            name = "{}_{}".format(i,suffix)
-            if i > 0:
-                agent = initializeNN(inputs_size, name)
-                visNN(agent)
-            sandbox = Training(5)
-            sandbox.run()
-            sandbox.close()
-            plt.close()
+    sandbox = Training(5)
+    sandbox.run()
+    sandbox.close()
+    plt.close()
