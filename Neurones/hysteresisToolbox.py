@@ -35,7 +35,6 @@ GAMMA = 0.099
 #GAMMA = 0.05
 
 graphe = True
-verbose = False
 
 dir = "/var/opt/emoncms/phpfina"
 
@@ -186,7 +185,7 @@ def buildEnv(pos, wsize = wsize):
     datas[0,0] = random.randint(0,1)*max_power
     datas[0,2] = random.randint(14,20)
     # on connait Text (vérité terrain) sur toute la longueur de l'épisode
-    datas[:,1] = Text[pos:pos+wsize+1]
+    datas[:,1] = Text[pos:pos+wsize]
     #print(wsize+4*24*3600//interval)
     occupation = agenda[pos:pos+wsize+4*24*3600//interval]
     #print(occupation.shape)
@@ -286,6 +285,28 @@ def modelPlayHysteresys(datas, index=1, Tc=Tc, max_power=max_power):
 
     return {"heating":heating, "datas":datas}
 
+class ProgressBar:
+    '''
+    Visualisation temps réel de l'avancement d'un process
+    '''
+    def __init__ (self, valmax, title):
+        if valmax == 0:  valmax = 1
+        self._valmax = valmax
+        self._maxbar = 30
+        self._scale = float(self._maxbar / 100)
+        self._title  = title
+
+    def update(self, val):
+        if val > self._valmax: val = self._valmax
+        perc  = round( 100 * val / self._valmax)
+        bar   = int(perc * self._scale)
+        out = "\r{:20s} [{:s}{:s}] {:d}/{:d}".format(self._title,"=" * bar, " " * (self._maxbar - bar), val+1, self._valmax)
+        sys.stdout.write(out)
+        #Extinction du curseur
+        #os.system("setterm -cursor off")
+        # Rafraichissement de la barre
+        sys.stdout.flush()
+
 class Training:
     """
     boite à outil de simulation pour l'entrainement du réseau neurone par renforcement
@@ -303,6 +324,7 @@ class Training:
         self._rewards = []
         self._Text = []
         self._Tint = []
+        self._Tintocc = []
 
     def _sigint_handler(self, signal, frame):
         """
@@ -318,18 +340,27 @@ class Training:
         pos, tsvrai = setStart()
         xr = np.arange(tsvrai, tsvrai+wsize*interval, interval)
         datas = buildEnv(pos)
+
         result = modelPlayHysteresys(copy.deepcopy(datas))
         mConso = int(np.sum(result["datas"][1:,0]) / 1000)
+
+        for i in range(1,wsize):
+            predictionBrute = agent(formatForNetwork(datas, i).reshape(1,inputs_size))
+            action = np.argmax(predictionBrute)
+            datas[i,0] = action * max_power
+            datas[i,2] = getR1C1(datas, i)
+        aConso = int(np.sum(datas[1:,0]) / 1000)
 
         # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
         title = "épisode {} - {} {}".format(self._steps,tsvrai, tsToHuman(tsvrai))
-        title = "{}\n conso {}".format(title, mConso)
+        title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
         ax1 = plt.subplot(311)
         plt.title(title)
         ax1.add_patch(zoneconfort)
         plt.ylabel("Temp. intérieure °C")
-        plt.plot(xr, result["datas"][:,2], color="orange", label="Tint")
+        plt.plot(xr, result["datas"][:,2], color="orange", label="TintMod")
+        plt.plot(xr, datas[:,2], color="black", label="TintAgent")
         plt.legend(loc='upper left')
 
         ax2 = ax1.twinx()
@@ -339,7 +370,8 @@ class Training:
 
         plt.subplot(312, sharex=ax1)
         plt.ylabel("Consommation W")
-        plt.plot(xr, result["datas"][:,0], color="orange", label="consommation")
+        plt.plot(xr, result["datas"][:,0], color="orange", label="consoMod")
+        plt.plot(xr, datas[:,0], color="black", label="consoAgent")
         plt.legend()
 
         ax3 = plt.subplot(313, sharex=ax1)
@@ -424,6 +456,7 @@ class Training:
         apred = 0
         train = False
         if self._mem.size() > BATCH_SIZE * 3:
+            barre = ProgressBar(wsize-1,"training")
             train = True
         conso = 0
         for i in range(1,wsize):
@@ -445,6 +478,7 @@ class Training:
             rewardTab.append(reward)
             if train:
                 self.trainOnce()
+                barre.update(i)
             npreds = self._steps * (wsize -1) + i
             self._eps = MIN_EPS + (MAX_EPS - MIN_EPS) * math.exp(-LAMBDA * npreds)
 
@@ -464,7 +498,7 @@ class Training:
         self._rewards.append(a)
         self._Text.append([Text_min, Text_moy, Text_max])
         self._Tint.append([Tint_min, Tint_moy, Tint_max])
-        self._Tint.append([Tocc_min, Tocc_moy, Tocc_max])
+        self._Tintocc.append([Tocc_min, Tocc_moy, Tocc_max])
         self._episodes_ts.append(tsvrai)
 
 
@@ -516,32 +550,28 @@ class Training:
                     self._Text = np.array(self._Text)
                     self._Tint = np.array(self._Tint)
 
-                    nb = 211
                     plt.figure(figsize=(20, 10))
-                    ax1 = plt.subplot(nb)
+                    ax1 = plt.subplot(211)
                     plt.plot(self._Text[:,0], color="blue")
                     plt.plot(self._Text[:,1], "o", color="blue")
                     plt.plot(self._Text[:,2], color="blue")
                     plt.plot(self._Tint[:,0], color="orange")
                     plt.plot(self._Tint[:,1], "o", color="orange")
                     plt.plot(self._Tint[:,2], color="orange")
-                    nb+=1
-                    plt.subplot(nb, sharex=ax1)
+                    plt.subplot(212, sharex=ax1)
                     plt.plot(self._rewards)
 
                     plt.show()
                     self.play(ts=self._episodes_ts[0])
 
-                if not savedModel :
-                    agent.save(name)
-                else:
-                    i = 1
-                    while True:
-                        if os.path.isfile("{}_{}".format(i,name)):
-                            i+=1
-                        else:
-                            break
-                    agent.save("{}_{}".format(i,name))
+
+                i = 1
+                while True:
+                    if os.path.isfile("{}_{}".format(i,name)):
+                        i+=1
+                    else:
+                        break
+                agent.save("{}_{}".format(i,name))
 
 
 if __name__ == "__main__":
@@ -563,18 +593,6 @@ if __name__ == "__main__":
         savedModel = True
 
     import tensorflow as tf
-
-    exit = "Pour continuer, pressez une touche ou CTRL-C pour sortir"
-    message = ""
-
-    if savedModel == True and mode == "train":
-        message = "Attention, un réseau existe déjà sous ce nom. Il sera chargé et réentrainé."
-
-    if savedModel == False and mode =="play":
-        message = "Aucun réseau sous ce nom. On va procéder à une initialisation aléatoire."
-
-    if message != "":
-        input("{} {}".format(message,exit))
 
     if savedModel == True:
         agent = tf.keras.models.load_model(name)
