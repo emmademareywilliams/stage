@@ -25,6 +25,6 @@ Ci-dessous, les données récoltées pour chaque circuit et à chaque date de me
 Date mesure // Circuit | Cellules | Nord | Sud | Est
  --|--|--|--|--
  **10/08** | 2.5 | 4 | 2.6 | 1.1
- **13/08** | 2.16 | 4.24 | 0.85 | 2.55 
+ **13/08** | 2.16 | 4.24 | 2.55 | 0.85 
 
 
