@@ -46,7 +46,8 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":1, "flow_rate":5}
+circuit = {"name":"Nord", "Text":9, "flow_rate":5}
+# changer Text: 1 en Text: 9 pour travailler avec les données du collège Marc Bloch
 
 Cw = 1162.5 #Wh/m3/K
 max_power = circuit["flow_rate"] * Cw * 15
@@ -627,7 +628,8 @@ if __name__ == "__main__":
     print("Durée totale en secondes: {}".format(fullLength))
 
     _tss = meta["start_time"]
-    _tse = 1615000000
+    _tse = 1628000000
+    # mettre 1628000000 à la place de 1615000000 quand on joue avec les données de Marc Bloch
 
     if _tse <= _tss :
         sys.exit()
