@@ -481,25 +481,30 @@ class Training:
                 barre.update(i-1)
             npreds = self._steps * (wsize -1) + i
             self._eps = MIN_EPS + (MAX_EPS - MIN_EPS) * math.exp(-LAMBDA * npreds)
-
-        print("\népisode {} - {} aléatoires / {} réseau".format(self._steps, rpred, apred))
+        if train: print()
+        print("épisode {} - {} aléatoires / {} réseau".format(self._steps, rpred, apred))
         Text_min, Text_moy, Text_max = getStats(datas[1:,1])
         Tint_min, Tint_moy, Tint_max = getStats(datas[1:,2])
         print("Text min {:.2f} Text moy {:.2f} Text max {:.2f}".format(Text_min, Text_moy, Text_max))
         print("Tint min {:.2f} Tint moy {:.2f} Tint max {:.2f}".format(Tint_min, Tint_moy, Tint_max))
-        #on crée un vecteur w ne contenant que les valeurs de température intérieure en période d'occupation
-        w = datas[datas[:,3]!=0,2]
-        if w.shape[0]:
+        self._Text.append([Text_min, Text_moy, Text_max])
+        self._Tint.append([Tint_min, Tint_moy, Tint_max])
+        #print(datas[:,3])
+        nbocc = np.sum(datas[:,3])
+        print("{} points en occupation".format(nbocc))
+        if np.sum(datas[:,3]) != 0 :
+            #w ne contient que les valeurs de température intérieure en période d'occupation
+            w = datas[datas[:,3]!=0,2]
             Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
-        print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
+            print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
+            self._Tintocc.append([Tocc_min, Tocc_moy, Tocc_max])
 
         rewardTab = np.array(rewardTab)
         a = np.sum(rewardTab)
         print("Récompense(s) {}".format(a))
         self._rewards.append(a)
-        self._Text.append([Text_min, Text_moy, Text_max])
-        self._Tint.append([Tint_min, Tint_moy, Tint_max])
-        self._Tintocc.append([Tocc_min, Tocc_moy, Tocc_max])
+
+
         self._episodes_ts.append(tsvrai)
 
 
