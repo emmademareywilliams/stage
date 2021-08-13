@@ -478,7 +478,7 @@ class Training:
             rewardTab.append(reward)
             if train:
                 self.trainOnce()
-                barre.update(i)
+                barre.update(i-1)
             npreds = self._steps * (wsize -1) + i
             self._eps = MIN_EPS + (MAX_EPS - MIN_EPS) * math.exp(-LAMBDA * npreds)
 
@@ -489,7 +489,8 @@ class Training:
         print("Tint min {:.2f} Tint moy {:.2f} Tint max {:.2f}".format(Tint_min, Tint_moy, Tint_max))
         #on crée un vecteur w ne contenant que les valeurs de température intérieure en période d'occupation
         w = datas[datas[:,3]!=0,2]
-        Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
+        if w.shape[0]:
+            Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
         print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
 
         rewardTab = np.array(rewardTab)
@@ -563,7 +564,6 @@ class Training:
 
                     plt.show()
                     self.play(ts=self._episodes_ts[0])
-
 
                 i = 1
                 while True:
