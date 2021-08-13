@@ -47,13 +47,10 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":9, "Tint":29, "flow_rate":5, "pompe":28, "Tdep":10, "Tret":11}
+circuit = {"name":"Nord", "Text":1, "flow_rate":5}
 
 Cw = 1162.5 #Wh/m3/K
 max_power = circuit["flow_rate"] * Cw * 15
-# la loi d'eau du circuit
-coeffs = np.array([[-10,20],
-                   [85 ,40]])
 
 # température de consigne en °C
 # confort temperature set point
@@ -67,32 +64,15 @@ C = 8.63446560e+08
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
 
-# Définition de la fenêtre caractérisant l'environnement
-# taille de l'historique en nombre d'intervalles
-history = 12*3600//interval
-# nombre de paramètres pour décrire l'environnement
-# 3 paramètres physiques : Qc, Text et Tint
-# dans la vrai vie, on pourrait rajouter le soleil mais le R1C1 n'en a pas besoin
-# 3 paramètres organisationnels :
-# - occupation O/N,
-# - nombre d'intervalles d'ici le changement d 'occupation, sorte de time of flight,
-# - température de consigne
-numPar = 3
+
 # nombre d'actions possibles  : 2 = on chauffe ou pas
 # pour l'instant, on reste simple
 numAct = 2
 
 # nombre d'intervalles sur lequel la simulation sera menée
 # 60 correspond à un weekend
-goto = 60*3600//interval
-#goto = 8*24*3600//interval
-
-# taille de la fenêtre
-wsize = history + goto + 1
-
-# si playWithModel vaut 1, on compare le réseau au modèle sur lequel on l'a entrainé
-# si playWithModel vaut 0, on compare à une stratégie de chauffe classique (réduits de nuit/week-end)
-playWithModel = 1
+wsize = 1 + 60*3600//interval
+#wsize = 1 + 8*24*3600//interval
 
 # nombre de paramètres à fournir au réseau pour prédire l'état suivant à partir de l'état actuel
 # cas 1 : on se limite à lui donner Tint[-1], Text[0]
@@ -131,8 +111,7 @@ def simplePathCompleter(text,state):
     return [x for x in glob.glob(text+'*')][state]
 
 
-
-def initializeNN(inputs_size, name, init_mode=-1):
+def initializeNN(inputs_size, name):
     """
     initialisation du réseau neurone qui jouera le rôle de contrôleur ou agent énergétique
 
@@ -144,18 +123,11 @@ def initializeNN(inputs_size, name, init_mode=-1):
     - soit par l'environnement réel par monitoring
     """
     tf.keras.backend.set_floatx('float64')
-    if init_mode == 1 :
-        initializer = tf.keras.initializers.Ones()
-    if init_mode == 0 :
-        initializer = tf.keras.initializers.Zeros()
     inputs = tf.keras.Input(shape=(inputs_size, ), name='states')
-    if init_mode == -1 :
-        x = tf.keras.layers.Dense((50), activation='relu')(inputs)
-    else :
-        x = tf.keras.layers.Dense((50), kernel_initializer=initializer, activation='relu')(inputs)
+    x = tf.keras.layers.Dense((50), activation='relu')(inputs)
     # pour ajouter de la profondeur (pas utilisé pour l'instant)
     #x = tf.keras.layers.Dense((50), activation='relu')(x)
-    outputs = tf.keras.layers.Dense(numAct,activation='linear')(x)
+    outputs = tf.keras.layers.Dense(numAct,activation='relu')(x)
     agent = tf.keras.Model(inputs=inputs,outputs=outputs,name=name)
     agent.compile(loss="mse",optimizer="adam",metrics=['mae'])
     print("initialisation de l'agent terminée")
@@ -167,7 +139,7 @@ def visNN(agent):
     visualisation des poids du réseau
     """
     agent.summary()
-    print(agent.get_weights())
+    #print(agent.get_weights())
 
 def setStart(ts=None, wsize = wsize):
     """
@@ -176,13 +148,11 @@ def setStart(ts=None, wsize = wsize):
     ou le fixe à une valeur donnée pour rejouer un épisode (ex : 1588701000)
 
     retourne la position dans la timeserie et le timestamp correspondant
+
     """
     if ts is None:
         start = _tss
-        if numPar != 6:
-            end = _tse - wsize * interval
-        else:
-            end = _tse - wsize * interval - 4*24*3600
+        end = _tse - wsize * interval - 4*24*3600
         #print(tsToHuman(start),tsToHuman(end))
         # on tire un timestamp avant fin mai OU après début octobre
         ts = getRandomStart(start, end, 10, 5)
@@ -196,36 +166,35 @@ def setStart(ts=None, wsize = wsize):
 
 def buildEnv(pos, wsize = wsize):
     """
-    construit l'environnement d'un épisode sur la base d'une position donnée pos
-
-    wsize : longueur de la fenêtre de données en nombre d'intervalles
-
     retourne le tenseur des données datas
 
     - axe 0 = le temps
     - axe 1 = les paramètres
 
-    param. physiques : puissance de chauffage puis temp. extérieure et intérieure
+    nombre de paramètres pour décrire l'environnement
+    3 paramètres physiques : Qc, Text et Tint
+    dans la vrai vie, on pourrait rajouter le soleil mais le R1C1 n'en a pas besoin
 
-    param. organisationnels : occupation, nombre d'intervalles d'içi le changement d'occupation, temp. de consigne*occupation
+    3 paramètres organisationnels :
+    - occupation O/N,
+    - nombre d'intervalles d'ici le changement d 'occupation, sorte de time of flight,
+    - temperature de consigne * occupation
+
     """
-    datas=np.zeros((wsize, numPar))
-    datas[0:history,0] = Qc[pos:pos+history]
+    datas=np.zeros((wsize, 6))
+    # condition initiale aléatoire
+    datas[0,0] = random.randint(0,1)*max_power
+    datas[0,2] = random.randint(14,20)
     # on connait Text (vérité terrain) sur toute la longueur de l'épisode
-    datas[:,1] = Text[pos:pos+wsize]
-    if numPar == 6:
-        #print(wsize+4*24*3600//interval)
-        occupation = agenda[pos:pos+wsize+4*24*3600//interval]
-        #print(occupation.shape)
-        datas[:,3] = occupation[0:wsize]
-        for i in range(wsize):
-            datas[i,4] = getLevelDuration(occupation, i)
-        # consigne * occupation
-        datas[:,5] = Tc * datas[:,3]
-    # on simule la température intérieure sur l'historique
-    # condition initiale pour la simulation = Tint[pos]
-    # Tint température intérieure mesurée
-    datas[0:history,2] = R1C1sim(interval, R, C, datas[0:history,0], datas[0:history,1], Tint[pos])
+    datas[:,1] = Text[pos:pos+wsize+1]
+    #print(wsize+4*24*3600//interval)
+    occupation = agenda[pos:pos+wsize+4*24*3600//interval]
+    #print(occupation.shape)
+    datas[:,3] = occupation[0:wsize]
+    for i in range(wsize):
+        datas[i,4] = getLevelDuration(occupation, i)
+    # consigne * occupation
+    datas[:,5] = Tc * datas[:,3]
     return datas
 
 def formatForNetwork(datas, index, inputs_size=inputs_size):
@@ -235,17 +204,12 @@ def formatForNetwork(datas, index, inputs_size=inputs_size):
     produit le state/nextstate que l'on enregistre dans la mémoire du réseau
     """
     if inputs_size == 2:
-        # on ne conserve que :
-        # - la température intérieure à index-1
-        # - la température extérieure à index
-        state = np.array([datas[index-1,2], datas[index,1]])
-    elif inputs_size == 4:
+        # on donne  à l'agent les températures intérieure et extérieure à index-1
+        state = np.array([datas[index-1,2], datas[index-1,1]])
+    if inputs_size == 4:
         # on rajoute aux 2 paramètres précédant 2 paramètres organisationnels
         # occupation*consigne, nombre d'intervalles d'içi le changement d'occupation
-        state = np.array([datas[index-1,2], datas[index,1], datas[index,5], datas[index,4]])
-    elif inputs_size == 5:
-        # on différentie température de consigne et occupation
-        state = np.array([datas[index-1,2], datas[index,1], datas[index,3], datas[index,4], datas[index,5]])
+        state = np.array([datas[index-1,2], datas[index-1,1], datas[index-1,5], datas[index-1,4]])
 
     return state
 
@@ -295,175 +259,7 @@ def getStats(datas):
     moy = np.mean(datas)
     return min,moy,max
 
-def waterLaw(coeffs, i=0):
-    """
-    loi d'eau (peu utilisée dans le simulateur jusqu'à présent)
-
-    coeffs : tableau numpy de taille (2,n) - 2 lignes et n colonnes
-
-    coeffs[0,:] : série de températures extérieures
-
-    coeffs[1,:] : série des températures de départ correspondantes
-
-    ```
-    coeffs = np.array([[-10, 20],
-                       [85 , 40]])
-    ```
-
-    ou encore :
-    ```
-    coeffs = np.array([[-20, -10, 20 , 30],
-                       [95 , 85 , 40 , 30]])
-    ```
-
-    """
-    a = (coeffs[1,i+1]-coeffs[1,i])/(coeffs[0,i+1]-coeffs[0,i])
-    b = coeffs[1,i] - a * coeffs[0,i]
-    return a, b
-
-
-"""
-Stratégie industrielle :
-"""
-
-def industryPlayReductions(datas, index, max_power=max_power, coeffs = None):
-    """
-    simulation d'un pilotage par agenda avec réduit de nuit/week-end et préchauffage
-
-    stratégie courante qt les capteurs de temp. intérieure n'ont pas de rôle dans la régul. de la distribution
-
-    le contrôle en température intérieure est svt réalisé au niveau des émetteurs par robinets thermostatiques
-    """
-    if coeffs is not None:
-        a_cells, b_cells = waterLaw(coeffs)
-        Tdep = a_cells * datas[:,1] + b_cells
-        Tret = 4 + 0.8 * Tdep
-        power = circuit["flow_rate"] * Cw * (Tdep - Tret)
-    else :
-        power = np.ones(datas.shape[0]) * max_power
-    for i in range(index,datas.shape[0]):
-        action = datas[i,3]
-        # pas d'occupation
-        if datas[i,3] == 0:
-            # il fait doux dehors, on peut faire des économies
-            if datas[i,1] >= 10 and datas[i,1] < Tc+2:
-                action = 0.1
-            # il fait froid, hors-gel à minima
-            if datas[i,1] < 10:
-                action = 0.4
-            # le préchauffage
-            if datas[i,4] <= 3:
-                action = 1
-        # s'il fait chaud dehors, qu'on soit occupé ou non, pas la peine de chauffer
-        if datas[i,1] >= Tc+2:
-            action = 0
-        datas[i,0] = action * power[i]
-        datas[i,2] = getR1C1(datas, i)
-    heating=True
-    # on vérifie si on a chauffé ou pas
-    if not np.any(datas[index:,0]):
-        heating=False
-    return {"heating":heating, "datas":datas}
-
-def industryPlayHystNRed(datas, index, max_power=max_power, coeffs = None):
-    """
-    simulation d'un pilotage par agenda avec :
-
-    - réduit de nuit/week-end
-    - préchauffage
-    - contrôle hysteresys sur température intérieure en occupation
-    """
-    if coeffs is not None:
-        a_cells, b_cells = waterLaw(coeffs)
-        Tdep = a_cells * datas[:,1] + b_cells
-        Tret = 4 + 0.8 * Tdep
-        power = circuit["flow_rate"] * Cw * (Tdep - Tret)
-    else :
-        power = np.ones(datas.shape[0]) * max_power
-    for i in range(index,datas.shape[0]):
-        # l'ation de chauffage suit l'occupation
-        # pas d'occupation > pas de chauffage > action = 0
-        # occupation > on chauffe > action = 1
-        action = datas[i,3]
-        # partant de ce choix basique, on raffine en traitant des cas particuliers
-        # hors occupation, on prévoit un hors-gel et un préchauffage
-        if datas[i,3] == 0:
-            # hors-gel déclenché si température extérieure inférieure à 10
-            if datas[i,1] < 10:
-                action = 0.4
-            # préchauffage si on est proche de l'arrivée du personnel
-            if datas[i,4] <= 3:
-                action = 1
-        # en occupation, si on est dans la zone de confort > hysteresys
-        else :
-            if datas[i-1,2] > Tc + 1 or datas[i-1,2] < Tc -1:
-                action = datas[i-1,2] <= Tc
-        datas[i,0] = action * power[i]
-        datas[i,2] = getR1C1(datas, i)
-    heating=True
-    # on vérifie si on a chauffé ou pas
-    if not np.any(datas[index:,0]):
-        heating=False
-    return {"heating":heating, "datas":datas}
-
-def industryPlayHysteresis(datas, index, max_power=max_power, coeffs = None):
-    if coeffs is not None:
-        a_cells, b_cells = waterLaw(coeffs)
-        Tdep = a_cells * datas[:,1] + b_cells
-        Tret = 4 + 0.8 * Tdep
-        power = circuit["flow_rate"] * Cw * (Tdep - Tret)
-    else :
-        power = np.ones(datas.shape[0]) * max_power
-    for i in range(index,datas.shape[0]):
-        action = datas[i,3]
-        if datas[i-1,2] > Tc + 1 or datas[i-1,2] < Tc -1:
-            action = datas[i-1,2] <= Tc
-        datas[i,0] = action * power[i]
-        datas[i,2] = getR1C1(datas, i)
-    heating=True
-    # on vérifie si on a chauffé ou pas
-    if not np.any(datas[index:,0]):
-        heating=False
-    return {"heating":heating, "datas":datas}
-
-
-'''
-Modèle IA :
-'''
-
-def modelPlayWeekInHysteresys(datas, index, Tc, max_power, pos):
-    """
-    le modèle joue un épisode de la vraie vie intégrant des périodes d'occupation et de non-occupation
-
-    **il cumule les rôles de contrôleur et d'environnement !**
-    """
-    for i in range(index,datas.shape[0]):
-        if datas[i,3] == 0:
-            # aucune occupation
-            # prédiction à la cible en chauffant
-            tof = int(datas[i,4])
-            _Qc = np.ones(tof) * max_power
-            Tint_sim = R1C1sim(interval, R, C, _Qc, Text[pos+i:pos+i+tof], datas[i-1,2])
-            if Tint_sim[-1] <= Tc:
-                datas[i,0]= max_power
-        else:
-            # occupation
-            if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
-                action = datas[i-1,2] <= Tc
-                datas[i,0] = action * max_power
-            else:
-                # on est dans la fenêtre > on ne change rien :-)
-                datas[i,0] = datas[i-1,0]
-        datas[i,2] = getR1C1(datas, i)
-
-    heating=True
-    # on vérifie si on a chauffé ou pas
-    if not np.any(datas[index:,0]):
-        heating=False
-
-    return {"heating":heating, "datas":datas}
-
-def modelPlayHysteresys(datas, index, Tc, max_power):
+def modelPlayHysteresys(datas, index=1, Tc=Tc, max_power=max_power):
     """
     le modèle joue un contrôleur hysteresys
 
@@ -476,197 +272,19 @@ def modelPlayHysteresys(datas, index, Tc, max_power):
 
     max_power : puissance de chauffage
     """
-    # on regarde ce qu'il se passe sans chauffage
-    datas[index:,2] = R1C1sim(interval, R, C, datas[index:,0], datas[index:,1], datas[index-1,2])
-    # s'il n'est pas nécessaire de chauffer, on peut s'arrêter là :-)
-    heating = False
-    if datas[-1,2] < Tc:
-        heating = True
-        for i in range(index,datas.shape[0]):
-            if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
-                action = datas[i-1,2] <= Tc
-                datas[i,0] = action * max_power
-            else:
-                # on est dans la fenêtre > on ne change rien :-)
-                datas[i,0] = datas[i-1,0]
-            datas[i,2] = getR1C1(datas, i)
+    for i in range(index,datas.shape[0]):
+        if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
+            action = datas[i-1,2] <= Tc
+            datas[i,0] = action * max_power
+        else:
+            # on est dans la fenêtre > on ne change rien :-)
+            datas[i,0] = datas[i-1,0]
+        datas[i,2] = getR1C1(datas, i)
+
+    # on vérifie si on a chauffé ou pas
+    heating =  np.sum(datas[index:,0]) > 0
 
     return {"heating":heating, "datas":datas}
-
-def modelPlayNonOccupation(datas, index, Tc, max_power):
-    """
-    le modèle joue une période de non occupation (week-end)
-
-    **il cumule les rôles de contrôleur et d'environnement !**
-
-    On veut garantir une température intérieure Tc à la fin
-
-    retourne un hash composé de :
-
-    - un booléen indiquant s'il faut chauffer ou non
-    - un booléen indiquant si la température de consigne est atteinte
-    - l'indice à partir duquel il faut chauffer (-1 si le chauffage n'est pas nécessaire)
-    - un tenseur de données contenant les données sources, le scénario de chauffage et la température intérieure simulée
-
-    """
-    # on regarde ce qu'il se passe sans chauffage
-    datas[index:,2] = R1C1sim(interval, R, C, datas[index:,0], datas[index:,1], datas[index-1,2])
-    # s'il n'est pas nécessaire de chauffer, on peut s'arrêter là :-)
-    heating = False
-    success = True
-    i = -1
-    # sinon....
-    if datas[-1,2] < Tc:
-        heating = True
-        success=False
-        i=index
-        while i < datas.shape[0]:
-            _Qc = np.ones(datas.shape[0]-i) * max_power
-            Tint_sim = R1C1sim(interval, R, C, _Qc, datas[i:,1], datas[i,2])
-            if Tint_sim[-1] < Tc:
-                # il faut chauffer
-                break
-            else:
-                # il n'est pas encore temps de déclencher le chauffage
-                i+=1
-        if i == datas.shape[0]: i-=1
-        datas[i:,2] = Tint_sim
-        datas[i:,0] = _Qc
-        if verbose:
-            info = "on chauffe à l'indice {}".format(i)
-            info = "{} - {:.2f}°C à la cible".format(info,Tint_sim[-1])
-            print(info)
-        # contrôle hysteresys à la cible pour voir si consigne est atteinte
-        if Tint_sim[-1]<=Tc+1 and Tint_sim[-1]>=Tc-1:
-            success=True
-
-    return {"heating":heating, "success":success, "index":i, "datas":datas}
-
-"""
-FONCTIONS RECOMPENSE/REWARD
-
-En donnant à la fonction,
-- les 3 premiers éléments : on cherche à ce que le controleur maintienne en permanence la température de consigne
-- les 6 éléments : on cherche à ce que le contrôleur gère des périodes de non-occupation
-
--> TO DO : il faudrait aussi qu'il soit apte à prendre en compte une température de consigne variable.....
-"""
-def CP(dline):
-    """
-    penalité de confort utilisée pour entrainer le réseau à recréer en permanence un comportement de type hystéresys
-
-    dans toutes les fonctions CP*, dline est composé au maximum des éléments suivants :
-
-    - 0) la puissance de chauffage
-    - 1) la température extérieure à i
-    - 2) la température intérieure à i
-    - 3) occupation 0/1 à i,
-    - 4) nombre d'intervalles entre i et le changement d'occupation (time of flight - tof)
-    - 5) la température de consigne * occupation à i
-
-    dline : vecteur des données [Qc, Text, Tint, Occ, Tof, Tc] au point/instant i
-
-    dline = une ligne du tenseur datas
-    """
-    confortPenalty = abs(dline[2] - Tc)
-    return confortPenalty
-
-def CPA(dline):
-    """
-    penalité de confort utilisée pour entrainer le réseau à subir en alternance des périodes d'occupation et d'inoccupation
-
-    lors des périodes d'occupation, le réseau se comporte comme un hystéresys
-
-    mode A
-    """
-    # le bâtiment n'est pas occupé
-    if dline[3] == 0:
-        confortPenalty = abs(dline[2] - Tc) / (dline[4] + 1)
-    # le bâtiment est occupé
-    else:
-        confortPenalty = abs(dline[2] - Tc)
-    return confortPenalty
-
-def CPB(dline):
-    """
-    penalité de confort utilisée pour entrainer le réseau à subir en alternance des périodes d'occupation et d'inoccupation
-
-    mode B - probablement trop orienté
-    """
-    confortPenalty = 0
-    # calcule une pénalité si on est dans un des 2 cas suivants :
-    # 1) on chauffe
-    # 2) la température intérieure est inférieure à la consigne
-    # en effet, il semble intuitif de ne pas pénaliser le réseau
-    # s'il a décidé de ne pas chauffer
-    # ET si la température intérieure résultant de cette action est au dessus de la consigne
-    if dline[0] !=0 or dline[2] < Tc:
-        # le bâtiment n'est pas occupé
-        if dline[3] == 0:
-            confortPenalty = abs(dline[2] - Tc) / (dline[4] + 1)
-        # le bâtiment est occupé
-        else:
-            confortPenalty = abs(dline[2] - dline[5])
-    return confortPenalty
-
-def CPC(dline):
-    """
-    penalité de confort utilisée pour entrainer le réseau à subir en alternance des périodes d'occupation et d'inoccupation
-
-    mode C
-    """
-    # le bâtiment n'est pas occupé ET sa température est en dessous de la consigne
-    if dline[3] == 0 and dline[2] <= Tc + hh :
-        confortPenalty = abs(dline[2] - Tc) / (dline[4] + 1)
-    # le bâtiment est occupé OU sa température est au dessus de la consigne
-    else:
-        confortPenalty = abs(dline[2] - Tc)
-    return confortPenalty
-
-def evaluateReward(dline, mode='A', conso=-1):
-    """
-    calcule une récompense de type confort et/ou énergie
-
-    HH : hystérésis simple sans tenir compte de l'occupation
-    """
-    if mode == 'HH':
-        confortPenalty = CP(dline)
-    if mode == 'A':
-        confortPenalty = CPA(dline)
-    if mode == 'B':
-        confortPenalty = CPB(dline)
-    if mode == 'C':
-        confortPenalty = CPC(dline)
-
-    if conso != -1:
-        energyPenalty = conso / goto
-        reward = - confortPenalty - energyPenalty
-        return [reward, -confortPenalty, -energyPenalty]
-    else :
-        reward = - confortPenalty
-        return reward
-
-class ProgressBar:
-    '''
-    Visualisation temps réel de l'avancement d'un process
-    '''
-    def __init__ (self, valmax, title):
-        if valmax == 0:  valmax = 1
-        self._valmax = valmax
-        self._maxbar = 30
-        self._scale = float(self._maxbar / 100)
-        self._title  = title
-
-    def update(self, val):
-        if val > self._valmax: val = self._valmax
-        perc  = round( 100 * val / self._valmax)
-        bar   = int(perc * self._scale)
-        out = "\r{:20s} [{:s}{:s}] {:d}/{:d}".format(self._title,"=" * bar, " " * (self._maxbar - bar), val+1, self._valmax)
-        sys.stdout.write(out)
-        #Extinction du curseur
-        #os.system("setterm -cursor off")
-        # Rafraichissement de la barre
-        sys.stdout.flush()
 
 class Training:
     """
@@ -695,191 +313,46 @@ class Training:
 
     def play(self, ts=None):
         """
-        fait simplement jouer un réseau de neurone aléatoire ou pré-enregistré
 
-        compare avec le résultat du modèle ou d'une stratégie industrielle
-
-        calcule l'énergie consommée pour le réseau et le modèle
         """
-        pos, tsvrai = setStart(ts=ts)
-        xr = np.arange(tsvrai, tsvrai+(history+goto)*interval, interval)
+        pos, tsvrai = setStart()
+        xr = np.arange(tsvrai, tsvrai+wsize*interval, interval)
         datas = buildEnv(pos)
+        result = modelPlayHysteresys(copy.deepcopy(datas))
+        mConso = int(np.sum(result["datas"][1:,0]) / 1000)
 
-        labelAgent = "agent IA"
-        if playWithModel == 1:
-            # le modèle joue l'épisode et produit son scénario
-            #result = modelPlayHysteresys(copy.deepcopy(datas), history, Tc, max_power)
-            #result = modelPlayNonOccupation(copy.deepcopy(datas), history, Tc, max_power)
-            result = modelPlayWeekInHysteresys(copy.deepcopy(datas), history, Tc, max_power,pos)
-
-            labelModel = "modèle"
-        else:
-            #result = industryPlayReductions(copy.deepcopy(datas), history)
-            #result = industryPlayHystNRed(copy.deepcopy(datas), history)
-            result = industryPlayHysteresis(copy.deepcopy(datas), history)
-            labelModel = "réduits nuit/week-end"
-        mConso = int(np.sum(result["datas"][history:,0]) / 1000)
-        """
-        # l'agent joue l'épisode
-        for i in range(goto):
-            index = history+i
-            if lite:
-                predictionBrute = tflite_output(agent, formatForNetwork(datas, index))
-            else:
-                predictionBrute = agent(formatForNetwork(datas, index).reshape(1,inputs_size))
-            action = np.argmax(predictionBrute)
-            datas[index,0] = action * max_power
-            datas[index,2] = getR1C1(datas, index)
-        aConso = int(np.sum(datas[history:,0]) / 1000)
-        """
-        title = "épisode {} - {} {}".format(self._steps,tsvrai, tsToHuman(tsvrai))
-        title = "{}\n".format(title)
-        if result["heating"]:
-            title = "{}\n conso {} {}".format(title, labelModel, mConso)
-            if "index" in result:
-                title = "{} indice {}".format(title,result["index"])
-            if "success" in result and not result["success"]:
-                title = "{}\n consigne non atteinte : besoin de plus de puissance ".format(title)
-        else:
-            title = "{}\n modèle - chauffage pas nécessaire".format(title)
-
-        # matérialisation de la zone de confort par un hystéréris de 2 degrés autour de la température de consigne
+        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
-        Tint = np.array([datas[:-1,2],result["datas"][:-1,2]])
-        Tintmin = np.amin(Tint)
-        Tintmax = np.amax(Tint)
-        Textmin = np.amin(datas[:-1,1])
-        Textmax = np.amax(datas[:-1,1])
-        if datas.shape[1] >= 5:
-            # on extrait tous les indices pour lesquels datas[:,4] prend sa valeur minimale = 0
-            # le vecteur résultant compilera les indices indiquant un changement d'occupation
-            changes = np.where(datas[:,4] == datas[:,4].min())[0]
-            zonesOcc=[]
-            zonesOccText=[]
-            #print(changes)
-            for i in changes:
-                if datas[i,3] == 0:
-                    imin = i
-                    break
-            for i in changes:
-                if datas[i,3] == 0:
-                    if i < datas.shape[0]-1:
-                        l = datas[i+1,4]
-                        h = Tintmax - Tintmin
-                        w = l*interval
-                        #print("{} vs {}".format(i,imin))
-                        v = Rectangle((xr[i],Tintmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
-                        zonesOcc.append(v)
-                        h = Textmax - Textmin
-                        if i == imin:
-                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="occupation")
-                        else:
-                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
-                        zonesOccText.append(v)
-
-        ax1 = plt.subplot(211)
-        plt.title(title)
-        plt.ylabel("Temp. extérieure °C")
-        plt.plot(xr, datas[:-1,1], color="blue", label="Text")
-        if datas.shape[1] >= 5:
-            for v in zonesOccText:
-                ax1.add_patch(v)
-        plt.legend(loc='upper left')
-        ax2 = ax1.twinx()
-        ax2.add_patch(zoneconfort)
-        plt.ylabel("Temp. intérieure °C")
-        plt.plot(xr, result["datas"][:-1,2], color="orange", label="Tint {}".format(labelModel))
-        plt.legend(loc='upper right')
-        plt.subplot(212, sharex=ax1)
-        plt.ylabel("Consommation W")
-        plt.plot(xr, result["datas"][:-1,0], color="orange", label=labelModel)
-        plt.legend()
-        plt.show()
-
-        """
-        nb = 211
-        if datas.shape[1] >= 5 or playWithModel == 0 :
-            nb = 311
-
-        # matérialisation de la zone de confort par un hystéréris de 2 degrés autour de la température de consigne
-        zoneconfort = Rectangle((xr[0], Tc-1), xr[-1]-xr[0], 2, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
-        Tint = np.array([datas[:-1,2],result["datas"][:-1,2]])
-        Tintmin = np.amin(Tint)
-        Tintmax = np.amax(Tint)
-        Textmin = np.amin(datas[:-1,1])
-        Textmax = np.amax(datas[:-1,1])
-
-        if datas.shape[1] >= 5:
-            # on extrait tous les indices pour lesquels datas[:,4] prend sa valeur minimale = 0
-            # le vecteur résultant compilera les indices indiquant un changement d'occupation
-            changes = np.where(datas[:,4] == datas[:,4].min())[0]
-            zonesOcc=[]
-            zonesOccText=[]
-            #print(changes)
-            for i in changes:
-                if datas[i,3] == 0:
-                    imin = i
-                    break
-            for i in changes:
-                if datas[i,3] == 0:
-                    if i < datas.shape[0]-1:
-                        l = datas[i+1,4]
-                        h = Tintmax - Tintmin
-                        w = l*interval
-                        #print("{} vs {}".format(i,imin))
-                        v = Rectangle((xr[i],Tintmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
-                        zonesOcc.append(v)
-                        h = Textmax - Textmin
-                        if i == imin:
-                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="occupation")
-                        else:
-                            v = Rectangle((xr[i],Textmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
-                        zonesOccText.append(v)
-
-        ax1 = plt.subplot(nb)
+        title = "épisode {} - {} {}".format(self._steps,tsvrai, tsToHuman(tsvrai))
+        title = "{}\n conso {}".format(title, mConso)
+        ax1 = plt.subplot(311)
         plt.title(title)
         ax1.add_patch(zoneconfort)
-        if datas.shape[1] >= 5:
-            for v in zonesOcc:
-                ax1.add_patch(v)
         plt.ylabel("Temp. intérieure °C")
-        #plt.plot(xr,Tint[pos:pos+history+goto], color="yellow")
-        plt.plot(xr,datas[:-1,2], color="black", label="Tint {}".format(labelAgent))
-        plt.plot(xr,result["datas"][:-1,2], color="orange", label="Tint {}".format(labelModel))
+        plt.plot(xr, result["datas"][:,2], color="orange", label="Tint")
         plt.legend(loc='upper left')
-        if playWithModel == 1:
-            ax2 = ax1.twinx()
-        else :
-            nb += 1
-            ax2=plt.subplot(nb, sharex=ax1)
-            if datas.shape[1] >= 5:
-                for v in zonesOccText:
-                    ax2.add_patch(v)
 
+        ax2 = ax1.twinx()
         plt.ylabel("Temp. extérieure °C")
-        plt.plot(xr,datas[:-1,1], color="blue", label="Text")
+        plt.plot(xr, result["datas"][:,1], color="blue", label="Text")
         plt.legend(loc='upper right')
-        nb += 1
-        plt.subplot(nb, sharex=ax1)
-        #plt.plot(xr,QcTrue[pos:pos+history+goto], color="#f9acac")
+
+        plt.subplot(312, sharex=ax1)
         plt.ylabel("Consommation W")
-        plt.plot(xr,result["datas"][:-1,0], color="orange", label=labelModel)
-        plt.plot(xr, datas[:-1,0], color="black", label=labelAgent)
+        plt.plot(xr, result["datas"][:,0], color="orange", label="consommation")
         plt.legend()
-        if datas.shape[1] >= 5 and playWithModel == 1:
-            nb+=1
-            ax3 = plt.subplot(nb, sharex=ax1)
-            plt.ylabel("°C")
-            plt.plot(xr,datas[:-1,3],'o', markersize=2)
-            # pas la peine d'afficher la consigne : on a la zone de confort et les zones d'occupation
-            plt.plot(xr,datas[:-1,5], label="consigne")
-            plt.legend(loc='upper left')
-            ax4 = ax3.twinx()
-            plt.ylabel("nb intervalles > cgt occ.")
-            plt.plot(xr,datas[:-1,4],'o', markersize=1, color="red")
-        plt.xlabel("Temps en secondes")
+
+        ax3 = plt.subplot(313, sharex=ax1)
+        plt.ylabel("°C")
+        plt.plot(xr, result["datas"][:,3],'o', markersize=2)
+        # pas la peine d'afficher la consigne : on a la zone de confort et les zones d'occupation
+        plt.plot(xr, result["datas"][:,5], label="consigne")
+        plt.legend(loc='upper left')
+        ax4 = ax3.twinx()
+        plt.ylabel("nb intervalles > cgt occ.")
+        plt.plot(xr, result["datas"][:,4],'o', markersize=1, color="red")
+
         plt.show()
-        """
 
     def trainOnce(self):
         """
@@ -933,14 +406,6 @@ class Training:
             y[i] = tf.stack(q)
         agent.train_on_batch(x, y)
 
-    def realtrain(self):
-        """
-        entrainement sur données réelles
-
-        pas implémenté
-        """
-        pass
-
     def train(self):
         """
         - joue un épisode
@@ -961,9 +426,8 @@ class Training:
         if self._mem.size() > BATCH_SIZE * 3:
             train = True
         conso = 0
-        for i in range(goto):
-            index = history+i
-            state = formatForNetwork(datas, index)
+        for i in range(1,wsize):
+            state = formatForNetwork(datas, i)
             if random.random() < self._eps:
                 rpred += 1
                 action = random.randint(0, numAct - 1)
@@ -973,39 +437,34 @@ class Training:
                 action = np.argmax(predictionBrute)
             conso += action
             # on exécute l'action choisir et on met à jour le tenseur de données
-            datas[index,0] = action * max_power
-            datas[index,2] = getR1C1(datas, index)
-            nextstate = formatForNetwork(datas, index+1)
-            reward = evaluateReward(datas[index,:], mode='HH')
-            if isinstance(reward, list) == 1:
-                self._mem.addSample((state,action,reward[0],nextstate))
-            else:
-                self._mem.addSample((state,action,reward,nextstate))
+            datas[i,0] = action * max_power
+            datas[i,2] = getR1C1(datas, i)
+            nextstate = formatForNetwork(datas, i+1)
+            reward = - abs(datas[i,2] - Tc)
+            self._mem.addSample((state,action,reward,nextstate))
             rewardTab.append(reward)
             if train:
                 self.trainOnce()
-            npreds = self._steps * goto + i
+            npreds = self._steps * (wsize -1) + i
             self._eps = MIN_EPS + (MAX_EPS - MIN_EPS) * math.exp(-LAMBDA * npreds)
 
         print("\népisode {} - {} aléatoires / {} réseau".format(self._steps, rpred, apred))
-        Text_min, Text_moy, Text_max = getStats(datas[history:-1,1])
-        Tint_min, Tint_moy, Tint_max = getStats(datas[history:-1,2])
+        Text_min, Text_moy, Text_max = getStats(datas[1:,1])
+        Tint_min, Tint_moy, Tint_max = getStats(datas[1:,2])
         print("Text min {:.2f} Text moy {:.2f} Text max {:.2f}".format(Text_min, Text_moy, Text_max))
         print("Tint min {:.2f} Tint moy {:.2f} Tint max {:.2f}".format(Tint_min, Tint_moy, Tint_max))
-        if datas.shape[1] > 3:
-            #on crée un vecteur w ne contenant que les valeurs de température intérieure en période d'occupation
-            w = datas[datas[:,3]!=0,2]
-            Tocc_min, Tocc_moy, Tocc_max = getStats(w[history:-1])
-            print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
+        #on crée un vecteur w ne contenant que les valeurs de température intérieure en période d'occupation
+        w = datas[datas[:,3]!=0,2]
+        Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
+        print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
+
         rewardTab = np.array(rewardTab)
-        a = np.sum(rewardTab, axis=0)
+        a = np.sum(rewardTab)
         print("Récompense(s) {}".format(a))
         self._rewards.append(a)
         self._Text.append([Text_min, Text_moy, Text_max])
-        if datas.shape[1] == 3:
-            self._Tint.append([Tint_min, Tint_moy, Tint_max])
-        if datas.shape[1] > 3:
-            self._Tint.append([Tocc_min, Tocc_moy, Tocc_max])
+        self._Tint.append([Tint_min, Tint_moy, Tint_max])
+        self._Tint.append([Tocc_min, Tocc_moy, Tocc_max])
         self._episodes_ts.append(tsvrai)
 
 
@@ -1068,13 +527,7 @@ class Training:
                     plt.plot(self._Tint[:,2], color="orange")
                     nb+=1
                     plt.subplot(nb, sharex=ax1)
-                    if len(self._rewards.shape) == 2:
-                        labels = ["totaux", "confort", "énergie"]
-                        for i in range(self._rewards.shape[1]):
-                            plt.plot(self._rewards[:,i],label=labels[i])
-                        plt.legend()
-                    if len(self._rewards.shape) == 1:
-                        plt.plot(self._rewards)
+                    plt.plot(self._rewards)
 
                     plt.show()
                     self.play(ts=self._episodes_ts[0])
@@ -1132,43 +585,17 @@ if __name__ == "__main__":
 
     visNN(agent)
 
-
-    # on cale les métadonnées sur le flux de température intérieure
-    # c'est celui dont l'enregistrement a été déclenché en dernier
-    # le flux de température intérieure ne va nous servir
-    # qu'à définir la condition initiale sur chaque échantillon
-    # on utilisera seulement des Tint synthétiques calculées avec le modèle
-    # pour Text, on prendra par contre la vérité terrain
-
-    meta = getMeta(circuit["Tint"],dir)
+    meta = getMeta(circuit["Text"],dir)
 
     # durée du flux en secondes
     fullLength = meta["npoints"] * meta["interval"]
-    print("Caractéristiques du flux de température intérieure")
+    print("Caractéristiques du flux de température extérieure")
     print("Démarrage : {}".format(meta["start_time"]))
     print("Fin: {}".format(meta["start_time"]+fullLength))
     print("Durée totale en secondes: {}".format(fullLength))
 
-    # _tss est le timestamp à partir duquel le sampling va commencer
-    # _tse est le timestamp auquel on arrête le sampling
-    # on peut retenir de travailler sur toute la durée du flux
-    # ou bien de de se restreindre à un intervalle
-    # en effet, celà permet de faire opérer/réentrainer un réseau sur des données qu'il ne connait pas
-    tsMessage = "Saisissez votre timestamp de démarrage"
-    tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"])
-    _tss=input(tsMessage)
-    if not _tss:
-        _tss = meta["start_time"]
-    else:
-        _tss = int(_tss)
-
-    tsMessage = "Saisissez votre timestamp de fin"
-    tsMessage = "{} ou validez sans rien saisir pour conserver {}\n".format(tsMessage, meta["start_time"]+fullLength)
-    _tse=input(tsMessage)
-    if not _tse:
-        _tse = meta["start_time"]+fullLength
-    else:
-        _tse = int(_tse)
+    _tss = meta["start_time"]
+    _tse = 1615000000
 
     if _tse <= _tss :
         sys.exit()
@@ -1186,26 +613,16 @@ if __name__ == "__main__":
     input("pressez une touche pour continuer")
 
     Text = PyFina(circuit["Text"], dir, _tss, interval, npoints)
-    Tint = PyFina(circuit["Tint"], dir, _tss, interval, npoints)
-
-    # on utilisera le flux de fonctionnement de la pompe
-    # pour produire un historique de chauffage "réaliste"
-    pompe = PyFina(circuit["pompe"], dir, _tss, interval, npoints)
-    # on construit un flux simplifié
-    Qc = pompe * max_power
 
     agenda = basicAgenda(npoints,interval, _tss,-1,-1,schedule=schedule)
 
     # affichage de toutes les données chargées
     plt.figure(figsize=(20, 10))
     ax1=plt.subplot(211)
-    plt.plot(Text.timescale(),Text, label='Text')
-    plt.plot(Tint.timescale(),Tint, label='Tint')
-    ax2=ax1.twinx()
-    plt.plot(pompe.timescale(),Qc, color="yellow", label='heating')
+    plt.plot(meta["start_time"]+Text.timescale(),Text, label='Text')
     plt.legend()
-    ax3 = plt.subplot(212,  sharex=ax1)
-    plt.plot(Text.timescale(),agenda, label='occupation')
+    ax2 = plt.subplot(212,  sharex=ax1)
+    plt.plot(meta["start_time"]+Text.timescale(),agenda, label='occupation')
     plt.legend()
     plt.show()
 
