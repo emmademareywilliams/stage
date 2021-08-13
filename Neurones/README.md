@@ -16,6 +16,8 @@ Dans une telle situation d'apprentissage, on rencontre les éléments suivants :
 
 Dans notre cas, l'agent est représenté par un réseau de neurones (géré par la bibliothèque Python *TensorFlow*).
 
+Plus précisemment, la méthode qui va être utilisée est la méthode du *Q-learning* (...)
+
 
 ### Première étape : hystérésis 
 
