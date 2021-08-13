@@ -11,7 +11,7 @@ Dans une telle situation d'apprentissage, on rencontre les éléments suivants :
 * l'*agent* prend les décisions, c'est-à-dire qu'il choisit quelle action effectuer aux vues de son environnement ;
 * l'*environnement* produit des états et des récompenses, quantités sur lesquelles s'appuie l'agent pour déterminer la politique à suivre (ensemble des actions choisies par l'agent et qui maximise l'apport en récompense). 
 
-![RL principe](/images/RL.jpg)
+![RL principe](images/RL.jpg)
 
 
 Dans notre cas, l'agent est représenté par un réseau de neurones (géré par la bibliothèque Python *TensorFlow*).
@@ -27,7 +27,7 @@ Pour que la température intérieure reste dans la zone de confort définie, le 
 
 On obtient la courbe caractéristique suivante :
 
-![hysteresis](/images/hysteresis.png)
+![hysteresis](images/hysteresis.png)
 
 L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresisToolbox.py`.
 
