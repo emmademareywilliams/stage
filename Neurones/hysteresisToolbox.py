@@ -492,7 +492,7 @@ class Training:
         #print(datas[:,3])
         nbocc = np.sum(datas[:,3])
         print("{} points en occupation".format(nbocc))
-        if np.sum(datas[:,3]) != 0 :
+        if nbocc > 0 :
             #w ne contient que les valeurs de température intérieure en période d'occupation
             w = datas[datas[:,3]!=0,2]
             Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
