@@ -490,7 +490,7 @@ class Training:
         self._Text.append([Text_min, Text_moy, Text_max])
         self._Tint.append([Tint_min, Tint_moy, Tint_max])
         #print(datas[:,3])
-        nbocc = np.sum(datas[:,3])
+        nbocc = np.sum(datas[1:,3])
         print("{} points en occupation".format(nbocc))
         if nbocc > 0 :
             #w ne contient que les valeurs de température intérieure en période d'occupation
@@ -498,12 +498,13 @@ class Training:
             Tocc_min, Tocc_moy, Tocc_max = getStats(w[1:])
             print("Tocc min {:.2f} Tocc moy {:.2f} Tocc max {:.2f}".format(Tocc_min, Tocc_moy, Tocc_max))
             self._Tintocc.append([Tocc_min, Tocc_moy, Tocc_max])
+        else:
+            self._Tintocc.append([None, None, None])
 
         rewardTab = np.array(rewardTab)
         a = np.sum(rewardTab)
         print("Récompense(s) {}".format(a))
         self._rewards.append(a)
-
 
         self._episodes_ts.append(tsvrai)
 
