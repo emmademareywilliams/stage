@@ -127,7 +127,7 @@ def initializeNN(inputs_size, name):
     x = tf.keras.layers.Dense((50), activation='relu')(inputs)
     # pour ajouter de la profondeur (pas utilisé pour l'instant)
     #x = tf.keras.layers.Dense((50), activation='relu')(x)
-    outputs = tf.keras.layers.Dense(numAct,activation='relu')(x)
+    outputs = tf.keras.layers.Dense(numAct,activation='linear')(x)
     agent = tf.keras.Model(inputs=inputs,outputs=outputs,name=name)
     agent.compile(loss="mse",optimizer="adam",metrics=['mae'])
     print("initialisation de l'agent terminée")
