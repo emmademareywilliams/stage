@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-reinforcement learning SANDBOX
+reinforcement learning
 
-**a toolkit to train a free-model controler on a R1C1 model**
+training an agent recreating the behavior of a hysteresis controller
 """
 import numpy as np
 # nombre d'épisodes que l'on souhaite jouer
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 500
+MAX_EPISODES = 900
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -34,8 +34,6 @@ LAMBDA = 0.0005
 GAMMA = 0.099
 #GAMMA = 0.05
 
-graphe = True
-
 dir = "/var/opt/emoncms/phpfina"
 
 # sampling interval in seconds
@@ -46,7 +44,7 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":9, "flow_rate":5}
+circuit = {"name":"Nord", "Text":5, "Tint":4, "flow_rate":5}
 # changer Text: 1 en Text: 9 pour travailler avec les données du collège Marc Bloch
 
 Cw = 1162.5 #Wh/m3/K
@@ -63,7 +61,6 @@ C = 8.63446560e+08
 
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
-
 
 # nombre d'actions possibles  : 2 = on chauffe ou pas
 # pour l'instant, on reste simple
@@ -127,7 +124,7 @@ def initializeNN(inputs_size, name):
     x = tf.keras.layers.Dense((50), activation='relu')(inputs)
     # pour ajouter de la profondeur (pas utilisé pour l'instant)
     #x = tf.keras.layers.Dense((50), activation='relu')(x)
-    outputs = tf.keras.layers.Dense(numAct,activation='relu')(x)
+    outputs = tf.keras.layers.Dense(numAct,activation='linear', name='output')(x)
     agent = tf.keras.Model(inputs=inputs,outputs=outputs,name=name)
     agent.compile(loss="mse",optimizer="adam",metrics=['mae'])
     print("initialisation de l'agent terminée")
@@ -184,7 +181,7 @@ def buildEnv(pos, wsize = wsize):
     datas=np.zeros((wsize, 6))
     # condition initiale aléatoire
     datas[0,0] = random.randint(0,1)*max_power
-    datas[0,2] = random.randint(14,20)
+    datas[0,2] = random.randint(17,20)
     # on connait Text (vérité terrain) sur toute la longueur de l'épisode
     datas[:,1] = Text[pos:pos+wsize]
     #print(wsize+4*24*3600//interval)
@@ -193,7 +190,7 @@ def buildEnv(pos, wsize = wsize):
     datas[:,3] = occupation[0:wsize]
     for i in range(wsize):
         datas[i,4] = getLevelDuration(occupation, i)
-    # consigne * occupation
+    # consigne
     datas[:,5] = Tc * datas[:,3]
     print("condition initiale : Qc {:.2f} Text {:.2f} Tint {:.2f}".format(datas[0,0],datas[0,1],datas[0,2]))
     return datas
@@ -309,12 +306,22 @@ class ProgressBar:
         # Rafraichissement de la barre
         sys.stdout.flush()
 
+def saveAgent(name,suffix):
+    ts = time.time()
+    now = tsToHuman(ts, fmt="%Y_%m_%d_%H_%M_%S")
+    if "raw" in name:
+        filename = "{}_{}_{}.h5".format(name[0:-3],suffix,now)
+    else:
+        filename = "{}_{}_{}".format(now,suffix,name)
+    agent.save(filename)
+    return filename
+
 class Training:
     """
     boite à outil de simulation pour l'entrainement du réseau neurone par renforcement
     """
-    def __init__(self, step):
-        self._step = step
+    def __init__(self, name):
+        self._name = name
         self._exit = False
         self._ts = int(time.time())
         # numéro de l'épisode
@@ -494,10 +501,9 @@ class Training:
         print("Tint min {:.2f} Tint moy {:.2f} Tint max {:.2f}".format(Tint_min, Tint_moy, Tint_max))
         self._Text.append([Text_min, Text_moy, Text_max])
         self._Tint.append([Tint_min, Tint_moy, Tint_max])
-        #print(datas[:,3])
+
         nbocc = np.sum(datas[1:,3])
         print("{} points en occupation".format(nbocc))
-
         if nbocc > 0 :
             #w ne contient que les valeurs de température intérieure en période d'occupation
             w = datas[datas[:,3]!=0,2]
@@ -536,15 +542,11 @@ class Training:
                 if self._steps > MAX_EPISODES:
                     self._exit = True
 
-            now = time.time()
-
-            if now - self._ts > self._step :
-                self._ts += self._step
-                if mode == "play":
-                    self.play()
-                else :
-                    self.train()
-                self._steps += 1
+            if mode == "play":
+                self.play()
+            else :
+                self.train()
+            self._steps += 1
 
             time.sleep(0.1)
 
@@ -561,32 +563,33 @@ class Training:
         else:
             print("training has stopped")
             if len(self._rewards):
-                if graphe:
-                    self._rewards=np.array(self._rewards)
-                    self._Text = np.array(self._Text)
-                    self._Tint = np.array(self._Tint)
+                self._rewards=np.array(self._rewards)
+                self._Text = np.array(self._Text)
+                self._Tint = np.array(self._Tint)
 
-                    plt.figure(figsize=(20, 10))
-                    ax1 = plt.subplot(211)
-                    plt.plot(self._Text[:,0], color="blue")
-                    plt.plot(self._Text[:,1], "o", color="blue")
-                    plt.plot(self._Text[:,2], color="blue")
-                    plt.plot(self._Tint[:,0], color="orange")
-                    plt.plot(self._Tint[:,1], "o", color="orange")
-                    plt.plot(self._Tint[:,2], color="orange")
-                    plt.subplot(212, sharex=ax1)
-                    plt.plot(self._rewards)
+                name = saveAgent(self._name,"trained")
 
-                    plt.show()
-                    self.play(ts=self._episodes_ts[0])
+                d = int(time.time()) - self._ts
 
-                i = 1
-                while True:
-                    if os.path.isfile("{}_{}".format(i,name)):
-                        i+=1
-                    else:
-                        break
-                agent.save("{}_{}".format(i,name))
+                title = "durée entrainement : {} s".format(d)
+
+                plt.figure(figsize=(20, 10))
+                ax1 = plt.subplot(211)
+                plt.title(title)
+                plt.plot(self._Text[:,0], color="blue")
+                plt.plot(self._Text[:,1], "o", color="blue")
+                plt.plot(self._Text[:,2], color="blue")
+                plt.plot(self._Tint[:,0], color="orange")
+                plt.plot(self._Tint[:,1], "o", color="orange")
+                plt.plot(self._Tint[:,2], color="orange")
+                plt.subplot(212, sharex=ax1)
+                plt.plot(self._rewards)
+                # enregistrement des indicateurs qualité de l'entrainement
+                plt.savefig("{}".format(name[0:-3]))
+                ax1.set_xlim(0, 200)
+                plt.savefig("{}_begin".format(name[0:-3]))
+                ax1.set_xlim(MAX_EPISODES-200, MAX_EPISODES-1)
+                plt.savefig("{}_end".format(name[0:-3]))
 
 
 if __name__ == "__main__":
@@ -611,14 +614,17 @@ if __name__ == "__main__":
 
     if savedModel == True:
         agent = tf.keras.models.load_model(name)
-        test=agent.get_layer(name="states")
-        inputs_size = test.get_config()["batch_input_shape"][1]
+        inlayer=agent.get_layer(name="states")
+        inputs_size = inlayer.get_config()["batch_input_shape"][1]
     else :
         agent = initializeNN(inputs_size, name)
+        name = saveAgent(name,"raw")
+        print(name)
 
     visNN(agent)
+    input("press a key")
 
-    meta = getMeta(circuit["Text"],dir)
+    meta = getMeta(circuit["Tint"],dir)
 
     # durée du flux en secondes
     fullLength = meta["npoints"] * meta["interval"]
@@ -628,7 +634,7 @@ if __name__ == "__main__":
     print("Durée totale en secondes: {}".format(fullLength))
 
     _tss = meta["start_time"]
-    _tse = 1628000000
+    _tse = meta["start_time"]+fullLength
     # mettre 1628000000 à la place de 1615000000 quand on joue avec les données de Marc Bloch
 
     if _tse <= _tss :
@@ -650,7 +656,7 @@ if __name__ == "__main__":
 
     agenda = basicAgenda(npoints,interval, _tss,-1,-1,schedule=schedule)
 
-    # affichage de toutes les données chargées
+    # affichage de la vérité terrain pour s'assurer qu'il n'y a pas de valeurs aberrantes
     plt.figure(figsize=(20, 10))
     ax1=plt.subplot(211)
     plt.plot(meta["start_time"]+Text.timescale(),Text, label='Text')
@@ -660,7 +666,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    sandbox = Training(5)
+    sandbox = Training(name)
     sandbox.run()
     sandbox.close()
     plt.close()
