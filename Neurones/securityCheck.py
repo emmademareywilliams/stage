@@ -13,16 +13,30 @@ def securityCheck(id, dir):
     """
     meta = getMeta(id, dir)
     pos = 0
-    with open("{}/{}.dat".format(dir, id), "rb") as ts:
-        ts.seek(pos*4, 0)
-        hexa = ts.read(4)
-        aa = bytearray(hexa)
-        if len(aa) == 4:
-            value = struct.unpack('<f', aa)[0]
-            if not(math.isnan(value)) and value > 100:
-                print("valeur aberrante à {}".format(pos))
-            else:
-                print("tout va bien :-)")
-        pos +=1
+    i = 0
+    nbn =0
+    with open("{}/{}.dat".format(dir, id), "rb+") as ts:
+        while pos <= meta["npoints"]:
+            ts.seek(pos*4, 0)
+            hexa = ts.read(4)
+            aa = bytearray(hexa)
+            if len(aa) == 4:
+                value = struct.unpack('<f', aa)[0]
+                if math.isnan(value):
+                    nbn +=1
+                elif value > 100:
+                    print("valeur aberrante à {} : {}".format(pos, value))
+                    i += 1
+                    nv = struct.pack('<f', float('nan'))
+                    try:
+                        ts.seek(pos*4,0)
+                        ts.write(nv)
+                    except Exception as e:
+                        print(e)
+                    finally:
+                        print("4 bytes written")
+            pos +=1
+        print("{} valeurs aberrantes".format(i))
+        print("{} nan".format(nbn))
 
-securityCheck(9, dir)
+securityCheck(100, dir)
