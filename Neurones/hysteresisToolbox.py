@@ -43,7 +43,7 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":5, "Tint":4, "flow_rate":5}
+circuit = {"name":"Nord", "Text":9, "Tint":4, "flow_rate":5}
 # changer Text: 1 en Text: 9 pour travailler avec les données du collège Marc Bloch
 
 Cw = 1162.5 #Wh/m3/K
