@@ -3,7 +3,7 @@
 training an agent recreating the behavior of a hysteresis controller
 """
 
-from RLtoolbox import Training, Environnement, initializeNN, visNN, saveAgent, simplePathCompleter
+from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, simplePathCompleter, Tc, hh, max_power
 import readline
 import os
 from dataengines import PyFina, getMeta
@@ -39,9 +39,27 @@ inputs_size = 2
 # tof représente le nombre d'intervalles d'içi le changement d'occupation
 #inputs_size = 4
 
+class Env(Environnement):
+    def play(self, datas):
+        """
+        fait jouer un contrôleur hysteresys à un modèle R1C1
+        """
+        for i in range(1, datas.shape[0]):
+            if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
+                action = datas[i-1,2] <= Tc
+                datas[i,0] = action * max_power
+            else:
+                # on est dans la fenêtre > on ne change rien :-)
+                datas[i,0] = datas[i-1,0]
+            datas[i,2] = self.getR1C1(datas, i)
+        return datas
+
 class Hysteresys(Training):
     def reward(self, datas, i):
-        reward = - abs(datas[i,2] - self._Tc)
+        """
+        la récompense correspondant à un comportement hysteresys
+        """
+        reward = - abs(datas[i,2] - Tc)
         return reward
 
 if __name__ == "__main__":
@@ -68,7 +86,7 @@ if __name__ == "__main__":
         agent = tf.keras.models.load_model(name)
     else :
         agent = initializeNN(inputs_size, numAct, name)
-        name = saveAgent(agent, name," raw")
+        name = saveNN(agent, name," raw")
 
     visNN(agent)
 
@@ -113,7 +131,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    env = Environnement(Text, agenda, _tss, _tse, interval, wsize)
+    env = Env(Text, agenda, _tss, _tse, interval, wsize)
     sandbox = Hysteresys(name, mode, env, agent)
     sandbox.run()
     sandbox.close()

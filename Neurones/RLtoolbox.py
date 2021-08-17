@@ -81,7 +81,7 @@ def initializeNN(inSize, outSize, name):
     - soit par le modèle par calcul
     - soit par l'environnement réel par monitoring
     """
-    tf.keras.backend.set_floatx('float64')
+    tf.keras.backend.set_floatx('float32')
     inputs = tf.keras.Input(shape=(inSize, ), name='states')
     x = tf.keras.layers.Dense((50), activation='relu')(inputs)
     # pour ajouter de la profondeur (pas utilisé pour l'instant)
@@ -99,6 +99,18 @@ def visNN(agent):
     agent.summary()
     #print(agent.get_weights())
 
+def saveNN(agent, name, suffix):
+    """
+    sauve le réseau au format h5
+    """
+    ts = time.time()
+    now = tsToHuman(ts, fmt="%Y_%m_%d_%H_%M_%S")
+    if "raw" in name:
+        filename = "{}_{}_{}.h5".format(name[0:-3],suffix,now)
+    else:
+        filename = "{}_{}_{}".format(now,suffix,name)
+    agent.save(filename)
+    return filename
 
 class Environnement:
     """
@@ -173,21 +185,11 @@ class Environnement:
         _Text = datas[index-1:index+1,1]
         return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
 
-    def modelPlayHysteresys(self, datas, index=1, Tc=Tc, max_power=max_power):
+    def play(self, datas):
         """
-        fait jouer un contrôleur hysteresys à un modèle R1C1
-        retourne un tenseur de données contenant les données sources, le scénario de chauffage et la température intérieure simulée
-        Tc : température intérieure de consigne
-        max_power : puissance de chauffage
+        à définir dans la classe fille
+        retourne le tenseur de données sources complété par le scénario de chauffage et la température intérieure simulée
         """
-        for i in range(index,datas.shape[0]):
-            if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
-                action = datas[i-1,2] <= Tc
-                datas[i,0] = action * max_power
-            else:
-                # on est dans la fenêtre > on ne change rien :-)
-                datas[i,0] = datas[i-1,0]
-            datas[i,2] = self.getR1C1(datas, i)
         return datas
 
 class Memory:
@@ -246,22 +248,11 @@ class ProgressBar:
         # Rafraichissement de la barre
         sys.stdout.flush()
 
-def saveAgent(agent, name, suffix):
-    ts = time.time()
-    now = tsToHuman(ts, fmt="%Y_%m_%d_%H_%M_%S")
-    if "raw" in name:
-        filename = "{}_{}_{}.h5".format(name[0:-3],suffix,now)
-    else:
-        filename = "{}_{}_{}".format(now,suffix,name)
-    agent.save(filename)
-    return filename
-
 class Training:
     """
     boite à outil de simulation pour l'entrainement du réseau neurone par renforcement
     """
     def __init__(self, name, mode, env, agent):
-        self._Tc = Tc
         self._name = name
         self._mode = mode
         self._env = env
@@ -307,7 +298,7 @@ class Training:
         adatas = self._env.buildEnv(pos)
         wsize = adatas.shape[0]
 
-        mdatas = self._env.modelPlayHysteresys(copy.deepcopy(adatas))
+        mdatas = self._env.play(copy.deepcopy(adatas))
         mConso = int(np.sum(mdatas[1:,0]) / 1000)
 
         for i in range(1,wsize):
@@ -430,7 +421,6 @@ class Training:
         if self._mem.size() > BATCH_SIZE * 3:
             barre = ProgressBar(wsize-1,"training")
             train = True
-        conso = 0
         for i in range(1,wsize):
             state = adatas[i-1, 1:self._inSize + 1]
             if random.random() < self._eps:
@@ -440,7 +430,6 @@ class Training:
                 apred += 1
                 predictionBrute = self._agent(state.reshape(1, self._inSize))
                 action = np.argmax(predictionBrute)
-            conso += action
             # on exécute l'action choisir et on met à jour le tenseur de données
             adatas[i,0] = action * max_power
             adatas[i,2] = self._env.getR1C1(adatas, i)
@@ -492,12 +481,8 @@ class Training:
         signal.signal(signal.SIGINT, self._sigint_handler)
         signal.signal(signal.SIGTERM, self._sigint_handler)
 
-        if not self._exit:
-            pass
-
         # Until asked to stop
         while not self._exit:
-
             if MAX_EPISODES:
                 if self._steps > MAX_EPISODES:
                     self._exit = True
@@ -525,7 +510,7 @@ class Training:
                 self._Text = np.array(self._Text)
                 self._Tint = np.array(self._Tint)
 
-                name = saveAgent(self._agent, self._name, "trained")
+                name = saveNN(self._agent, self._name, "trained")
 
                 d = int(time.time()) - self._ts
 
