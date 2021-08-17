@@ -34,4 +34,12 @@ On obtient la courbe caractéristique suivante :
 L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresisToolbox.py`.
 
 
+### Deuxième étape : prise en compte de l'occupation
+
+L'algorithme précédant nous a permis d'obtenir un comportement d'hystérésis *quel que soit l'occupation effective du bâtiment*. Or, afin d'en optimiser la consommation énergétique, il est important de prendre en compte son occupation, en d'autres termes, de considérer les moments durant lesquels des personnes sont présentes dans la structure. En dehors de ces heures d'occupation, il n'est pas nécessaire de maintenir la température de consigne.
+
+Désormais, notre objectif est de maintenir la température dans la zone de confort *seulement lorsque le bâtiment est occupé*. Dans le cas contraire, pendant le weekend notamment, aucune consigne de température n'est appliquée. 
+
+Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
+
 

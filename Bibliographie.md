@@ -6,7 +6,7 @@ TensorFlow tutorial : https://adventuresinmachinelearning.com/python-tensorflow-
 
 Précisions sur les technologies de chauffage (eau) : http://ebeclim.com/cvc_prodistrib.html
 
-État de l'art sur les réseaux de neurones dans le bâtiment : 
+**État de l'art sur les réseaux de neurones dans le bâtiment** : 
 
 * *Reinforcement learning for energy conservation and comfort in buildings*. K. Dalamagkidis et al., Building and Environnement 2007: 2686-2698
 * *A review of reinforcement learning methodologies on control systems for building energy*. M. Han et al., Dalarna university, 2018
@@ -14,4 +14,10 @@ Précisions sur les technologies de chauffage (eau) : http://ebeclim.com/cvc_pro
 *Deep Learning with Python*, F. Chollet, Manning Publications Co. 2018 
 
 Grands principes du décret tertiaire : https://cegibat.grdf.fr/reglementation-energetique-batiment/decret-tertiaire-les-grands-principes
+
+**Notions sur l'apprentissage par réseau de neurones** :
+* Introduction au fonctionnement d'un réseau de neurones : https://adventuresinmachinelearning.com/neural-networks-tutorial/
+* Comment initialiser les poids d'un réseau de neurones : https://adventuresinmachinelearning.com/weight-initialization-tutorial-tensorflow/
+* Le réseau risque de ne plus apprendre si la fonction d'activation n'est pas la bonne : https://adventuresinmachinelearning.com/vanishing-gradient-problem-tensorflow/
+
 
