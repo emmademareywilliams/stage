@@ -8,7 +8,7 @@ import numpy as np
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 900
+MAX_EPISODES = 500
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -43,8 +43,9 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 # le circuit
 # flow_rate en m3/h
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":9, "Tint":4, "flow_rate":5}
+circuit = {"name":"Nord", "Text":100, "Tint":4, "flow_rate":5}
 # changer Text: 1 en Text: 9 pour travailler avec les données du collège Marc Bloch
+# Text = 100 pour jouer avec les valeurs modifiées (non aberrantes)
 
 Cw = 1162.5 #Wh/m3/K
 max_power = circuit["flow_rate"] * Cw * 15
@@ -599,7 +600,9 @@ if __name__ == "__main__":
     visNN(agent)
     input("press a key")
 
-    meta = getMeta(circuit["Tint"],dir)
+    # meta = getMeta(circuit["Tint"],dir)
+    # pour Marc Bloch :
+    meta = getMeta(circuit["Text"],dir)
 
     # durée du flux en secondes
     fullLength = meta["npoints"] * meta["interval"]
