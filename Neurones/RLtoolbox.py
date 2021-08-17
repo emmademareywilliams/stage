@@ -509,6 +509,7 @@ class Training:
                 self._rewards=np.array(self._rewards)
                 self._Text = np.array(self._Text)
                 self._Tint = np.array(self._Tint)
+                self._Tintocc = np.array(self._Tintocc)
 
                 name = saveNN(self._agent, self._name, "trained")
 
@@ -525,6 +526,9 @@ class Training:
                 plt.plot(self._Tint[:,0], color="orange")
                 plt.plot(self._Tint[:,1], "o", color="orange")
                 plt.plot(self._Tint[:,2], color="orange")
+                plt.plot(self._Tintocc[:,0], color="green")
+                plt.plot(self._Tintocc[:,1], "o", color="green")
+                plt.plot(self._Tintocc[:,2], color="green")
                 plt.subplot(212, sharex=ax1)
                 plt.plot(self._rewards)
                 # enregistrement des indicateurs qualité de l'entrainement
