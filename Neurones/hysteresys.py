@@ -40,7 +40,7 @@ inputs_size = 2
 #inputs_size = 4
 
 class Env(Environnement):
-    def play(self, datas):
+    def play(self, datas, pos=None):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1
         """

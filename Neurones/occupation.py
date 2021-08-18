@@ -42,7 +42,7 @@ inputs_size = 2
 
 
 class Env(Environnement):
-    def play(self, datas):
+    def play(self, datas, pos):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
         """
@@ -51,9 +51,10 @@ class Env(Environnement):
                 # pas d'occupation
                 # on chauffe en fonction du tof
                 tof = int(datas[i-1,4])
+                print(tof)
                 Qc = np.ones(tof)*max_power
-                Tint_sim = R1C1sim(interval, R, C, Qc, Text[pos+i:pos+i+tof], datas[i-1, 2])
-                if Tint_sim[-1] <= Tc:
+                Tint_sim = self.getR1C1variant(datas, i, Qc, tof)
+                if Tint_sim[-1] < Tc - hh:
                     datas[i,0] = max_power
 
             else:
@@ -65,7 +66,7 @@ class Env(Environnement):
                 else:
                     # on est dans la fenêtre > on ne change rien :-)
                     datas[i,0] = datas[i-1,0]
-                datas[i,2] = getR1C1(datas, i)
+            datas[i,2] = self.getR1C1(datas, i)
 
         # on vérifie si on a chauffé ou pas
         #heating =  np.sum(datas[index:,0]) > 0

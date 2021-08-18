@@ -59,7 +59,7 @@ import signal
 import time
 import copy
 import math
-from models import R1C1variant
+from models import R1C1variant, R1C1sim
 
 # pour l'autocompletion en ligne de commande
 import readline
@@ -185,6 +185,15 @@ class Environnement:
         _Text = datas[index-1:index+1,1]
         return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
 
+    def getR1C1variant(self, datas, index, Qc, tof):
+        """
+        calcul de température par convolution
+        utilisé dans le modèle avec occupation
+        """
+        Text = datas[index-1:index-1+tof, 1]
+        Tint = datas[index-1, 2]
+        return R1C1sim(self._interval, R, C, Qc, Text, Tint)
+
     def play(self, datas):
         """
         à définir dans la classe fille
@@ -298,7 +307,7 @@ class Training:
         adatas = self._env.buildEnv(pos)
         wsize = adatas.shape[0]
 
-        mdatas = self._env.play(copy.deepcopy(adatas))
+        mdatas = self._env.play(copy.deepcopy(adatas), pos)
         mConso = int(np.sum(mdatas[1:,0]) / 1000)
 
         for i in range(1,wsize):
