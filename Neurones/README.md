@@ -18,6 +18,8 @@ Dans notre cas, l'agent est représenté par un réseau de neurones (géré par 
 
 Plus précisemment, la méthode qui va être utilisée est la méthode du *Q-learning* (...)
 
+> On crée un fichier général, nommé `RLtoolbox.py`, et qui comprend toutes les fonctions nécessaires au fonctionnement de l'algorithme RL, *quel que soit le modèle qu'on utilisera par la suite*. Ce fichier sera complété par d'autres codes de la forme `{nom modèle}.py` et qui contiendront les classes filles pour l'environnement et le modèle, ainsi que le main. 
+
 
 ### Première étape : hystérésis 
 
@@ -31,7 +33,7 @@ On obtient la courbe caractéristique suivante :
 
 ![hysteresis](imagesHysteresis/hysteresis.png)
 
-L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresisToolbox.py`.
+L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresis.py`.
 
 
 ### Deuxième étape : prise en compte de l'occupation
@@ -42,4 +44,4 @@ Désormais, notre objectif est de maintenir la température dans la zone de conf
 
 Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
 
-
+Le code correspondant à ce comportement est contenu dans le fichier `occupation.py`. 
