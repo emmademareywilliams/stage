@@ -10,6 +10,7 @@ from dataengines import PyFina, getMeta
 import matplotlib.pylab as plt
 import numpy as np
 from planning import tsToHuman, basicAgenda
+from models import R1C1sim
 
 # le circuit
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
@@ -39,28 +40,51 @@ inputs_size = 2
 # tof représente le nombre d'intervalles d'içi le changement d'occupation
 #inputs_size = 4
 
+
 class Env(Environnement):
     def play(self, datas):
         """
-        fait jouer un contrôleur hysteresys à un modèle R1C1
+        fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
         """
-        for i in range(1, datas.shape[0]):
-            if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
-                action = datas[i-1,2] <= Tc
-                datas[i,0] = action * max_power
+        for i in range(1,datas.shape[0]):
+            if datas[i-1,3] == 0 :
+                # pas d'occupation
+                # on chauffe en fonction du tof
+                tof = int(datas[i-1,4])
+                Qc = np.ones(tof)*max_power
+                Tint_sim = R1C1sim(interval, R, C, Qc, Text[pos+i:pos+i+tof], datas[i-1, 2])
+                if Tint_sim[-1] <= Tc:
+                    datas[i,0] = max_power
+
             else:
-                # on est dans la fenêtre > on ne change rien :-)
-                datas[i,0] = datas[i-1,0]
-            datas[i,2] = self.getR1C1(datas, i)
+                # en occupation
+                # hystérésis classique
+                if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
+                    action = datas[i-1,2] <= Tc
+                    datas[i,0] = action * max_power
+                else:
+                    # on est dans la fenêtre > on ne change rien :-)
+                    datas[i,0] = datas[i-1,0]
+                datas[i,2] = getR1C1(datas, i)
+
+        # on vérifie si on a chauffé ou pas
+        #heating =  np.sum(datas[index:,0]) > 0
         return datas
 
-class Hysteresys(Training):
+class HystNOcc(Training):
     def reward(self, datas, i):
         """
-        la récompense correspondant à un comportement hysteresys
+        la récompense correspondant à un comportement hysteresys avec occupation
+        reprend le mode C du code initial
         """
-        reward = - abs(datas[i,2] - Tc)
+        if datas[i,3] == 0 and datas[i,2] <= Tc-hh:
+            # le bâtiment n'est pas occupé ET la température est hors de la zone de confort
+            reward = - abs(datas[i,2]-Tc)/(datas[i,4]+1)
+        else:
+            # on retrouve l'hystérésis classique
+            reward = - abs(datas[i,2] - Tc)
         return reward
+
 
 if __name__ == "__main__":
 
@@ -132,7 +156,7 @@ if __name__ == "__main__":
     plt.show()
 
     env = Env(Text, agenda, _tss, _tse, interval, wsize)
-    sandbox = Hysteresys(name, mode, env, agent)
+    sandbox = HystNOcc(name, mode, env, agent)
     sandbox.run()
     sandbox.close()
     plt.close()
