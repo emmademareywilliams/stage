@@ -41,7 +41,7 @@ Après avoir entraîné l'agent sur 500 épisodes, on obtient ce type de comport
 
 On note que l'on obtient bien le comportement souhaité, c'est-à-dire que la température intérieure reste constamment dans la zone de confort. L'agent est même plus efficient que le modèle car :
 * la température ne quitte jamais la zone de confort (à part pour le point initial de température, qui a été généré aléatoirement) et oscille beaucoup moins autour de la consigne ;
-* l'agent consomme moins que le modèle (1743 W contre 2005 W).  
+* l'agent consomme moins que le modèle (1743 W contre 2005 W dans ce cas particulier).  
 
 
 ### Deuxième étape : prise en compte de l'occupation
