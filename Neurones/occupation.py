@@ -53,8 +53,7 @@ class Env(Environnement):
                 # on chauffe en fonction du tof
                 tof = int(datas[i-1,4])
                 # print("tof: {}, i: {}".format(tof, i))
-                Qc = np.ones(tof)*max_power
-                Tint_sim = self.getR1C1variant(datas, i, Qc, tof)
+                Tint_sim = self.getR1C1variant(datas, i, pos, tof)
                 if Tint_sim[-1] < Tc - hh:
                     datas[i,0] = max_power
 

@@ -186,14 +186,17 @@ class Environnement:
         #print("Text shape : {}, Qc shape : {}".format(_Text.shape[0], _Qc.shape[0]))
         return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
 
-    def getR1C1variant(self, datas, index, Qc, tof):
+    def getR1C1variant(self, datas, index, pos, tof):
         """
         calcul de température par convolution
         utilisé dans le modèle avec occupation
         """
-        Text = datas[index-1:index-1+tof, 1]
+        Qc = np.ones(tof)*max_power
+        # datas[0,1] correspond à Text[pos] / datas[1,1] correspond à Text[pos+1]
+        # index varie de 1 à datas.shape[0]-1
+        Text = self._Text[pos+index-1:pos+index-1+tof]
         Tint = datas[index-1, 2]
-        #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
+        print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
         return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
     def play(self, datas):
@@ -304,7 +307,7 @@ class Training:
     def play(self, ts=None):
         """
         """
-        pos, tsvrai = self._env.setStart()
+        pos, tsvrai = self._env.setStart(1608928315)
         xr = self._env.xr(tsvrai)
         adatas = self._env.buildEnv(pos)
         wsize = adatas.shape[0]
