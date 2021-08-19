@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 900
+MAX_EPISODES = 200
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -183,6 +183,7 @@ class Environnement:
         """
         _Qc = datas[index-1:index+1,0]
         _Text = datas[index-1:index+1,1]
+        #print("Text shape : {}, Qc shape : {}".format(_Text.shape[0], _Qc.shape[0]))
         return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
 
     def getR1C1variant(self, datas, index, Qc, tof):
@@ -192,6 +193,7 @@ class Environnement:
         """
         Text = datas[index-1:index-1+tof, 1]
         Tint = datas[index-1, 2]
+        #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
         return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
     def play(self, datas):
