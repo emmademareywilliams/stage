@@ -4,7 +4,7 @@ On peut modéliser simplement un bâtiment via un modèle RC : selon cette analo
 
 ![modélisation RC](images/RCmodel.svg "modélisation RC bâtiment")
 
-Si on prodcède à une loi des mailles / loi des noeuds, on aboutit à l'équation différentielle suivante qui régit le comportement dynamique du bâtiment :  
+Si on procède à une loi des mailles / loi des noeuds, on aboutit à l'équation différentielle suivante qui régit le comportement dynamique du bâtiment :  
 
 ![solution équa diff](images/equadiff_solution.png "solution équation diff")
 
