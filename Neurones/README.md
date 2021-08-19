@@ -50,6 +50,10 @@ L'algorithme précédant nous a permis d'obtenir un comportement d'hystérésis 
 
 Désormais, notre objectif est de maintenir la température dans la zone de confort *seulement lorsque le bâtiment est occupé*. Dans le cas contraire, pendant le weekend notamment, aucune consigne de température n'est appliquée. 
 
-Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
+Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** (en pointillés rouges sur la figure ci-dessous) et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
 
 Le code correspondant à ce comportement est contenu dans le fichier `occupation.py`. 
+
+Après avoir entraîné le réseau sur 200 épisodes, on obtient le résultat suivant : 
+
+![avec occupation](imagesHystNOcc/comportement_200ep.png)
