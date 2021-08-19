@@ -26,8 +26,9 @@ interval = 3600
 
 # nombre d'intervalles sur lequel la simulation sera menée
 # 60 correspond à un weekend
-wsize = 1 + 60*3600//interval
-#wsize = 1 + 8*24*3600//interval
+#wsize = 1 + 60*3600//interval
+# pour visualiser l'influence de l'occupation :
+wsize = 1 + 8*24*3600//interval
 
 # nombre d'actions possibles  : 2 = on chauffe ou pas
 numAct = 2
@@ -38,7 +39,7 @@ inputs_size = 2
 # cas 2 : on fournit au réseau Text[i-1], Tint[i-1], Tc*occupation[i-1], tof[i-1]
 # Tc est la température de consigne
 # tof représente le nombre d'intervalles d'içi le changement d'occupation
-#inputs_size = 4
+inputs_size = 4
 
 
 class Env(Environnement):
