@@ -35,6 +35,14 @@ On obtient la courbe caractéristique suivante :
 
 L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresis.py`.
 
+Après avoir entraîné l'agent sur 500 épisodes, on obtient ce type de comportement (l'agent est en noir) :
+
+![hysteresis 500 ep](imagesHysteresis/comportement_newCode_16_08_2.png)
+
+On note que l'on obtient bien le comportement souhaité, c'est-à-dire que la température intérieure reste constamment dans la zone de confort. L'agent est même plus efficient que le modèle car :
+* la température ne quitte jamais la zone de confort (à part pour le point initial de température, qui a été généré aléatoirement) et oscille beaucoup moins autour de la consigne ;
+* l'agent consomme moins que le modèle (1743 W contre 2005 W).  
+
 
 ### Deuxième étape : prise en compte de l'occupation
 
