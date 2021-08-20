@@ -52,8 +52,22 @@ Désormais, notre objectif est de maintenir la température dans la zone de conf
 
 Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** (en pointillés rouges sur la figure ci-dessous) et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
 
-Le code correspondant à ce comportement est contenu dans le fichier `occupation.py`. 
+Le code correspondant à ce comportement est contenu dans le fichier `occupation.py`. Une autre version de ce fichier, nommée `occupationb.py`, permet de lancer des tests plusieurs fois d'affilée sur des réseaux de neurones différents. 
+
+> Attention à la CPU si on lance plusieurs entraînements à la suite ! En effet, si le processeur n'a pas le temps de vider la mémoire vive avant de commencer un nouvel entraînement, la machine va planter. 
+
 
 Après avoir entraîné le réseau sur 200 épisodes, on obtient le résultat suivant : 
 
 ![avec occupation](imagesHystNOcc/comportement_200ep.png)
+
+
+**Observations sur les résultats obtenus :**
+On obtient des résultats assez disparates sur les différents entraînements réalisés. Chaque réseau qui résulte de ces entraînements présente l'un des comportements suivants : 
+* la température reste dans la zone de confort, quelle que soit l'occupation du bâtiment ; 
+* en période de non occupation, l'agent chauffe plus et la température est au dessus de la zone de confort ; 
+* pour des réseaux moins entraînés, on se rapproche du comportement voulu (baisse de tempérture en non occupation).
+
+En conclusion, la fonction *reward* implémentée ne convient pas aux objectifs recherchés. On tachera dorénavant de développer un nouveau système de récompense prenant en compte à la fois la température ET la consommation. 
+
+
