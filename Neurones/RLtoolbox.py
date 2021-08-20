@@ -307,7 +307,7 @@ class Training:
     def play(self, ts=None):
         """
         """
-        pos, tsvrai = self._env.setStart(1608928315)
+        pos, tsvrai = self._env.setStart()
         xr = self._env.xr(tsvrai)
         adatas = self._env.buildEnv(pos)
         wsize = adatas.shape[0]

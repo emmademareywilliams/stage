@@ -78,7 +78,7 @@ class HystNOcc(Training):
         la récompense correspondant à un comportement hysteresys avec occupation
         reprend le mode C du code initial
         """
-        if datas[i,3] == 0 and datas[i,2] <= Tc-hh:
+        if datas[i,3] == 0 and datas[i,2] <= Tc+hh:
             # le bâtiment n'est pas occupé ET la température est hors de la zone de confort
             reward = - abs(datas[i,2]-Tc)/(datas[i,4]+1)
         else:
