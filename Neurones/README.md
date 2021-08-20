@@ -63,6 +63,7 @@ Après avoir entraîné le réseau sur 200 épisodes, on obtient le résultat su
 
 
 **Observations sur les résultats obtenus :**
+
 On obtient des résultats assez disparates sur les différents entraînements réalisés. Chaque réseau qui résulte de ces entraînements présente l'un des comportements suivants : 
 * la température reste dans la zone de confort, quelle que soit l'occupation du bâtiment ; 
 * en période de non occupation, l'agent chauffe plus et la température est au dessus de la zone de confort ; 
