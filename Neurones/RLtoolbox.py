@@ -15,6 +15,7 @@ MEMORY_SIZE = 50000
 
 MAX_EPS = 1
 MIN_EPS = 0.01
+
 # decay parameter
 # c'est lui qui détermine la part d'aléatoire dans l'entrainement
 # c'est-à-dire qui met le curseur entre exploration (aléatoire) et exploitation (utilisation du réseau)
@@ -23,8 +24,11 @@ MIN_EPS = 0.01
 # on l'appelle aussi eligibility trace decay quant on fait du TD(lambda) ce qui n'est pas le cas içi
 # TD = temporal difference
 # içi on fait du TD simple, celui mis au point par Chris Watkins
+#   * grande valeur de LAMBDA <--> on privilégie l'exploitation
+#   * petite valeur de LAMBDA <--> on privilégie l'exploration 
 LAMBDA = 0.001
 LAMBDA = 0.0005
+
 # discount parameter
 # plus cette valeur est petite, moins on tient compte des récompenses différées
 # = on donne plus d'importance aux récompenses immédiates
