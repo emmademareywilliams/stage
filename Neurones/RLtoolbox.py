@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 900
+MAX_EPISODES = 400
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -25,7 +25,7 @@ MIN_EPS = 0.01
 # TD = temporal difference
 # içi on fait du TD simple, celui mis au point par Chris Watkins
 #   * grande valeur de LAMBDA <--> on privilégie l'exploitation
-#   * petite valeur de LAMBDA <--> on privilégie l'exploration 
+#   * petite valeur de LAMBDA <--> on privilégie l'exploration
 LAMBDA = 0.001
 LAMBDA = 0.0005
 
