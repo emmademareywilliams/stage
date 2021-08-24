@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-training an agent recreating the behavior of a hysteresis controller
+entrainement only
 """
 
-from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, simplePathCompleter, Tc, hh, max_power
+from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, Tc, hh, max_power
 import readline
 import os
 from dataengines import PyFina, getMeta
@@ -30,37 +30,6 @@ numAct = 2
 
 # nombre de paramètres à fournir au réseau pour prédire l'action à exécuter à l'étape i
 inputs_size = 4
-
-
-class Env(Environnement):
-    def play(self, datas, pos):
-        """
-        fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
-        """
-        for i in range(1,datas.shape[0]):
-            if datas[i-1,3] == 0 :
-                # pas d'occupation
-                # on chauffe en fonction du tof
-                tof = int(datas[i-1,4])
-                # print("tof: {}, i: {}".format(tof, i))
-                Tint_sim = self.getR1C1variant(datas, i, pos, tof)
-                if Tint_sim[-1] < Tc - hh:
-                    datas[i,0] = max_power
-
-            else:
-                # en occupation
-                # hystérésis classique
-                if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
-                    action = datas[i-1,2] <= Tc
-                    datas[i,0] = action * max_power
-                else:
-                    # on est dans la fenêtre > on ne change rien :-)
-                    datas[i,0] = datas[i-1,0]
-            datas[i,2] = self.getR1C1(datas, i)
-
-        # on vérifie si on a chauffé ou pas
-        #heating =  np.sum(datas[index:,0]) > 0
-        return datas
 
 class HystNOcc(Training):
     def reward(self, datas, i):
@@ -100,7 +69,7 @@ if __name__ == "__main__":
 
     agenda = basicAgenda(npoints,interval, _tss,-1,-1,schedule=schedule)
 
-    env = Env(Text, agenda, _tss, _tse, interval, wsize)
+    env = Environnement(Text, agenda, _tss, _tse, interval, wsize)
 
     name = "RL.h5"
     agent = initializeNN(inputs_size, numAct, name)
