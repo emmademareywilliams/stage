@@ -1,10 +1,10 @@
 #!/bin/bash
 # lance plusieurs entrainements successifs
 
-for i in `seq 0 1 2 3 4 5`;
+for i in 1 2;
 do
     echo "simulation $i"
-    ./occupation.py
+    python3 occupationb.py
 done
 mkdir assets
 mv *.png assets/
