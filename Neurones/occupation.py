@@ -158,6 +158,8 @@ if __name__ == "__main__":
 
     env = Env(Text, agenda, _tss, _tse, interval, wsize)
     sandbox = HystNOcc(name, mode, env, agent)
+    #sandbox.play(1589644200)
+    #sandbox.play(1608928315)
     sandbox.run()
     sandbox.close()
     plt.close()

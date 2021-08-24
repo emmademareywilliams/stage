@@ -192,8 +192,7 @@ class Environnement:
         utilisé dans le modèle avec occupation
         """
         Qc = np.ones(tof)*max_power
-        # datas[0,1] correspond à Text[pos] / datas[1,1] correspond à Text[pos+1]
-        # index varie de 1 à datas.shape[0]-1
+        # datas[i,1] correspond à Text[i+pos]
         Text = self._Text[pos+index-1:pos+index-1+tof]
         Tint = datas[index-1, 2]
         #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
@@ -307,7 +306,7 @@ class Training:
     def play(self, ts=None):
         """
         """
-        pos, tsvrai = self._env.setStart()
+        pos, tsvrai = self._env.setStart(ts)
         xr = self._env.xr(tsvrai)
         adatas = self._env.buildEnv(pos)
         wsize = adatas.shape[0]
