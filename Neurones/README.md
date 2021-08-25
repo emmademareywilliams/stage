@@ -72,3 +72,14 @@ On obtient des résultats assez disparates sur les différents entraînements r�
 En conclusion, la fonction *reward* implémentée ne convient pas aux objectifs recherchés. On tachera dorénavant de développer un nouveau système de récompense prenant en compte à la fois la température ET la consommation. 
 
 
+### Troisième étape : recherche de la fonction *reward* optimale
+
+Commu vu précédement, la fonction *reward* héritée du premier code n'aboutit pas à des résultats satisfaisants. Pour implémenter une nouvelle fonction qui réponde à nos objectifs, les pistes suivantes pourront être explorées :
+* à partir de la récompense d'une hystérésis classique, pénaliser l'agent si celui-ci chauffe en période de non occupation ;
+* prendre en compte à la fois la température de consigne et la consommation, avec un système de poids ;
+* jouer sur les différents paramètres du Q-learning (comme *gamma*, qui joue sur la prise en compte des récompenses différées, ou bien *lambda*, qui traduit l'équilibrage entre exploration et exploitation) ;
+* ...
+
+
+> On pourra également s'intéresser à l'**Inverse Reinforcement Learning**, dont le but est de déterminer la fonction *reward* en se basant sur le comportement d'un "expert" (dans notre cas, le modèle qui réalise parfaitement l'hystérésis et l'arrêt de la chauffe en période de non occupation). 
+
