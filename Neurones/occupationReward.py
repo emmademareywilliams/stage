@@ -75,24 +75,13 @@ class Env(Environnement):
 class HystNOcc(Training):
     def reward(self, datas, i):
         """
-        la récompense correspondant à un comportement hysteresys avec occupation
-        reprend le mode C du code initial
+        on part de la récompense d'un hystérésis classique
+        on pénalise si on chauffe quand le bâtiment n'est pas occupé 
         """
-        reward = 0
+        reward = - abs( datas[i,2] - Tc )
         if datas[i,3] == 0:
-            # bâtiment non occupé
             if datas[i,0] != 0:
-                # l'agent est en train de chauffer donc on pénalise
-                reward = -1
-            elif datas[i,0] == 0:
-                # l'agent ne chauffe pas pendant le weekend, on ne fait rien
-                pass
-        elif datas[i,3] != 0 and datas[i-1,3] == 0:
-            # à l'ouverture du bâtiment, on applique une pénalité en fonction de la température intérieure :
-            if Tc-hh < datas[i,2] < Tc:
-                reward = 100
-            elif datas[i,2] <= Tc-hh:
-                reward = -100
+                reward -= datas[i,4] / 10
         return reward
 
 
