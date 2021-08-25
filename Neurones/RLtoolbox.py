@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 800
+MAX_EPISODES = 400
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -32,7 +32,7 @@ LAMBDA = 0.0005
 # discount parameter
 # plus cette valeur est petite, moins on tient compte des récompenses différées
 # = on donne plus d'importance aux récompenses immédiates
-GAMMA = 0.9
+GAMMA = 0.8
 #GAMMA = 0.05
 
 Cw = 1162.5 #Wh/m3/K
