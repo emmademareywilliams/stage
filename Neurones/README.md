@@ -106,4 +106,10 @@ On aboutit au résultat suivant en terme d'évolution de la récompense, et pour
 L'agent se comporte comme il le doit, c'est-à-dire qu'il procède à un hystérésis et arrête de chauffer en période de non occupation. Le seul bémol est que la consommation de l'agent reste supérieure à celle du modèle. 
 
 
+**Influence du paramètre gamma :**
 
+Il est intéressant d'observer quelle est l'influence du paramètre gamma sur la qualité de la politique de l'agent. Pour ce faire, en utilisant la fonction *reward* décrite ci-dessus et toutes choses égales par ailleurs, on fait varier gamma (à chaque fois sur une durée de 400 épisodes). 
+* Pour gamma = 0.5, on n'a pas de convergence au niveau de la récompense, et le comportement de l'agent n'est pas du tout ce que l'on veut ;
+* Pour gamma = 0.8, on ne peut pas vraiment parler de convergence de la récompense ; néanmoins, le comportement de l'agent est satisfaisant (on constate qu'il suit de près ou de loin le modèle). 
+
+![gamma = 0.8](imagesTestReward/comportement_gamma_0_8.png)
