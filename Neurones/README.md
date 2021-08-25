@@ -83,3 +83,27 @@ Commu vu précédement, la fonction *reward* héritée du premier code n'aboutit
 
 > On pourra également s'intéresser à l'**Inverse Reinforcement Learning**, dont le but est de déterminer la fonction *reward* en se basant sur le comportement d'un "expert" (dans notre cas, le modèle qui réalise parfaitement l'hystérésis et l'arrêt de la chauffe en période de non occupation). 
 
+
+**Fonction *reward* satisfaisante :**
+
+```
+def reward(self, datas, i):
+  reward = -abs(datas[i, 2] - Tc)
+  if datas[i, 3] == 0:
+    if datas[i, 0] !=0:
+      reward -= datas[i, 4] /10
+  return reward 
+```
+
+La fonction implémentée fonctionne comme suit :
+* la récompense (ou plutôt le malus) de base est celui utilisé dans le cas de l'hystérésis classique ; 
+* dans le cas d'une période de non occupation, l'agent est pénalisé si et seulement s'il est en train de chauffer. Dans ce cas, la valeur de la pénalité correspond au *time of flight* (distance à la cible occupation) divisé par 10 (car sinon les valeurs de pénalité sont beaucoup trop importantes et il n'y a pas convergence). 
+
+On aboutit au résultat suivant en terme d'évolution de la récompense, et pour un gamma de 0.9 : 
+
+![reward qui marche](imagesTestReward/reward25_08_800ep.png)
+
+L'agent se comporte comme il le doit, c'est-à-dire qu'il procède à un hystérésis et arrête de chauffer en période de non occupation. Le seul bémol est que la consommation de l'agent reste supérieure à celle du modèle. 
+
+
+
