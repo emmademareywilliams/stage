@@ -17,6 +17,8 @@ from models import R1C1sim
 circuit = {"name":"Nord", "Text":100, "Tint":4}
 
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
+# cas d'un long weekend férié (4 jours) :
+# schedule = np.array([ [7,17], [7,17], [7,17], [-1,-1], [-1,-1], [-1,-1], [-1,-1] ])
 
 dir = "/var/opt/emoncms/phpfina"
 
@@ -26,9 +28,11 @@ interval = 3600
 
 # nombre d'intervalles sur lequel la simulation sera menée
 # 60 correspond à un weekend
-#wsize = 1 + 60*3600//interval
+wsize = 1 + 60*3600//interval
 # pour visualiser l'influence de l'occupation :
 wsize = 1 + 8*24*3600//interval
+# si on veut observer l'agent sur une période plus longue :
+# wsize = 1 + 10*24*3600//interval
 
 # nombre d'actions possibles  : 2 = on chauffe ou pas
 numAct = 2
@@ -78,10 +82,10 @@ class HystNOcc(Training):
         on part de la récompense d'un hystérésis classique
         on pénalise si on chauffe quand le bâtiment n'est pas occupé
         """
-        reward = - abs( datas[i,2] - Tc ) / datas[i,4]
+        reward = - abs( datas[i,2] - Tc )
         if datas[i,3] == 0:
             if datas[i,0] != 0:
-                reward -= datas[i,4] / 15
+                reward -= datas[i,4] / 5
         return reward
 
 
