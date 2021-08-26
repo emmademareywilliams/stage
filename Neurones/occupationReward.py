@@ -76,12 +76,12 @@ class HystNOcc(Training):
     def reward(self, datas, i):
         """
         on part de la récompense d'un hystérésis classique
-        on pénalise si on chauffe quand le bâtiment n'est pas occupé 
+        on pénalise si on chauffe quand le bâtiment n'est pas occupé
         """
-        reward = - abs( datas[i,2] - Tc )
+        reward = - abs( datas[i,2] - Tc ) / datas[i,4]
         if datas[i,3] == 0:
             if datas[i,0] != 0:
-                reward -= datas[i,4] / 10
+                reward -= datas[i,4] / 15
         return reward
 
 

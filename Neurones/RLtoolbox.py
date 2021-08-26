@@ -32,7 +32,7 @@ LAMBDA = 0.0005
 # discount parameter
 # plus cette valeur est petite, moins on tient compte des récompenses différées
 # = on donne plus d'importance aux récompenses immédiates
-GAMMA = 0.8
+GAMMA = 0.9
 #GAMMA = 0.05
 
 Cw = 1162.5 #Wh/m3/K
