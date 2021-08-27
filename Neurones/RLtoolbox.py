@@ -49,6 +49,10 @@ Tc = 20
 R = 3.08814171e-04
 C = 8.63446560e+08
 
+# autre test de robustesse sur les valeurs de R et de C :
+R = 3.42506838e-04
+C = 1.06209090e+09
+
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
 
