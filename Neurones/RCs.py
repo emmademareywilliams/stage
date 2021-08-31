@@ -16,7 +16,18 @@ import copy
 import math
 import sys
 from models import R1C1variant, R1C1sim
+from dataengines import PyFina, getMeta
+from planning import tsToHuman, basicAgenda
+from models import R1C1sim
 
+exit = False
+
+circuit = {"name":"Nord", "Text":100, "Tint":4}
+schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
+interval = 3600
+dir = "/var/opt/emoncms/phpfina"
+
+wsize = 1 + 8*24*3600//interval
 
 Cw = 1162.5 #Wh/m3/K
 # flow_rate en m3/h
@@ -27,7 +38,6 @@ max_power = flow_rate * Cw * 15
 # confort temperature set point
 Tc = 20
 
-
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
 
@@ -35,8 +45,8 @@ hh = 1
 # dictionnaire des différentes valeurs (R,C) :
 RCvalues = [(3.08814171e-04, 8.63446560e+08), (3.42506838e-04, 1.06209090e+09)]
 # pour le moment, on prendra les valeurs suivantes pour voi si la structure du code fonctionne :
-R = RCvalues[0][0]
-C = RCvalues[0][1]
+# R = RCvalues[0][0]
+# C = RCvalues[0][1]
 
 
 class Environnement:
@@ -123,7 +133,7 @@ class Environnement:
         Tint = datas[index-1, 2]
         return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
-    def play(self, datas):
+    def play(self, datas, pos):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
         retourne le tenseur de données sources complété par le scénario de chauffage et la température intérieure simulée
@@ -162,9 +172,17 @@ def playRC(env, ts=None):
     xr = env.xr(tsvrai)
     adatas = env.buildEnv(pos)
     wsize = adatas.shape[0]
+    RCdatas = []
+    RCconso = []
 
-    mdatas = env.play(copy.deepcopy(adatas), pos)
-    mConso = int(np.sum(mdatas[1:,0]) / 1000)
+    for i in range(len(RCvalues)):
+        R = RCvalues[i][0]
+        C = RCvalues[i][1]
+        print("R : {} // C : {}".format(R,C))
+        mdatas = env.play(copy.deepcopy(adatas), pos)
+        mConso = int(np.sum(mdatas[1:,0]) / 1000)
+        RCdatas.append(mdatas)
+        RCconso.append(mconso)
 
 
     # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
@@ -177,12 +195,14 @@ def playRC(env, ts=None):
     plt.title(title)
     ax1.add_patch(zoneconfort)
     plt.ylabel("Temp. intérieure °C")
-    plt.plot(xr, mdatas[:,2], color="orange", label="TintMod")
+    plt.plot(xr, RCdatas[0][:,2], color="orange", label="TintMod")
     plt.legend(loc='upper left')
 
     ax2 = ax1.twinx()
-    plt.ylabel("Temp. extérieure °C")
-    plt.plot(xr, mdatas[:,1], color="blue", label="Text")
+    #plt.ylabel("Temp. extérieure °C")
+    #plt.plot(xr, mdatas[:,1], color="blue", label="Text")
+    plt.ylabel("Temp. intérieure °C")
+    plt.plot(xr, RCdatas[1][:,2], color="orange", label="TintMod")
     plt.legend(loc='upper right')
 
 
@@ -192,7 +212,7 @@ def playRC(env, ts=None):
     plt.legend(loc='upper left')
     ax4 = ax3.twinx()
     plt.ylabel("nb intervalles > cgt occ.")
-    plt.plot(xr, mdatas[:,4],'o', markersize=1, color="red")
+    plt.plot(xr, RCdatas[0][:,4],'o', markersize=1, color="red")
 
     plt.show()
 
@@ -214,9 +234,8 @@ def run(env):
     signal.signal(signal.SIGTERM, _sigint_handler)
 
     # Until asked to stop
-    while not exit:
-        playRC(env)
-        time.sleep(0.1)
+    playRC(env)
+    plt.close()
 
 def close():
     """
@@ -228,7 +247,7 @@ def close():
 
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
     meta = getMeta(circuit["Tint"],dir)
 
@@ -271,7 +290,7 @@ if __name__=="__main__":
     plt.legend()
     plt.show()
 
-    env = Env(Text, agenda, _tss, _tse, interval, wsize)
+    env = Environnement(Text, agenda, _tss, _tse, interval, wsize)
     #sandbox = HystNOcc(name, mode, env, agent)
     #sandbox.play(1589644200)
     #sandbox.play(1608928315)
