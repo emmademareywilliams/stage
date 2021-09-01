@@ -46,8 +46,8 @@ hh = 1
 
 
 # dictionnaire des différentes valeurs (R,C) :
-Rvalues = [3.08814171e-04, 3.08814171e-05, 3.08814171e-03]
-Cvalues = [8.63446560e+08, 8.63446560e+07, 8.63446560e+09]
+Rvalues = [3.08814171e-04, 2.99e-4, 1.38e-5, 3.43e-4]
+Cvalues = [8.63446560e+08, 7.57e+8, 1.08e+11, 1.06e+9]
 # pour le moment, on prendra les valeurs suivantes pour voi si la structure du code fonctionne :
 # R = RCvalues[0][0]
 # C = RCvalues[0][1]
@@ -182,9 +182,9 @@ def playRC(env, mode, ts=None):
     mode R --> on fait varier la valeur de R
     """
     if mode == 'R':
-        C = Cvalues[0]
         for i in range(len(Rvalues)):
             R = Rvalues[i]
+            C = Cvalues[i]
             mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
             mConso = int(np.sum(mdatas[1:,0]) / 1000)
             RCdatas.append(mdatas)
@@ -195,16 +195,15 @@ def playRC(env, mode, ts=None):
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
 
         title = "timestamp {} {}".format(tsvrai, tsToHuman(tsvrai))
-        title = "Pour C constant : C = {}".format(C)
+        #title = "Pour C constant : C = {}".format(C)
 
         ax1 = plt.subplot(211)
         plt.title(title)
         ax1.add_patch(zoneconfort)
         plt.ylabel("Temp. intérieure °C")
-        plt.plot(xr, RCdatas[0][:,2], color='orange', label="R : {}".format(Rvalues[0]))
-        plt.plot(xr, RCdatas[1][:,2], color="blue", label="R : {}".format(Rvalues[1]))
-        plt.plot(xr, RCdatas[2][:,2], color="red", label="R : {}".format(Rvalues[2]))
-        plt.legend(loc='lower right')
+        for i in range(len(Rvalues)):
+            plt.plot(xr, RCdatas[i][:,2], label="R : {} // C : {}".format(Rvalues[i], Cvalues[i]))
+        plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc='lower left', mode='expand', ncol=2)
 
 
     """
