@@ -46,7 +46,7 @@ inputs_size = 2
 inputs_size = 4
 
 #facteur de pondération entre température et énergie (utilisé dans rewardBis) :
-k = 0.5
+k = 0.3
 
 
 class Env(Environnement):
