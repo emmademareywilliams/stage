@@ -22,6 +22,9 @@ from models import R1C1sim
 
 exit = False
 
+mode = 'R'
+#mode = 'C'
+
 circuit = {"name":"Nord", "Text":100, "Tint":4}
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 interval = 3600
@@ -43,7 +46,8 @@ hh = 1
 
 
 # dictionnaire des différentes valeurs (R,C) :
-RCvalues = [(3.08814171e-04, 8.63446560e+08), (3.42506838e-04, 1.06209090e+09)]
+Rvalues = [3.08814171e-04, 3.08814171e-05, 3.08814171e-03]
+Cvalues = [8.63446560e+08, 8.63446560e+07, 8.63446560e+09]
 # pour le moment, on prendra les valeurs suivantes pour voi si la structure du code fonctionne :
 # R = RCvalues[0][0]
 # C = RCvalues[0][1]
@@ -114,7 +118,7 @@ class Environnement:
         """
         return np.arange(tsvrai, tsvrai+self._wsize*self._interval, self._interval)
 
-    def getR1C1(self, datas, index):
+    def getR1C1(self, datas, index, R, C):
         """
         calcule la température intérieure à l'index selon un modèle R1C1
         """
@@ -122,7 +126,7 @@ class Environnement:
         _Text = datas[index-1:index+1,1]
         return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
 
-    def getR1C1variant(self, datas, index, pos, tof):
+    def getR1C1variant(self, datas, index, pos, tof, R, C):
         """
         calcul de température par convolution
         utilisé dans le modèle avec occupation
@@ -133,7 +137,7 @@ class Environnement:
         Tint = datas[index-1, 2]
         return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
-    def play(self, datas, pos):
+    def play(self, datas, pos, R, C):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
         retourne le tenseur de données sources complété par le scénario de chauffage et la température intérieure simulée
@@ -144,7 +148,7 @@ class Environnement:
                 # on chauffe en fonction du tof
                 tof = int(datas[i-1,4])
                 # print("tof: {}, i: {}".format(tof, i))
-                Tint_sim = self.getR1C1variant(datas, i, pos, tof)
+                Tint_sim = self.getR1C1variant(datas, i, pos, tof, R, C)
                 if Tint_sim[-1] < Tc - hh:
                     datas[i,0] = max_power
 
@@ -157,7 +161,7 @@ class Environnement:
                 else:
                     # on est dans la fenêtre > on ne change rien :-)
                     datas[i,0] = datas[i-1,0]
-            datas[i,2] = self.getR1C1(datas, i)
+            datas[i,2] = self.getR1C1(datas, i, R, C)
 
         # on vérifie si on a chauffé ou pas
         #heating =  np.sum(datas[index:,0]) > 0
@@ -165,9 +169,8 @@ class Environnement:
 
 
 
-def playRC(env, ts=None):
-    """
-    """
+def playRC(env, mode, ts=None):
+
     pos, tsvrai = env.setStart(ts)
     xr = env.xr(tsvrai)
     adatas = env.buildEnv(pos)
@@ -175,35 +178,62 @@ def playRC(env, ts=None):
     RCdatas = []
     RCconso = []
 
-    for i in range(len(RCvalues)):
-        R = RCvalues[i][0]
-        C = RCvalues[i][1]
-        print("R : {} // C : {}".format(R,C))
-        mdatas = env.play(copy.deepcopy(adatas), pos)
-        mConso = int(np.sum(mdatas[1:,0]) / 1000)
-        RCdatas.append(mdatas)
-        RCconso.append(mconso)
+    """
+    mode R --> on fait varier la valeur de R
+    """
+    if mode == 'R':
+        C = Cvalues[0]
+        for i in range(len(Rvalues)):
+            R = Rvalues[i]
+            mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
+            mConso = int(np.sum(mdatas[1:,0]) / 1000)
+            RCdatas.append(mdatas)
+            RCconso.append(mConso)
 
 
-    # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
-    zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
+        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
+        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
 
-    title = "épisode {} {}".format(tsvrai, tsToHuman(tsvrai))
-    title = "{}\n conso Modèle {}".format(title, mConso)
+        title = "timestamp {} {}".format(tsvrai, tsToHuman(tsvrai))
+        title = "Pour C constant : C = {}".format(C)
 
-    ax1 = plt.subplot(211)
-    plt.title(title)
-    ax1.add_patch(zoneconfort)
-    plt.ylabel("Temp. intérieure °C")
-    plt.plot(xr, RCdatas[0][:,2], color="orange", label="TintMod")
-    plt.legend(loc='upper left')
+        ax1 = plt.subplot(211)
+        plt.title(title)
+        ax1.add_patch(zoneconfort)
+        plt.ylabel("Temp. intérieure °C")
+        plt.plot(xr, RCdatas[0][:,2], color='orange', label="R : {}".format(Rvalues[0]))
+        plt.plot(xr, RCdatas[1][:,2], color="blue", label="R : {}".format(Rvalues[1]))
+        plt.plot(xr, RCdatas[2][:,2], color="red", label="R : {}".format(Rvalues[2]))
+        plt.legend(loc='lower right')
 
-    ax2 = ax1.twinx()
-    #plt.ylabel("Temp. extérieure °C")
-    #plt.plot(xr, mdatas[:,1], color="blue", label="Text")
-    plt.ylabel("Temp. intérieure °C")
-    plt.plot(xr, RCdatas[1][:,2], color="orange", label="TintMod")
-    plt.legend(loc='upper right')
+
+    """
+    mode C --> on fait varier la valeur de C
+    """
+    if mode == 'C':
+        R = Rvalues[0]
+        for i in range(len(Cvalues)):
+            C = Cvalues[i]
+            mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
+            mConso = int(np.sum(mdatas[1:,0]) / 1000)
+            RCdatas.append(mdatas)
+            RCconso.append(mConso)
+
+
+        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
+        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
+
+        title = "timestamp {} {}".format(tsvrai, tsToHuman(tsvrai))
+        title = "Pour R constant : R = {}".format(C)
+
+        ax1 = plt.subplot(211)
+        plt.title(title)
+        ax1.add_patch(zoneconfort)
+        plt.ylabel("Temp. intérieure °C")
+        plt.plot(xr, RCdatas[0][:,2], color='orange', label="C : {}".format(Cvalues[0]))
+        plt.plot(xr, RCdatas[1][:,2], color="blue", label="C : {}".format(Cvalues[1]))
+        plt.plot(xr, RCdatas[2][:,2], color="red", label="C : {}".format(Cvalues[2]))
+        plt.legend(loc='lower right')
 
 
     ax3 = plt.subplot(212, sharex=ax1)
@@ -234,7 +264,7 @@ def run(env):
     signal.signal(signal.SIGTERM, _sigint_handler)
 
     # Until asked to stop
-    playRC(env)
+    playRC(env, mode)
     plt.close()
 
 def close():
@@ -280,6 +310,7 @@ if __name__ == "__main__":
 
     agenda = basicAgenda(npoints,interval, _tss,-1,-1,schedule=schedule)
 
+    """
     # affichage de la vérité terrain pour s'assurer qu'il n'y a pas de valeurs aberrantes
     plt.figure(figsize=(20, 10))
     ax1=plt.subplot(211)
@@ -289,6 +320,7 @@ if __name__ == "__main__":
     plt.plot(meta["start_time"]+Text.timescale(),agenda, label='occupation')
     plt.legend()
     plt.show()
+    """
 
     env = Environnement(Text, agenda, _tss, _tse, interval, wsize)
     #sandbox = HystNOcc(name, mode, env, agent)
