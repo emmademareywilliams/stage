@@ -112,4 +112,4 @@ Il est intéressant d'observer quelle est l'influence du paramètre gamma sur la
 * Pour gamma = 0.5, on n'a pas de convergence au niveau de la récompense, et le comportement de l'agent n'est pas du tout ce que l'on veut ;
 * Pour gamma = 0.8, on ne peut pas vraiment parler de convergence de la récompense ; néanmoins, le comportement de l'agent est satisfaisant (on constate qu'il suit de près ou de loin le modèle). 
 
-![gamma = 0.8](imagesTestReward/comportement_gamma_0_8.png)
+![gamma = 0.8](imagesTestReward/testGamma/comportement_gamma_0_8.png)
