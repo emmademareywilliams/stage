@@ -14,7 +14,7 @@ from models import R1C1sim
 
 # le circuit
 # numéro de flux sur le serveur local synchronisé avec le serveur de terrain via le module sync
-circuit = {"name":"Nord", "Text":100, "Tint":4}
+circuit = {"name":"Nord", "Text":5, "Tint":4}
 
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 # cas d'un long weekend férié (4 jours) :
@@ -107,6 +107,11 @@ class HystNOcc(Training):
 
 if __name__ == "__main__":
 
+    import tensorflow as tf
+    
+    # pour utiliser le CPU et non le GPU
+    tf.config.set_visible_devices([], 'GPU')
+
     mode = input("train/play ?")
 
     readline.set_completer_delims('\t')
@@ -122,8 +127,6 @@ if __name__ == "__main__":
     savedModel = False
     if os.path.isfile(name):
         savedModel = True
-
-    import tensorflow as tf
 
     if savedModel == True:
         agent = tf.keras.models.load_model(name)
