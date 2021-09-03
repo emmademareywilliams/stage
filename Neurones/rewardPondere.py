@@ -46,7 +46,7 @@ inputs_size = 2
 inputs_size = 4
 
 #facteur de pondération entre température et énergie (utilisé dans rewardBis) :
-k = 0.6
+k = 0
 
 
 class Env(Environnement):
@@ -80,15 +80,28 @@ class Env(Environnement):
         return datas
 
 class HystNOcc(Training):
+    """
     def reward(self, datas, i):
-        """
-        prise en compte de la température ET de l'énergie via le facteur de pondération
-        """
+        #prise en compte de la température ET de l'énergie via le facteur de pondération
         reward = 0
         if datas[i,3] != 0:
            reward = - abs( datas[i,2] - Tc )
         else:
            reward -= k*datas[i,0]/max_power
+        return reward
+    """
+
+    def reward(self, datas, i):
+        """
+        essai avec une récompense positive
+        """
+        reward = 0
+        if datas[i,3] != 0:
+            if abs( datas[i,2] - Tc ) < 1:
+                reward = 1
+
+        if datas[i,0]==0:
+            reward = k
         return reward
 
 
