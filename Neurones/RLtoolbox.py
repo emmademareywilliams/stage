@@ -311,6 +311,23 @@ class Training:
         print("signal de fermeture reçu")
         self._exit = True
 
+
+    def stats(self, datas, wsize):
+        Tocc = []
+        inc = 0
+        for i in range(1, wsize):
+            if datas[i, 3] != 0:
+                # si on est en période d'occupation
+                Tocc.append(datas[i, 2])
+                if datas[i, 2] < Tc or datas[i, 2] > Tc:
+                    # cas d'un intervalle d'inconfort
+                    inc += 1
+
+        Tocc_moy = round(np.mean(Tocc),2)
+        incHour = inc*self._env._interval //3600
+        return incHour, Tocc_moy
+
+
     def play(self, ts=None):
         """
         """
@@ -330,11 +347,15 @@ class Training:
             adatas[i,2] = self._env.getR1C1(adatas, i)
         aConso = int(np.sum(adatas[1:,0]) / 1000)
 
+        aIncHour, aTocc_moy = self.stats(adatas, wsize)
+        mIncHour, mTocc_moy = self.stats(mdatas, wsize)
+
         # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
 
         title = "épisode {} - {} {}".format(self._steps, tsvrai, tsToHuman(tsvrai))
         title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
+        title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mIncHour, aIncHour)
 
         ax1 = plt.subplot(311)
         plt.title(title)

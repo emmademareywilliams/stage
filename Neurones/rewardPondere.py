@@ -46,7 +46,9 @@ inputs_size = 2
 inputs_size = 4
 
 #facteur de pondération entre température et énergie (utilisé dans rewardBis) :
-k = 0
+k = 0.6
+# pour utiliser une récompense positive :
+# k = 0
 
 
 class Env(Environnement):
@@ -80,7 +82,7 @@ class Env(Environnement):
         return datas
 
 class HystNOcc(Training):
-    """
+
     def reward(self, datas, i):
         #prise en compte de la température ET de l'énergie via le facteur de pondération
         reward = 0
@@ -89,12 +91,10 @@ class HystNOcc(Training):
         else:
            reward -= k*datas[i,0]/max_power
         return reward
-    """
 
+    """
     def reward(self, datas, i):
-        """
-        essai avec une récompense positive
-        """
+        #essai avec une récompense positive
         reward = 0
         if datas[i,3] != 0:
             if abs( datas[i,2] - Tc ) < 1:
@@ -103,12 +103,12 @@ class HystNOcc(Training):
         if datas[i,0]==0:
             reward = k
         return reward
-
+    """
 
 if __name__ == "__main__":
 
     import tensorflow as tf
-    
+
     # pour utiliser le CPU et non le GPU
     tf.config.set_visible_devices([], 'GPU')
 
