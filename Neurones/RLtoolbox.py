@@ -319,7 +319,7 @@ class Training:
             if datas[i, 3] != 0:
                 # si on est en période d'occupation
                 Tocc.append(datas[i, 2])
-                if datas[i, 2] < Tc or datas[i, 2] > Tc:
+                if datas[i, 2] < Tc-hh or datas[i, 2] > Tc+hh:
                     # cas d'un intervalle d'inconfort
                     inc += 1
 
