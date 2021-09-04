@@ -2,3 +2,5 @@ Neurones/réseaux*
 Neurones/assets*
 Neurones/todrop
 *.pyc
+__pycache__/
+*.py[cod]
