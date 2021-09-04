@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande free
-MAX_EPISODES = 400
+MAX_EPISODES = 900
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -160,7 +160,7 @@ class Environnement:
         - axe 1 = les paramètres
         nombre de paramètres pour décrire l'environnement
         3 paramètres physiques : Qc, Text et Tint
-        dans la vraie vie, on pourrait rajouter le soleil mais le R1C1 n'en a pas besoin
+        on pourrait rajouter le soleil mais le R1C1 n'en a pas besoin
         2 paramètres organisationnels :
         - temperature de consigne * occupation - si > 0 : bâtiment occupé,
         - nombre d'intervalles d'ici le changement d 'occupation, sorte de time of flight,
@@ -298,7 +298,13 @@ class Training:
         taille de l'input
         taille de la sortie
         """
-        outlayer = self._agent.get_layer(name="output")
+        self._LNames = []
+        for layer in self._agent.layers:
+            self._LNames.append(layer.name)
+        outputName = "output"
+        if "dense_1" in self._LNames:
+            outputName = "dense_1"
+        outlayer = self._agent.get_layer(name=outputName)
         inlayer = self._agent.get_layer(name="states")
         self._outSize = outlayer.get_config()['units']
         self._inSize = inlayer.get_config()["batch_input_shape"][1]
@@ -340,7 +346,13 @@ class Training:
         mConso = int(np.sum(mdatas[1:,0]) / 1000)
 
         for i in range(1,wsize):
-            state = adatas[i-1, 1:self._inSize + 1]
+            if "dense_1" in self._LNames :
+                # on permute Tint et Text car les agents jusque début 2021 prenaient Tint en premier....
+                # on pourrait utiliser np.array([ adatas[i-1,2], adatas[i-1,1], adatas[i-1,3], adatas[i-1,4] ])
+                # mais le slicing donne un code plus lisible et plus court :-)
+                state = adatas[i-1, [2,1,3,4] ]
+            else:
+                state = adatas[i-1, 1:self._inSize + 1]
             predictionBrute = self._agent(state.reshape(1, self._inSize))
             action = np.argmax(predictionBrute)
             adatas[i,0] = action * max_power
