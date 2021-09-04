@@ -1,3 +1,14 @@
+pour lire les fichiers binaires des flux de données avec numpy, installer PyFina :
+
+```
+python3 -m pip install PyFina
+```
+ou pour upgrader :
+```
+python3 -m pip install --upgrade PyFina
+```
+
+
 # Pilotage des systèmes par un réseau neuronal
 
 On souhaite piloter les installations énergétiques (pour le moment, le chauffage) d'un bâtiment via un système d'apprentissage renforcé. 
