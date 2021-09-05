@@ -10,7 +10,7 @@ Dans ce répertoire, on pourra trouver tout ce qui a pu être effectué lors de 
 * `Neurones` : dossier contenant tout ce qui a trait à l'apprentissage renforcé et à ses différents cas d'utilisation (hystérésis classique ou couplée avec des périodes de non occupation) 
 * `Notice` : dossier contenant la majorité de la documentation générale sur le sujet du stage, notamment : 
   * la notice d'utilisation du système Themis ;
-  * une liste des lignes de commandes couramment utilisées sous Linus ; 
+  * une liste des lignes de commandes couramment utilisées sous Linux ; 
   * une présentation de certaines notions nécessaires à la compréhension de certains aspects du sujet ;
   * quelques bases du langage PHP. 
 
