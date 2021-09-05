@@ -23,6 +23,6 @@ class HystNOcc(Training):
 
 if __name__ == "__main__":
 
-    from tools import train
+    from tools import trainFromRaw
 
     trainFromRaw(circuit, HystNOcc)

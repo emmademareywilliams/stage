@@ -20,6 +20,6 @@ class Hysteresys(Training):
 
 if __name__ == "__main__":
 
-    from tools import train
+    from tools import trainFromraw
 
     trainFromRaw(circuit, Hysteresys, visualCheck=True)
