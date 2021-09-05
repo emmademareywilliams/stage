@@ -2,7 +2,7 @@
 """
 joue des épisodes
 
-- demande à l'utilisateur de charger un réseau
+- demande à l'utilisateur de charger un réseau (fonction pickName)
 - en initialise un aléatoirement si l'utilisateur ne donne pas d'indication ou un nom de fichier qui n'existe pas
 
 """
@@ -35,17 +35,14 @@ class EnvHyst(Environnement):
         return datas
 
 class EnvHystNocc(Environnement):
-    def play(self, datas, pos):
+    def play(self, datas):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1 en prenant en compte l'occupation
         """
         for i in range(1,datas.shape[0]):
             if datas[i-1,3] == 0 :
-                # pas d'occupation
-                # on chauffe en fonction du tof
-                tof = int(datas[i-1,4])
-                # print("tof: {}, i: {}".format(tof, i))
-                Tint_sim = self.getR1C1variant(datas, i, pos, tof)
+                # pas d'occupation - calcul à la cible
+                Tint_sim = self.getR1C1toTarget(datas, i)
                 if Tint_sim[-1] < Tc - hh:
                     datas[i,0] = max_power
 
@@ -60,8 +57,6 @@ class EnvHystNocc(Environnement):
                     datas[i,0] = datas[i-1,0]
             datas[i,2] = self.getR1C1(datas, i)
 
-        # on vérifie si on a chauffé ou pas
-        #heating =  np.sum(datas[index:,0]) > 0
         return datas
 
 if __name__ == "__main__":

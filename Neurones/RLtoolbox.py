@@ -133,15 +133,14 @@ class Environnement:
             #print(tsToHuman(start),tsToHuman(end))
             # on tire un timestamp avant fin mai OU après début octobre
             ts = getRandomStart(start, end, 10, 5)
-        pos = (ts - self._tss) // self._interval
-        tsvrai = self._tss + pos * self._interval
+        self._pos = (ts - self._tss) // self._interval
+        self._tsvrai = self._tss + self._pos * self._interval
 
         print("*************************************")
         print("{} - {}".format(ts,tsToHuman(ts)))
-        print("vrai={} - {}".format(tsvrai, tsToHuman(tsvrai)))
-        return pos, tsvrai
+        print("vrai={} - {}".format(self._tsvrai, tsToHuman(self._tsvrai)))
 
-    def buildEnv(self, pos):
+    def buildEnv(self):
         """
         retourne le tenseur des données de l'épisode
         - axe 0 = le temps
@@ -158,8 +157,8 @@ class Environnement:
         datas[0,0] = random.randint(0,1)*max_power
         datas[0,2] = random.randint(17,20)
         # on connait Text (vérité terrain) sur toute la longueur de l'épisode
-        datas[:,1] = self._Text[pos:pos+self._wsize]
-        occupation = self._agenda[pos:pos+self._wsize+4*24*3600//self._interval]
+        datas[:,1] = self._Text[self._pos:self._pos+self._wsize]
+        occupation = self._agenda[self._pos:self._pos+self._wsize+4*24*3600//self._interval]
         for i in range(self._wsize):
             datas[i,4] = getLevelDuration(occupation, i)
         # consigne
@@ -167,30 +166,31 @@ class Environnement:
         print("condition initiale : Qc {:.2f} Text {:.2f} Tint {:.2f}".format(datas[0,0],datas[0,1],datas[0,2]))
         return datas
 
-    def xr(self, tsvrai):
+    def xr(self):
         """
         retourne le tableau des timestamps sur l'épisode
         """
-        return np.arange(tsvrai, tsvrai+self._wsize*self._interval, self._interval)
+        return np.arange(self._tsvrai, self._tsvrai+self._wsize*self._interval, self._interval)
 
-    def getR1C1(self, datas, index):
+    def getR1C1(self, datas, i):
         """
         calcule la température intérieure à l'index selon un modèle R1C1
         """
-        _Qc = datas[index-1:index+1,0]
-        _Text = datas[index-1:index+1,1]
+        _Qc = datas[i-1:i+1,0]
+        _Text = datas[i-1:i+1,1]
         #print("Text shape : {}, Qc shape : {}".format(_Text.shape[0], _Qc.shape[0]))
-        return R1C1variant(self._interval, R, C, _Qc, _Text, datas[index-1,2])
+        return R1C1variant(self._interval, R, C, _Qc, _Text, datas[i-1,2])
 
-    def getR1C1variant(self, datas, index, pos, tof):
+    def getR1C1toTarget(self, datas, i):
         """
         calcul de température par convolution
         utilisé dans le modèle avec occupation
         """
+        tof = int(datas[i-1, 4])
         Qc = np.ones(tof)*max_power
         # datas[i,1] correspond à Text[i+pos]
-        Text = self._Text[pos+index-1:pos+index-1+tof]
-        Tint = datas[index-1, 2]
+        Text = self._Text[self._pos+i-1:self._pos+i-1+tof]
+        Tint = datas[i-1, 2]
         #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
         return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
@@ -305,10 +305,10 @@ class Training:
         self._exit = True
 
 
-    def stats(self, datas, wsize):
+    def stats(self, datas):
         Tocc = []
         inc = 0
-        for i in range(1, wsize):
+        for i in range(1, self._env._wsize):
             if datas[i, 3] != 0:
                 # si on est en période d'occupation
                 Tocc.append(datas[i, 2])
@@ -324,12 +324,12 @@ class Training:
     def play(self, ts=None):
         """
         """
-        pos, tsvrai = self._env.setStart(ts)
-        xr = self._env.xr(tsvrai)
-        adatas = self._env.buildEnv(pos)
+        self._env.setStart(ts)
+        xr = self._env.xr()
+        adatas = self._env.buildEnv()
         wsize = adatas.shape[0]
 
-        mdatas = self._env.play(copy.deepcopy(adatas), pos)
+        mdatas = self._env.play(copy.deepcopy(adatas))
         mConso = int(np.sum(mdatas[1:,0]) / 1000)
 
         for i in range(1,wsize):
@@ -346,13 +346,13 @@ class Training:
             adatas[i,2] = self._env.getR1C1(adatas, i)
         aConso = int(np.sum(adatas[1:,0]) / 1000)
 
-        aIncHour, aTocc_moy = self.stats(adatas, wsize)
-        mIncHour, mTocc_moy = self.stats(mdatas, wsize)
+        aIncHour, aTocc_moy = self.stats(adatas)
+        mIncHour, mTocc_moy = self.stats(mdatas)
 
         # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
 
-        title = "épisode {} - {} {}".format(self._steps, tsvrai, tsToHuman(tsvrai))
+        title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
         title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
         title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mIncHour, aIncHour)
 
@@ -448,9 +448,9 @@ class Training:
         """
         # quant on a un bug à un épisode, on note le timestamp
         # on force ensuite le code à rejouer cet épisode
-        # ex : pos, tsvrai = setStart(1601659940)
-        pos, tsvrai = self._env.setStart()
-        adatas = self._env.buildEnv(pos)
+        # ex : self.setStart(1601659940)
+        self._env.setStart()
+        adatas = self._env.buildEnv()
         wsize = adatas.shape[0]
 
         # l'agent joue l'épisode
