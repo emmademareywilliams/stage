@@ -5,7 +5,7 @@ reinforcement learning toolbox
 # nombre d'épisodes que l'on souhaite jouer
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
-# à surveiller via la commande free
+# à surveiller via la commande `watch -n 1 free`
 MAX_EPISODES = 900
 
 # taille d'un batch d'entrainement
