@@ -274,7 +274,6 @@ class Training:
         # initialisation de la mémoire de l'agent
         self._mem = Memory(MEMORY_SIZE)
         self._eps = MAX_EPS
-        self._episodes_ts = []
         self._rewards = []
         self._Text = []
         self._Tint = []
@@ -511,9 +510,6 @@ class Training:
         a = np.sum(rewardTab)
         print("Récompense(s) {}".format(a))
         self._rewards.append(a)
-
-        self._episodes_ts.append(tsvrai)
-
 
     def run(self):
         """
