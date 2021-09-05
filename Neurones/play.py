@@ -67,11 +67,11 @@ class EnvHystNocc(Environnement):
 if __name__ == "__main__":
 
     from tools import getTruth, pickName
-    import tensorflow as tf
 
     name, savedModel = pickName()
 
     if savedModel == True:
+        import tensorflow as tf
         agent = tf.keras.models.load_model(name)
     else :
         agent = initializeNN(circuit["inputs_size"], circuit["numAct"], name)
