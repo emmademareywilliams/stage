@@ -2,25 +2,33 @@
 outils et méthodes autour des classes de RLtoolbox
 
 version beta : work in progress
+
+circuit : dictionnaire des paramètres du circuit
+
+exemple :
+```
+import numpy as np
+schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
+circuit = {"Text":1, "dir": "/var/opt/emoncms/phpfina",
+           "schedule": schedule, "interval": 3600, "wsize": 1 + 8*24,
+           "numAct": 2, "inputs_size": 4}
+```
 """
 
-from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, Tc, hh, max_power
+from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN
 from PyFina import PyFina, getMeta
 import matplotlib.pylab as plt
 from planning import tsToHuman, basicAgenda
+
+# pour l'autocompletion en ligne de commande
+import readline
+import os
+import glob
 
 def getTruth(circuit, visualCheck):
     """
     circuit : dictionnaire des paramètres du circuit
 
-    exemple :
-    ```
-    import numpy as np
-    schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
-    circuit = {"Text":1, "dir": "/var/opt/emoncms/phpfina",
-               "schedule": schedule, "interval": 3600, "wsize": 1 + 8*24,
-               "numAct": 2, "inputs_size": 4}
-    ```
     récupère la vérité terrain :
     - température extérieure
     - agenda d'occupation
@@ -75,7 +83,7 @@ def getTruth(circuit, visualCheck):
 
     return Text, agenda, _tss, _tse
 
-def train(circuit, training, visualCheck=False):
+def trainFromRaw(circuit, training, visualCheck=False):
     """
     circuit : dictionnaire des paramètres du circuit
 
@@ -83,22 +91,46 @@ def train(circuit, training, visualCheck=False):
     """
     import tensorflow as tf
 
-    interval = circuit["interval"]
-    wsize = circuit["wsize"]
-    numAct = circuit["numAct"]
-    inputs_size = circuit["inputs_size"]
-
     # pour utiliser le CPU et non le GPU
     tf.config.set_visible_devices([], 'GPU')
 
     Text, agenda, _tss, _tse = getTruth(circuit, visualCheck)
 
-    env = Environnement(Text, agenda, _tss, _tse, interval, wsize)
+    env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"])
 
     name = "RL.h5"
-    agent = initializeNN(inputs_size, numAct, name)
-    name = saveNN(agent, name,"raw")
+    agent = initializeNN(circuit["inputs_size"], circuit["numAct"], name)
+    name = saveNN(agent, name, "raw")
     visNN(agent)
     sandbox = training(name, "train", env, agent)
     sandbox.run()
     sandbox.close()
+
+
+def simplePathCompleter(text,state):
+    """
+    tab completer pour les noms de fichiers, chemins....
+    """
+    line   = readline.get_line_buffer().split()
+
+    return [x for x in glob.glob(text+'*')][state]
+
+def pickName():
+    """
+    ask a filename to the user and check if the file exists
+    """
+    readline.set_completer_delims('\t')
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(simplePathCompleter)
+    name = input("nom du réseau ?")
+    if not name:
+        name = "RL.h5"
+
+    if ".h5" not in name:
+        name = "{}.h5".format(name)
+
+    savedModel = False
+    if os.path.isfile(name):
+        savedModel = True
+
+    return name, savedModel

@@ -25,4 +25,4 @@ if __name__ == "__main__":
 
     from tools import train
 
-    train(circuit, HystNOcc)
+    trainFromRaw(circuit, HystNOcc)

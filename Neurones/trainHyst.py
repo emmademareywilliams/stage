@@ -15,9 +15,6 @@ circuit = {"Text":1, "dir": dir, "schedule": schedule, "interval": interval, "ws
 
 class Hysteresys(Training):
     def reward(self, datas, i):
-        """
-        la récompense correspondant à un comportement hysteresys
-        """
         reward = - abs(datas[i,2] - Tc)
         return reward
 
@@ -25,4 +22,4 @@ if __name__ == "__main__":
 
     from tools import train
 
-    train(circuit, Hysteresys, visualCheck=True)
+    trainFromRaw(circuit, Hysteresys, visualCheck=True)
