@@ -51,7 +51,7 @@ On obtient la courbe caractéristique suivante :
 
 ![hysteresis](imagesHysteresis/hysteresis.png)
 
-L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier `hysteresis.py`.
+L'objectif, dans un premier temps, consiste à ce que l'agent reproduise ce comportement d'hysteresis. Le code permettant un tel fonctionnement correspond au fichier [trainHyst.py](trainHyst.py).
 
 Après avoir entraîné l'agent sur 500 épisodes, on obtient ce type de comportement (l'agent est en noir) :
 
@@ -70,7 +70,7 @@ Désormais, notre objectif est de maintenir la température dans la zone de conf
 
 Pour mettre en place un tel algorithme, on considère une nouvelle variable appelée **time of flight** (en pointillés rouges sur la figure ci-dessous) et qui correspond à la durée jusqu'à la prochaine période d'occupation. 
 
-Le code correspondant à ce comportement est contenu dans le fichier `occupation.py`. Une autre version de ce fichier, nommée `occupationb.py`, permet de lancer des tests plusieurs fois d'affilée sur des réseaux de neurones différents. 
+Le code correspondant à ce comportement est contenu dans le fichier [trainOcc.py](trainOcc.py).
 
 > Attention à la CPU si on lance plusieurs entraînements à la suite ! En effet, si le processeur n'a pas le temps de vider la mémoire vive avant de commencer un nouvel entraînement, la machine va planter. 
 
