@@ -20,7 +20,7 @@ circuit = {"Text":1, "dir": dir, "schedule": schedule, "interval": interval, "ws
 
 
 class EnvHyst(Environnement):
-    def play(self, datas, pos=None):
+    def play(self, datas):
         """
         fait jouer un contrôleur hysteresys à un modèle R1C1
         """
