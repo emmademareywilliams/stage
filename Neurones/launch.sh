@@ -4,7 +4,7 @@
 for i in 1 2;
 do
     echo "simulation $i"
-    python3 occupationb.py
+    python3 trainOcc.py
 done
 mkdir assets
 mv *.png assets/
