@@ -7,6 +7,13 @@ ou pour upgrader :
 ```
 python3 -m pip install --upgrade PyFina
 ```
+Pour nettoyer les valeurs aberrantes :
+
+```
+from PyFina import *
+dir = "/var/opt/emoncms/phpfina"
+trim(1, dir, 500)
+```
 
 
 # Pilotage des systèmes par un réseau neuronal
