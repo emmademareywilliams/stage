@@ -20,12 +20,8 @@ from dataengines import PyFina, getMeta
 from planning import tsToHuman, basicAgenda
 from models import R1C1sim
 
-exit = False
 
-mode = 'R'
-#mode = 'C'
-
-circuit = {"name":"Nord", "Text":100, "Tint":4}
+circuit = {"name":"Nord", "Text":5, "Tint":4}
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 interval = 3600
 dir = "/var/opt/emoncms/phpfina"
@@ -44,10 +40,23 @@ Tc = 20
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
 
+message = "quel circuit ?"
+cir = input(message)
+circuit["name"] = cir
 
 # dictionnaire des différentes valeurs (R,C) :
-Rvalues = [3.08814171e-04, 2.99e-4, 1.38e-5, 3.43e-4]
-Cvalues = [8.63446560e+08, 7.57e+8, 1.08e+11, 1.06e+9]
+if cir == "Cellule":
+    Rvalues = [2.59e-4]
+    Cvalues = [1.31e9]
+
+if cir == "Nord":
+    Rvalues = [2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3]
+    Cvalues = [1.89e9, 1.53e9, 1.31e9, 2.05e9]
+
+if cir == "Sud":
+    Rvalues = [9.85e-4, 1.89e-4, 1.14e-3]
+    Cvalues = [2.19e9, 2.61e8, 4.14e8]
+
 # pour le moment, on prendra les valeurs suivantes pour voi si la structure du code fonctionne :
 # R = RCvalues[0][0]
 # C = RCvalues[0][1]
@@ -169,7 +178,7 @@ class Environnement:
 
 
 
-def playRC(env, mode, ts=None):
+def playRC(env, ts=None):
 
     pos, tsvrai = env.setStart(ts)
     xr = env.xr(tsvrai)
@@ -178,61 +187,28 @@ def playRC(env, mode, ts=None):
     RCdatas = []
     RCconso = []
 
-    """
-    mode R --> on fait varier la valeur de R
-    """
-    if mode == 'R':
-        for i in range(len(Rvalues)):
-            R = Rvalues[i]
-            C = Cvalues[i]
-            mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
-            mConso = int(np.sum(mdatas[1:,0]) / 1000)
-            RCdatas.append(mdatas)
-            RCconso.append(mConso)
+    for i in range(len(Rvalues)):
+        R = Rvalues[i]
+        C = Cvalues[i]
+        mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
+        mConso = int(np.sum(mdatas[1:,0]) / 1000)
+        RCdatas.append(mdatas)
+        RCconso.append(mConso)
 
 
-        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
-        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
+    # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
+    zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
 
-        title = "timestamp {} {}".format(tsvrai, tsToHuman(tsvrai))
-        #title = "Pour C constant : C = {}".format(C)
+    title = "Circuit {} \n timestamp {} {}".format(cir, tsvrai, tsToHuman(tsvrai))
+    #title = "Pour C constant : C = {}".format(C)
 
-        ax1 = plt.subplot(211)
-        plt.title(title)
-        ax1.add_patch(zoneconfort)
-        plt.ylabel("Temp. intérieure °C")
-        for i in range(len(Rvalues)):
-            plt.plot(xr, RCdatas[i][:,2], label="R : {} // C : {}".format(Rvalues[i], Cvalues[i]))
-        plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc='lower left', mode='expand', ncol=2)
-
-
-    """
-    mode C --> on fait varier la valeur de C
-    """
-    if mode == 'C':
-        R = Rvalues[0]
-        for i in range(len(Cvalues)):
-            C = Cvalues[i]
-            mdatas = env.play(copy.deepcopy(adatas), pos, R, C)
-            mConso = int(np.sum(mdatas[1:,0]) / 1000)
-            RCdatas.append(mdatas)
-            RCconso.append(mConso)
-
-
-        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
-        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None')
-
-        title = "timestamp {} {}".format(tsvrai, tsToHuman(tsvrai))
-        title = "Pour R constant : R = {}".format(C)
-
-        ax1 = plt.subplot(211)
-        plt.title(title)
-        ax1.add_patch(zoneconfort)
-        plt.ylabel("Temp. intérieure °C")
-        plt.plot(xr, RCdatas[0][:,2], color='orange', label="C : {}".format(Cvalues[0]))
-        plt.plot(xr, RCdatas[1][:,2], color="blue", label="C : {}".format(Cvalues[1]))
-        plt.plot(xr, RCdatas[2][:,2], color="red", label="C : {}".format(Cvalues[2]))
-        plt.legend(loc='lower right')
+    ax1 = plt.subplot(211)
+    plt.title(title)
+    ax1.add_patch(zoneconfort)
+    plt.ylabel("Temp. intérieure °C")
+    for i in range(len(Rvalues)):
+        plt.plot(xr, RCdatas[i][:,2], label="R : {} // C : {}".format(Rvalues[i], Cvalues[i]))
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc='lower left', mode='expand', ncol=2)
 
 
     ax3 = plt.subplot(212, sharex=ax1)
@@ -263,7 +239,7 @@ def run(env):
     signal.signal(signal.SIGTERM, _sigint_handler)
 
     # Until asked to stop
-    playRC(env, mode)
+    playRC(env)
     plt.close()
 
 def close():
