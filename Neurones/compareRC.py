@@ -70,7 +70,7 @@ while True:
 
     xr = np.arange(ts, ts+wsize*interval, interval)
     for i in range(len(Rvalues)):
-        plt.plot(xr, RCdata[i], label="R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
+        plt.plot(RCdata[i], label="R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
 
     plt.legend(loc='lower left', ncol=2)
     plt.title(title)
