@@ -16,7 +16,7 @@ circuit = {"Text":1, "dir": "/var/opt/emoncms/phpfina",
 """
 
 from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN
-from PyFina import PyFina, getMeta
+from dataengines import PyFina, getMeta
 import matplotlib.pylab as plt
 from planning import tsToHuman, basicAgenda
 

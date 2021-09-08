@@ -16,7 +16,7 @@ wsize = 1 + 8*24*3600//interval
 dir = "/var/opt/emoncms/phpfina"
 import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
-circuit = {"Text":1, "dir": dir, "schedule": schedule, "interval": interval, "wsize": wsize, "numAct": 2, "inputs_size": 4}
+circuit = {"Text":5, "dir": dir, "schedule": schedule, "interval": interval, "wsize": wsize, "numAct": 2, "inputs_size": 4}
 
 
 class EnvHyst(Environnement):

@@ -46,8 +46,18 @@ Tc = 20
 
 # le modèle qui va décrire l'évolution de la température intérieure
 # un modèle électrique équivalent de type R1C1
-R = 3.08814171e-04
-C = 8.63446560e+08
+
+# famille 1 :
+R = 2e-4
+C = 2e8
+
+#famille 2 :
+R = 3e-4
+C = 2e9
+
+#famille 3 :
+R = 1e-3
+C = 2e9
 
 # autre test de robustesse sur les valeurs de R et de C :
 #R = 3.42506838e-04
