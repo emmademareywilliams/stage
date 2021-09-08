@@ -5,7 +5,7 @@ from models import R1C1sim
 from planning import getRandomStart, tsToHuman
 from dataengines import PyFina, getMeta
 
-circuit = {"name":"Nord", "Text":5, "Tint":4}
+circuit = {"Text":5, "Tint":4}
 interval = 3600
 dir = "/var/opt/emoncms/phpfina"
 
@@ -16,9 +16,6 @@ Cw = 1162.5 #Wh/m3/K
 flow_rate = 5
 max_power = flow_rate * Cw * 15
 
-message = "quel circuit ?"
-cir = input(message)
-circuit["name"] = cir
 
 meta = getMeta(circuit["Text"],dir)
 fullLength = meta["npoints"] * meta["interval"]
@@ -33,17 +30,12 @@ Text = PyFina(circuit["Text"], dir, _tss, interval, npoints)
 T0 = 20
 
 # dictionnaire des différentes valeurs (R,C) :
-if cir == "Cellule":
-    Rvalues = [2.59e-4]
-    Cvalues = [1.31e9]
+# Rvalues[0] --> circuit cellule
+# Rvalues[1:4] --> circuit Nord
+# Rvalues[5:7] --> circuit Sud
 
-if cir == "Nord":
-    Rvalues = [2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3]
-    Cvalues = [1.89e9, 1.53e9, 1.31e9, 2.05e9]
-
-if cir == "Sud":
-    Rvalues = [9.85e-4, 1.89e-4, 1.14e-3]
-    Cvalues = [2.19e9, 2.61e8, 4.14e8]
+Rvalues = [2.59e-4, 2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3, 9.85e-4, 1.89e-4, 1.14e-3]
+Cvalues = [1.31e9, 1.89e9, 1.53e9, 1.31e9, 2.05e9, 2.19e9, 2.61e8, 4.14e8]
 
 
 message = "quel mode ? \n 1 --> chauffage constant ; 2 --> pas de chauffage \n"
@@ -52,8 +44,6 @@ if mode == "1":
     Qc = np.ones(wsize)
 else:
     Qc = np.zeros(wsize)
-
-Ok = True
 
 while True:
     ts = getRandomStart(_tss,_tse, 10, 5)
@@ -66,12 +56,20 @@ while True:
         convo = R1C1sim(interval, R, C, Qc, Text_ep, T0)
         RCdata.append(convo)
 
-    title = "Circuit {} \n timestamp {} / {}".format(cir, ts, tsToHuman(ts))
+    title = "Timestamp {} / {}".format(ts, tsToHuman(ts))
 
     xr = np.arange(ts, ts+wsize*interval, interval)
     for i in range(len(Rvalues)):
-        plt.plot(RCdata[i], label="R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
+        if i==0:
+            plt.plot(RCdata[i], label="Cellule : R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
+        if i in range(1,4):
+            plt.plot(RCdata[i], 'o', label="Nord : R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
+        if i in range(5,7):
+            plt.plot(RCdata[i], '--', label="Sud : R : {0:.2e} // C : {0:.2e}".format(Rvalues[i], Cvalues[i]))
+    plt.plot(Text_ep, '--', label="température extérieure")
 
     plt.legend(loc='lower left', ncol=2)
     plt.title(title)
+    plt.xlabel("Temps (heures)")
+    plt.ylabel("Température (°C)")
     plt.show()
