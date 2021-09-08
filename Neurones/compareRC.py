@@ -2,10 +2,13 @@
 import numpy as np
 import matplotlib.pylab as plt
 from models import R1C1sim
-from planning import getRandomStart, tsToHuman
+from planning import tsToTuple, tsToHuman
 from dataengines import PyFina, getMeta
+import signal
+import sys
+import random
 
-circuit = {"Text":5, "Tint":4}
+circuit = {"Text":1}
 interval = 3600
 dir = "/var/opt/emoncms/phpfina"
 
@@ -29,68 +32,82 @@ Text = PyFina(circuit["Text"], dir, _tss, interval, npoints)
 # valeur initiale de température pour la convolution :
 T0 = 15
 
-# dictionnaire des différentes valeurs (R,C) :
-# Rvalues[0] --> circuit cellule
-# Rvalues[1:4] --> circuit Nord
-# Rvalues[5:7] --> circuit Sud
+"""
+R représente l'isolation du bâtiment : plus la valeur de R est petite, moins il y d'isolation
+C représente l'inertie du bâtiment : plus la valeur de C est grande, plus le bâtiment a de l'inertie
 
+dictionnaire des différentes valeurs (R,C) :
+Rvalues[0] --> circuit cellule
+Rvalues[1:4] --> circuit Nord
+Rvalues[5:7] --> circuit Sud
+"""
 Rvalues = [2.59e-4, 2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3, 9.85e-4, 1.89e-4, 1.14e-3]
-Cvalues = [1.31e9, 1.89e9, 1.53e9, 1.31e9, 2.05e9, 2.19e9, 2.61e8, 4.14e8]
+Cvalues = [1.31e9,  1.89e9,  1.53e9,  1.31e9,  2.05e9,  2.19e9,  2.61e8,  4.14e8]
 
-# on distingue 3 grandes familles de couples (R,C) au niveau du comportement sans chauffage :
-Rfamily = [2e-4, 3e-4, 1e-3]
-Cfamily = [2e8, 2e9, 2e9]
+"""
+on distingue 4 grandes familles de couples (R,C)
+la famille R=2e-4 C=2e8 est une passoire parfaite, sans chauffage en hiver ou sans clim en été, on est à l'intérieur comme à l'extérieur
+la famille R=1e-1 C=2e9 est une cave parfaite
+ces 2 familles sont des caricatures pour forcer le trait et comprendre comment fonctionne l'analogie électrique
+"""
+Rfamily = [2e-4, 5e-4, 1e-3, 1e-1]
+Cfamily = [2e8,  2e9,  2e9,  2e9]
 
 
-message = "quel mode ? \n 1 --> chauffage constant ; 2 --> pas de chauffage \n"
-mode = input(message)
+season = input("quelle saison ? winter ? summer ?\n")
+
+mode = "0"
+energy = "pas de chauffage"
+if season == "winter":
+    message = "quel mode ? \n 1 --> chauffage constant ; 0 --> pas de chauffage \n"
+    mode = input(message)
+
 if mode == "1":
     Qc = np.ones(wsize)*max_power
+    energy = "chauffage permanent"
 else:
     Qc = np.zeros(wsize)*max_power
 
+def _sigint_handler(signal, frame):
+    print("fermeture")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, _sigint_handler)
+signal.signal(signal.SIGTERM, _sigint_handler)
+
+def getRandomStart(start, end, month_min, month_max, mode="winter"):
+    """
+    tire aléatoirement un timestamp dans un intervalle en faisant en sorte qu'il y ait assez de données pour la convolution
+    s'assure que le mois du timestamp convient à la saison que l'on veut étudier (hiver, été)
+    """
+    while True:
+        randomts = random.randrange(start, end - wsize * interval)
+        month = tsToTuple(randomts).tm_mon
+        if month in range(month_min, month_max) and mode=="summer":
+            break
+        if month not in range(month_min, month_max) and mode=="winter":
+            break
+    return randomts
+
 while True:
-    ts = getRandomStart(_tss,_tse, 10, 5) # comportement en hiver
-    #ts = getRandomStart(_tss, _tse, 4, 8) # comportement en été
+
+    ts = getRandomStart(_tss,_tse, 5, 10, season)
     pos = (ts - _tss) // interval
     Text_ep = Text[pos:pos+wsize]
-    """
-    RCdata = []
-    for i in range(len(Rvalues)):
-        R = Rvalues[i]
-        C = Cvalues[i]
-        convo = R1C1sim(interval, R, C, Qc, Text_ep, T0)
-        RCdata.append(convo)
-    """
-
-    RCfamily = []
-    for i in range(len(Rfamily)):
-        R = Rfamily[i]
-        C = Cfamily[i]
-        convo = R1C1sim(interval, R, C, Qc, Text_ep, T0)
-        RCfamily.append(convo)
 
     title = "Timestamp {} / {}".format(ts, tsToHuman(ts))
-
-    xr = np.arange(ts, ts+wsize*interval, interval)
-
-    """
-    for i in range(len(Rvalues)):
-        if i==0:
-            plt.plot(RCdata[i], ':', label="Cellule : R : {:.2e} // C : {:.2e}".format(Rvalues[i], Cvalues[i]))
-        if i in range(1,5):
-            plt.plot(RCdata[i], label="Nord : R : {:.2e} // C : {:.2e}".format(Rvalues[i], Cvalues[i]))
-        if i in range(5,8):
-            plt.plot(RCdata[i], '--', label="Sud : R : {:.2e} // C : {:.2e}".format(Rvalues[i], Cvalues[i]))
-    """
-
-    for i in range(len(Rfamily)):
-        plt.plot(RCfamily[i], '--', linewidth=2, label="famille {}".format(i+1))
-
-    plt.plot(Text_ep, linewidth=3, label="température extérieure")
-
-    plt.legend(loc='lower left', ncol=2)
+    title = "{}\n {}".format(title, energy)
+    plt.figure(figsize=(20, 10))
+    plt.subplot(111)
     plt.title(title)
     plt.xlabel("Temps (heures)")
     plt.ylabel("Température (°C)")
+
+    for i,R in enumerate(Rfamily):
+        C = Cfamily[i]
+        convo = R1C1sim(interval, R, C, Qc, Text_ep, T0)
+        plt.plot(convo, '--', linewidth=2, label="R={:.2e} C={:.2e}".format(R,C))
+
+    plt.plot(Text_ep, linewidth=3, label="température extérieure")
+    plt.legend(loc='upper left', ncol=2)
     plt.show()
