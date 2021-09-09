@@ -8,7 +8,7 @@ import signal
 import sys
 import random
 
-circuit = {"Text":1}
+circuit = {"Text":5}
 interval = 3600
 dir = "/var/opt/emoncms/phpfina"
 

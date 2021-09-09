@@ -36,9 +36,7 @@ GAMMA = 0.9
 #GAMMA = 0.05
 
 Cw = 1162.5 #Wh/m3/K
-# flow_rate en m3/h
-flow_rate = 5
-max_power = flow_rate * Cw * 15
+
 
 # température de consigne en °C
 # confort temperature set point
@@ -47,21 +45,10 @@ Tc = 20
 # le modèle qui va décrire l'évolution de la température intérieure
 # un modèle électrique équivalent de type R1C1
 
-# famille 1 :
-R = 2e-4
-C = 2e8
+# Les réseaux ont été entraînés sur un modèle de bâtiment avec les valeurs suivantes :
+#    R = 3.088e-04
+#    C = 8.63e+08
 
-#famille 2 :
-R = 3e-4
-C = 2e9
-
-#famille 3 :
-R = 1e-3
-C = 2e9
-
-# autre test de robustesse sur les valeurs de R et de C :
-#R = 3.42506838e-04
-#C = 1.06209090e+09
 
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
@@ -122,13 +109,17 @@ class Environnement:
     """
     stocke les données décrivant l'environnement et offre des méthodes pour le caractériser
     """
-    def __init__(self, Text, agenda, tss, tse, interval, wsize):
+    def __init__(self, Text, agenda, tss, tse, interval, wsize, R, C, flow_rate):
         self._Text = Text
         self._agenda = agenda
         self._tss = tss
         self._tse = tse
         self._interval = interval
         self._wsize = wsize
+        self._R = R
+        self._C = C
+        self._flow_rate = flow_rate
+        self._max_power = self._flow_rate * Cw * 15
 
     def setStart(self, ts=None):
         """
@@ -164,7 +155,7 @@ class Environnement:
         """
         datas=np.zeros((self._wsize, 5))
         # condition initiale aléatoire
-        datas[0,0] = random.randint(0,1)*max_power
+        datas[0,0] = random.randint(0,1)*self._max_power
         datas[0,2] = random.randint(17,20)
         # on connait Text (vérité terrain) sur toute la longueur de l'épisode
         datas[:,1] = self._Text[self._pos:self._pos+self._wsize]
@@ -189,7 +180,7 @@ class Environnement:
         _Qc = datas[i-1:i+1,0]
         _Text = datas[i-1:i+1,1]
         #print("Text shape : {}, Qc shape : {}".format(_Text.shape[0], _Qc.shape[0]))
-        return R1C1variant(self._interval, R, C, _Qc, _Text, datas[i-1,2])
+        return R1C1variant(self._interval, self._R, self._C, _Qc, _Text, datas[i-1,2])
 
     def getR1C1toTarget(self, datas, i):
         """
@@ -197,12 +188,12 @@ class Environnement:
         utilisé dans le modèle avec occupation
         """
         tof = int(datas[i-1, 4])
-        Qc = np.ones(tof)*max_power
+        Qc = np.ones(tof)*self._max_power
         # datas[i,1] correspond à Text[i+pos]
         Text = self._Text[self._pos+i-1:self._pos+i-1+tof]
         Tint = datas[i-1, 2]
         #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
-        return R1C1sim(self._interval, R, C, Qc, Text, Tint)
+        return R1C1sim(self._interval, self._R, self._C, Qc, Text, Tint)
 
     def play(self, datas):
         """
@@ -316,19 +307,13 @@ class Training:
 
 
     def stats(self, datas):
-        Tocc = []
-        inc = 0
-        for i in range(1, self._env._wsize):
-            if datas[i, 3] != 0:
-                # si on est en période d'occupation
-                Tocc.append(datas[i, 2])
-                if datas[i, 2] < Tc-hh or datas[i, 2] > Tc+hh:
-                    # cas d'un intervalle d'inconfort
-                    inc += 1
-
-        Tocc_moy = round(np.mean(Tocc),2)
-        incHour = inc*self._env._interval //3600
-        return incHour, Tocc_moy
+        w = datas[datas[:,3]!=0,2]
+        inc = w[w[:]<Tc-hh]
+        luxe = w[w[:]>Tc+hh]
+        Tocc_moy = round(np.mean(w[:]),2)
+        nbinc = inc.shape[0]
+        nbluxe = luxe.shape[0]
+        return Tocc_moy, nbinc, nbluxe
 
 
     def play(self, ts=None):
@@ -352,19 +337,19 @@ class Training:
                 state = adatas[i-1, 1:self._inSize + 1]
             predictionBrute = self._agent(state.reshape(1, self._inSize))
             action = np.argmax(predictionBrute)
-            adatas[i,0] = action * max_power
+            adatas[i,0] = action * self._env._max_power
             adatas[i,2] = self._env.getR1C1(adatas, i)
         aConso = int(np.sum(adatas[1:,0]) / 1000)
 
-        aIncHour, aTocc_moy = self.stats(adatas)
-        mIncHour, mTocc_moy = self.stats(mdatas)
+        aTocc_moy, aNbinc, aNbluxe = self.stats(adatas)
+        mTocc_moy, mNbinc, mNbluxe = self.stats(mdatas)
 
         # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
 
         title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
         title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
-        title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mIncHour, aIncHour)
+        title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mNbinc, aNbinc)
 
         ax1 = plt.subplot(311)
         plt.title(title)
@@ -482,7 +467,7 @@ class Training:
                 predictionBrute = self._agent(state.reshape(1, self._inSize))
                 action = np.argmax(predictionBrute)
             # on exécute l'action choisir et on met à jour le tenseur de données
-            adatas[i,0] = action * max_power
+            adatas[i,0] = action * self._env._max_power
             adatas[i,2] = self._env.getR1C1(adatas, i)
             nextstate = adatas[i, 1:self._inSize + 1]
             # calcul de la récompense ******************************************

@@ -7,7 +7,7 @@ joue des épisodes
 
 """
 
-from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, Tc, hh, max_power
+from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN, Tc, hh
 
 # le circuit
 interval = 3600
@@ -18,6 +18,15 @@ import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 circuit = {"Text":5, "dir": dir, "schedule": schedule, "interval": interval, "wsize": wsize, "numAct": 2, "inputs_size": 4}
 
+Rfamily = [2e-4, 5e-4, 1e-3, 1e-1]
+Cfamily = [2e8,  2e9,  2e9,  2e9]
+# à changer selon la famille (R,C) qu'on veut utiliser :
+i = 0
+R = Rfamily[i]
+C = Cfamily[i]
+
+flow_rate = 5
+
 
 class EnvHyst(Environnement):
     def play(self, datas):
@@ -27,7 +36,7 @@ class EnvHyst(Environnement):
         for i in range(1, datas.shape[0]):
             if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
                 action = datas[i-1,2] <= Tc
-                datas[i,0] = action * max_power
+                datas[i,0] = action * self._max_power
             else:
                 # on est dans la fenêtre > on ne change rien :-)
                 datas[i,0] = datas[i-1,0]
@@ -43,15 +52,16 @@ class EnvHystNocc(Environnement):
             if datas[i-1,3] == 0 :
                 # pas d'occupation - calcul à la cible
                 Tint_sim = self.getR1C1toTarget(datas, i)
+                #print("i={} target {}".format(i, Tint_sim[-1]))
                 if Tint_sim[-1] < Tc - hh:
-                    datas[i,0] = max_power
+                    datas[i,0] = self._max_power
 
             else:
                 # en occupation
                 # hystérésis classique
                 if datas[i-1,2] > Tc+hh or datas[i-1,2] < Tc-hh :
                     action = datas[i-1,2] <= Tc
-                    datas[i,0] = action * max_power
+                    datas[i,0] = action * self._max_power
                 else:
                     # on est dans la fenêtre > on ne change rien :-)
                     datas[i,0] = datas[i-1,0]
@@ -63,21 +73,27 @@ if __name__ == "__main__":
 
     from tools import getTruth, pickName
 
-    name, savedModel = pickName()
+    message = " 1 --> jouer sur les 3 réseaux paramétrés \n 2--> jouer sur un réseau au choix \n"
+    choix = input(message)
 
-    if savedModel == True:
-        import tensorflow as tf
-        agent = tf.keras.models.load_model(name)
-    else :
-        agent = initializeNN(circuit["inputs_size"], circuit["numAct"], name)
-        name = saveNN(agent, name, "raw")
+    if choix == "2":
+        name, savedModel = pickName()
 
-    visNN(agent)
+        if savedModel == True:
+            import tensorflow as tf
+            agent = tf.keras.models.load_model(name)
+        else :
+            agent = initializeNN(circuit["inputs_size"], circuit["numAct"], name)
+            name = saveNN(agent, name, "raw")
+
+        visNN(agent)
 
     Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=True)
 
-    env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize)
+    env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, R, C, flow_rate)
     sandbox = Training(name, "play", env, agent)
+    # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
+    #sandbox.play(1577269940)
     #sandbox.play(1589644200)
     #sandbox.play(1608928315)
     sandbox.run()
