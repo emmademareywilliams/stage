@@ -46,7 +46,9 @@ Cvalues = [1.31e9,  1.89e9,  1.53e9,  1.31e9,  2.05e9,  2.19e9,  2.61e8,  4.14e8
 
 """
 on distingue 4 grandes familles de couples (R,C)
-la famille R=2e-4 C=2e8 est une passoire parfaite, sans chauffage en hiver ou sans clim en été, on est à l'intérieur comme à l'extérieur
+la famille R=2e-4 C=2e8 est une passoire parfaite et la puissance de chauffage est sous-dimensionnée pour ce cas de figure
+lors des épisodes très froids et même en chauffant en permamence, Tint peine à monter et est très sensible aux variations de Text
+sans chauffage en hiver ou sans clim en été, on est à l'intérieur comme à l'extérieur
 la famille R=1e-1 C=2e9 est une cave parfaite
 ces 2 familles sont des caricatures pour forcer le trait et comprendre comment fonctionne l'analogie électrique
 """
