@@ -49,6 +49,16 @@ Tc = 20
 #    R = 3.088e-04
 #    C = 8.63e+08
 
+Rfamily = [2e-4, 5e-4, 1e-3, 1e-1]
+Cfamily = [2e8,  2e9,  2e9,  2e9]
+# à changer selon la famille (R,C) qu'on veut utiliser :
+i = 2
+R = Rfamily[i]
+C = Cfamily[i]
+
+flow_rate = 5
+max_power = flow_rate * Cw * 15
+
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
 
@@ -112,17 +122,14 @@ class Environnement:
     """
     stocke les données décrivant l'environnement et offre des méthodes pour le caractériser
     """
-    def __init__(self, Text, agenda, tss, tse, interval, wsize, R, C, flow_rate):
+    def __init__(self, Text, agenda, tss, tse, interval, wsize):
         self._Text = Text
         self._agenda = agenda
         self._tss = tss
         self._tse = tse
         self._interval = interval
         self._wsize = wsize
-        self._R = R
-        self._C = C
-        self._flow_rate = flow_rate
-        self._max_power = self._flow_rate * Cw * 15
+
 
     def setStart(self, ts=None):
         """
@@ -158,7 +165,7 @@ class Environnement:
         """
         datas=np.zeros((self._wsize, 5))
         # condition initiale aléatoire
-        datas[0,0] = random.randint(0,1)*self._max_power
+        datas[0,0] = random.randint(0,1)*max_power
         datas[0,2] = random.randint(17,20)
         # on connait Text (vérité terrain) sur toute la longueur de l'épisode
         datas[:,1] = self._Text[self._pos:self._pos+self._wsize]
@@ -176,27 +183,27 @@ class Environnement:
         """
         return np.arange(self._tsvrai, self._tsvrai+self._wsize*self._interval, self._interval)
 
-    def getR1C1(self, datas, i):
+    def getR1C1(self, datas, i, R=R, C=C, max_power=max_power):
         """
         calcule la température intérieure à l'index selon un modèle R1C1
         """
         _Qc = datas[i-1:i+1,0]
         _Text = datas[i-1:i+1,1]
         #print("Text shape : {}, Qc shape : {}".format(_Text.shape[0], _Qc.shape[0]))
-        return R1C1variant(self._interval, self._R, self._C, _Qc, _Text, datas[i-1,2])
+        return R1C1variant(self._interval, R, C, _Qc, _Text, datas[i-1,2])
 
-    def getR1C1toTarget(self, datas, i):
+    def getR1C1toTarget(self, datas, i, R=R, C=C, max_power=max_power):
         """
         calcul de température par convolution
         utilisé dans le modèle avec occupation
         """
         tof = int(datas[i-1, 4])
-        Qc = np.ones(tof)*self._max_power
+        Qc = np.ones(tof)*max_power
         # datas[i,1] correspond à Text[i+pos]
         Text = self._Text[self._pos+i-1:self._pos+i-1+tof]
         Tint = datas[i-1, 2]
         #print("variant : Text shape : {}, Qc shape : {}, tof : {}".format(Text.shape[0], Qc.shape[0], tof))
-        return R1C1sim(self._interval, self._R, self._C, Qc, Text, Tint)
+        return R1C1sim(self._interval, R, C, Qc, Text, Tint)
 
     def play(self, datas):
         """
@@ -346,7 +353,7 @@ class Training:
                 state = adatas[i-1, 1:self._inSize + 1]
             predictionBrute = self._agent(state.reshape(1, self._inSize))
             action = np.argmax(predictionBrute)
-            adatas[i,0] = action * self._env._max_power
+            adatas[i,0] = action * max_power
             adatas[i,2] = self._env.getR1C1(adatas, i)
         aConso = int(np.sum(adatas[1:,0]) / 1000)
 
@@ -481,7 +488,7 @@ class Training:
                 predictionBrute = self._agent(state.reshape(1, self._inSize))
                 action = np.argmax(predictionBrute)
             # on exécute l'action choisir et on met à jour le tenseur de données
-            adatas[i,0] = action * self._env._max_power
+            adatas[i,0] = action * max_power
             adatas[i,2] = self._env.getR1C1(adatas, i)
             nextstate = adatas[i, 1:self._inSize + 1]
             # calcul de la récompense ******************************************
@@ -561,7 +568,7 @@ class Training:
                 title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, aConsoMoy, mConsoMoy)
 
                 pct = round(100*(aConsoMoy-mConsoMoy)/mConsoMoy, 2)
-                title = "{} Pourcentage de gain agent : {} %".format(title, pct)
+                title = "{} Pourcentage de gain modèle : {} %".format(title, pct)
 
                 plt.figure(figsize=(20, 10))
                 ax1 = plt.subplot(311)
