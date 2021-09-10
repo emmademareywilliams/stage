@@ -37,10 +37,6 @@ Famille | R | C
 2 | 5e-4 | 2e9
 3 | 1e-3 | 2e9
 
-Ce qui donne en terme de comportement : 
-
-![comportements familles](familles.png) 
-
 
 On ajoutera une nouvelle paire (R, C) avec `R = 1e-1` et `C = 2e9`. Ces paramètres ne correspondent à aucune réalité physique mais permettent de visualiser un comportement extrême, de type "cave", comme sur la figure suivante : 
 
@@ -73,5 +69,10 @@ Au cours des divers tests de robustesse des agents, on obtient la figure suivant
 
 ![noel problematique](timestamp_noel.png)
 
+En période de non occupation, le modèle est en surchauffe ; a contrario, en période d'occuation, ni l'agent ni le modèle ne réussissent à atteindre la zone de confort, quand bien même ils décident de chauffer de manière presque constante. 
 
+Pour comprendre la cause de cecomportement, il faut revenir à l'interprétation physique du modèle RC : 
+* R est la résistance thermique qui correspond à l'**isolation** du bâtiment : plus R est faible, moins la résistance sera importante et plus il y aura de déperditions thermiques. C'est ce qui se passe dans le cas ci-dessus, pour lequel R = 2e-4. 
+* C est la capacité thermique qui rend compte de l'**inertie** d'une construction : plus la valeur de C est grande et plus le bâtiment a de l'inertie, c'est-à-dire moins il sera sensible aux variations extérieures de température. Au contraire, ici C = 2e8 (10 fois plus faible que les autres familles), donc la température intérieure est très sensible aux variations de la météo. 
 
+On se retrouve donc en présence d'une véritable passoire thermique, pour laquelle la puissance de chauffe est sous-dimensionnée. Sans chauffage l'hiver ou sans climatisation l'été, il n'y a aucune différence entre l'intérieur et l'extérieur (en terme de température). Il faudra revoir à la hausse la puissance de chauffage afin de palier à ce problème (via le débit dans le circuit).  
