@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande `watch -n 1 free`
-MAX_EPISODES = 900
+MAX_EPISODES = 500
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -49,9 +49,12 @@ Tc = 20
 #    R = 3.088e-04
 #    C = 8.63e+08
 
-
 # demi-intervalle (en °C) pour le contrôle hysteresys
 hh = 1
+
+# si on veut visualiser les comportements agent/modèle à chaque instance de play :
+visual = False
+
 
 import numpy as np
 import tensorflow as tf
@@ -279,6 +282,11 @@ class Training:
         self._Text = []
         self._Tint = []
         self._Tintocc = []
+        # indicateurs qualité en mode play pour tracer les graphes de stats :
+        self._ToccMoy = []
+        self._luxe = []
+        self._inconfort = []
+
 
     def getConfig(self):
         """
@@ -341,44 +349,48 @@ class Training:
             adatas[i,2] = self._env.getR1C1(adatas, i)
         aConso = int(np.sum(adatas[1:,0]) / 1000)
 
-        aTocc_moy, aNbinc, aNbluxe = self.stats(adatas)
-        mTocc_moy, mNbinc, mNbluxe = self.stats(mdatas)
+        aTocc_moy, aNbinc, aNbluxe = self.stats(adatas[1:,:])
+        mTocc_moy, mNbinc, mNbluxe = self.stats(mdatas[1:,:])
+        self._ToccMoy.append([aTocc_moy, mTocc_moy])
+        self._luxe.append([aNbluxe, mNbluxe])
+        self._inconfort.append([aNbinc, mNbinc])
 
-        # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
-        zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
+        if visual:
+            # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
+            zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
 
-        title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
-        title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
-        title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mNbinc, aNbinc)
+            title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
+            title = "{}\n conso Modèle {} conso Agent {}".format(title, mConso, aConso)
+            title = "{}\n Tocc moyenne modèle : {} agent : {} \n nb heures inconfort modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy, mNbinc, aNbinc)
 
-        ax1 = plt.subplot(311)
-        plt.title(title)
-        ax1.add_patch(zoneconfort)
-        plt.ylabel("Temp. intérieure °C")
-        plt.plot(xr, mdatas[:,2], color="orange", label="TintMod")
-        plt.plot(xr, adatas[:,2], color="black", label="TintAgent")
-        plt.legend(loc='upper left')
+            ax1 = plt.subplot(311)
+            plt.title(title)
+            ax1.add_patch(zoneconfort)
+            plt.ylabel("Temp. intérieure °C")
+            plt.plot(xr, mdatas[:,2], color="orange", label="TintMod")
+            plt.plot(xr, adatas[:,2], color="black", label="TintAgent")
+            plt.legend(loc='upper left')
 
-        ax2 = ax1.twinx()
-        plt.ylabel("Temp. extérieure °C")
-        plt.plot(xr, mdatas[:,1], color="blue", label="Text")
-        plt.legend(loc='upper right')
+            ax2 = ax1.twinx()
+            plt.ylabel("Temp. extérieure °C")
+            plt.plot(xr, mdatas[:,1], color="blue", label="Text")
+            plt.legend(loc='upper right')
 
-        plt.subplot(312, sharex=ax1)
-        plt.ylabel("Consommation W")
-        plt.plot(xr, mdatas[:,0], color="orange", label="consoMod")
-        plt.plot(xr, adatas[:,0], color="black", label="consoAgent")
-        plt.legend()
+            plt.subplot(312, sharex=ax1)
+            plt.ylabel("Consommation W")
+            plt.plot(xr, mdatas[:,0], color="orange", label="consoMod")
+            plt.plot(xr, adatas[:,0], color="black", label="consoAgent")
+            plt.legend()
 
-        ax3 = plt.subplot(313, sharex=ax1)
-        plt.ylabel("°C")
-        plt.plot(xr, mdatas[:,3], label="consigne")
-        plt.legend(loc='upper left')
-        ax4 = ax3.twinx()
-        plt.ylabel("nb intervalles > cgt occ.")
-        plt.plot(xr, mdatas[:,4],'o', markersize=1, color="red")
+            ax3 = plt.subplot(313, sharex=ax1)
+            plt.ylabel("°C")
+            plt.plot(xr, mdatas[:,3], label="consigne")
+            plt.legend(loc='upper left')
+            ax4 = ax3.twinx()
+            plt.ylabel("nb intervalles > cgt occ.")
+            plt.plot(xr, mdatas[:,4],'o', markersize=1, color="red")
 
-        plt.show()
+            plt.show()
 
     def reward(self, datas, i):
         """
@@ -536,6 +548,31 @@ class Training:
         """
         if self._mode == "play":
             print("leaving the game")
+            if len(self._ToccMoy):
+                self._ToccMoy = np.array(self._ToccMoy)
+                self._luxe = np.array(self._luxe)
+                self._inconfort = np.array(self._inconfort)
+
+                title = "nombre d'épisodes joués : {}".format(self._steps)
+
+                plt.figure(figsize=(20, 10))
+                ax1 = plt.subplot(311)
+                plt.title(title)
+                plt.plot(self._ToccMoy[:,0], color="blue", label='température moyenne occupation agent')
+                plt.plot(self._ToccMoy[:,1], color="red", label='température moyenne occupation modèle')
+                plt.legend()
+
+                ax2 = plt.subplot(312)
+                plt.plot(self._luxe[:,0], color='green', label="nombre heures > 21°C agent")
+                plt.plot(self._luxe[:,1], color='purple', label="nombre heures > 21°C modèle")
+                plt.legend()
+
+                ax3 = plt.subplot(313)
+                plt.plot(self._inconfort[:,0], label="nombre heures < 19°C agent")
+                plt.plot(self._inconfort[:,1], label="nombre heures < 19°C modèle")
+                plt.legend()
+                plt.show()
+
         else:
             print("training has stopped")
             if len(self._rewards):

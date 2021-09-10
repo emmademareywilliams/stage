@@ -93,7 +93,7 @@ if __name__ == "__main__":
     env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, R, C, flow_rate)
     sandbox = Training(name, "play", env, agent)
     # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
-    #sandbox.play(1577269940)
+    sandbox.play(1577269940)
     #sandbox.play(1589644200)
     #sandbox.play(1608928315)
     sandbox.run()
