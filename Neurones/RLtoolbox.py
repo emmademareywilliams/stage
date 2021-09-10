@@ -286,6 +286,7 @@ class Training:
         self._ToccMoy = []
         self._luxe = []
         self._inconfort = []
+        self._conso = []
 
 
     def getConfig(self):
@@ -354,6 +355,7 @@ class Training:
         self._ToccMoy.append([aTocc_moy, mTocc_moy])
         self._luxe.append([aNbluxe, mNbluxe])
         self._inconfort.append([aNbinc, mNbinc])
+        self._conso.append([aConso, mConso])
 
         if visual:
             # matérialisation de la zone de confort par un hystéréris autour de la température de consigne
@@ -553,7 +555,13 @@ class Training:
                 self._luxe = np.array(self._luxe)
                 self._inconfort = np.array(self._inconfort)
 
-                title = "nombre d'épisodes joués : {}".format(self._steps)
+                title = "nombre d'épisodes joués : {} \n".format(self._steps)
+                aConsoMoy = round(np.mean(self._conso, 0)[0],0)
+                mConsoMoy = round(np.mean(self._conso, 0)[1],0)
+                title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, aConsoMoy, mConsoMoy)
+
+                pct = round(100*(aConsoMoy-mConsoMoy)/mConsoMoy, 2)
+                title = "{} Pourcentage de gain agent : {} %".format(title, pct)
 
                 plt.figure(figsize=(20, 10))
                 ax1 = plt.subplot(311)
