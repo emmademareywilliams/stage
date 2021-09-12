@@ -41,8 +41,8 @@ Rvalues[0] --> circuit cellule
 Rvalues[1:4] --> circuit Nord
 Rvalues[5:7] --> circuit Sud
 """
-Rvalues = [2.59e-4, 2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3, 9.85e-4, 1.89e-4, 1.14e-3]
-Cvalues = [1.31e9,  1.89e9,  1.53e9,  1.31e9,  2.05e9,  2.19e9,  2.61e8,  4.14e8]
+Rvalues = [2.59e-4, 2.95e-4, 3.30e-4, 5.20e-4, 1.06e-3, 9.85e-4, 1.89e-3, 1.14e-3]
+Cvalues = [1.31e9,  1.89e9,  1.53e9,  1.31e9,  2.05e9,  2.19e8,  2.61e8,  4.14e8]
 
 """
 on distingue 4 grandes familles de couples (R,C)
