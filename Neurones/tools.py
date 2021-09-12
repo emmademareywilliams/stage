@@ -3,15 +3,19 @@ outils et méthodes autour des classes de RLtoolbox
 
 version beta : work in progress
 
-circuit : dictionnaire des paramètres du circuit
+circuit : dictionnaire des paramètres du circuit / zone de bâtiment
 
 exemple :
 ```
 import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
+Cw = 1162.5 #Wh/m3/K
+# débit de 5m3/h et deltaT de 15°C
+max_power = 5 * Cw * 15
 circuit = {"Text":1, "dir": "/var/opt/emoncms/phpfina",
            "schedule": schedule, "interval": 3600, "wsize": 1 + 8*24,
-           "numAct": 2, "inputs_size": 4}
+           "numAct": 2, "inputs_size": 4,
+           "max_power": max_power, "Tc": 20, "hh": 1}
 ```
 """
 
@@ -88,6 +92,8 @@ def trainFromRaw(circuit, training, visualCheck=False):
     circuit : dictionnaire des paramètres du circuit
 
     training : instance de la classe Training avec sa fonction reward définie
+
+    l'environnement utilise le modèle par défaut !!
     """
     import tensorflow as tf
 
@@ -96,7 +102,7 @@ def trainFromRaw(circuit, training, visualCheck=False):
 
     Text, agenda, _tss, _tse = getTruth(circuit, visualCheck)
 
-    env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"])
+    env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"], circuit["max_power"], circuit["Tc"], circuit["hh"])
 
     name = "RL.h5"
     agent = initializeNN(circuit["inputs_size"], circuit["numAct"], name)
