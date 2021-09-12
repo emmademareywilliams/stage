@@ -344,10 +344,8 @@ class Training:
                 # on permute Tint et Text car les agents jusque début 2021 prenaient Tint en premier....
                 # on pourrait utiliser np.array([ adatas[i-1,2], adatas[i-1,1], adatas[i-1,3], adatas[i-1,4] ])
                 # mais le slicing donne un code plus lisible et plus court :-)
-                if self._inSize == 2:
-                    state = adatas[i-1, [2,1] ]
-                else:
-                    state = adatas[i-1, [2,1,3,4] ]
+                reorder = [2,1,3,4]
+                state = adatas[i-1, reorder[0:self._inSize]]
             else:
                 state = adatas[i-1, 1:self._inSize + 1]
             predictionBrute = self._agent(state.reshape(1, self._inSize))
