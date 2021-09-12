@@ -108,6 +108,8 @@ class Environnement:
         self._max_power = max_power
         self._Tc = Tc
         self._hh = hh
+        print("environnement initialisé avec Tc={}, hh={}".format(self._Tc, self._hh))
+        input("press a key")
         self._model = modelRC
         if model:
             self._model = model
@@ -585,7 +587,7 @@ class Training:
 
             d = int(time.time()) - self._ts
 
-            title = "durée entrainement : {} s".format(d)
+            title = "durée entrainement : {} s \n Tc={} hh={}".format(d, self._env._Tc, self._env._hh)
 
             plt.figure(figsize=(20, 10))
             ax1 = plt.subplot(211)

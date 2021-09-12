@@ -18,7 +18,7 @@ import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 Cw = 1162.5 #Wh/m3/K
 max_power = 5 * Cw * 15
-Tc = 21
+Tc = 20
 hh = 1
 circuit = {"Text":1, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize}
@@ -86,11 +86,11 @@ if __name__ == "__main__":
 
         Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=True)
 
-        env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
+        env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
         sandbox = Training(name, "play", env, agent)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
         #sandbox.play(silent=False, ts=1577269940)
         #sandbox.play(silent=False, ts=1589644200)
         #sandbox.play(silent=False, ts=1608928315)
-        sandbox.run(silent=True)
+        sandbox.run(silent=False)
         sandbox.close()
