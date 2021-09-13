@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande `watch -n 1 free`
-MAX_EPISODES = 900
+MAX_EPISODES = 200
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -555,11 +555,19 @@ class Training:
         if self._mode == "play":
             print("leaving the game")
 
-            title = "nombre d'épisodes joués : {} \n".format(self._steps)
-            aConsoMoy = round(np.mean(self._stats[:,4]),0)
-            mConsoMoy = round(np.mean(self._stats[:,8]),0)
-            title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, aConsoMoy, mConsoMoy)
+            stats = np.mean(self._stats, axis = 0)
+            statsMoy = stats.round(1)
+            print("statistiques pour les {} épisodes joués : \n".format(self._steps))
+            print("Température intérieure moyenne en occupation : agent {} / modèle {} \n".format(statsMoy[1], statsMoy[5]))
+            print("Consommation moyenne : agent {} / modèle {} \n".format(statsMoy[4], statsMoy[8]))
+            print("Nombre de points en luxe : agent {} / modèle {} \n".format(statsMoy[2], statsMoy[6]))
+            print("Nombre de points en inconfort : agent {} / modèle {} \n".format(statsMoy[3], statsMoy[7]))
 
+            title = "nombre d'épisodes joués : {} \n".format(self._steps)
+            title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, statsMoy[4], statsMoy[8])
+
+            mConsoMoy = statsMoy[8]
+            aConsoMoy = statsMoy[4]
             pct = round(100*(mConsoMoy-aConsoMoy)/mConsoMoy, 2)
             title = "{} Pourcentage de gain agent : {} %".format(title, pct)
 
