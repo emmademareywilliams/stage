@@ -30,7 +30,7 @@ def update_annot(ind):
     pos = sc[-1].get_offsets()[ind["ind"][0]]
     #print(pos)
     annot.xy = pos
-    text = "épisode {}\n ts={}\n Tintoccmoy={}".format(int(pos[0]),int(stats[int(pos[0]),0]),int(stats[int(pos[0]),9]))
+    text = "épisode {}\n ts={}\n Tintoccmoy={:.2f}".format(int(pos[0]),int(stats[int(pos[0]),0]),stats[int(pos[0]),9])
     annot.set_text(text)
 
 def hover(event):
