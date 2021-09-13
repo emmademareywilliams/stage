@@ -30,7 +30,9 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 Cw = 1162.5 #Wh/m3/K
 max_power = 5 * Cw * 15
 
-circuit = {"Text":1, "dir": dir,
+# circuit = {"Text":1, "dir": dir, "schedule": schedule, "interval": interval, "wsize": wsize}
+
+circuit = {"Text":5, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize}
 
 Rfamily = [2e-4, 5e-4, 1e-3, 1e-1]

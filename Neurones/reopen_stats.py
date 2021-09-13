@@ -79,7 +79,8 @@ if os.path.isfile(name):
 
     from dataengines import getMeta
     dir = "/var/opt/emoncms/phpfina"
-    meta = getMeta(1, dir)
+    #meta = getMeta(1, dir)
+    meta = getMeta(5, dir)
     _tss = meta["start_time"]
     fullLength = meta["npoints"] * meta["interval"]
     _tse = meta["start_time"]+fullLength
