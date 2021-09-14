@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande `watch -n 1 free`
-MAX_EPISODES = 200
+MAX_EPISODES = 900
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -546,7 +546,7 @@ class Training:
 
             time.sleep(0.1)
 
-    def close(self):
+    def close(self, visual=True):
         """
         à la fermeture, si on vient de procéder à un entrainement :
         - on enregistre le réseau
@@ -554,40 +554,42 @@ class Training:
         """
         if self._mode == "play":
             print("leaving the game")
-
             stats = np.mean(self._stats, axis = 0)
             statsMoy = stats.round(1)
+            """
             print("statistiques pour les {} épisodes joués : \n".format(self._steps))
             print("Température intérieure moyenne en occupation : agent {} / modèle {} \n".format(statsMoy[1], statsMoy[5]))
             print("Consommation moyenne : agent {} / modèle {} \n".format(statsMoy[4], statsMoy[8]))
             print("Nombre de points en luxe : agent {} / modèle {} \n".format(statsMoy[2], statsMoy[6]))
             print("Nombre de points en inconfort : agent {} / modèle {} \n".format(statsMoy[3], statsMoy[7]))
+            """
 
-            title = "nombre d'épisodes joués : {} \n".format(self._steps)
-            title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, statsMoy[4], statsMoy[8])
+            if visual:
+                title = "nombre d'épisodes joués : {} \n".format(self._steps)
+                title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, statsMoy[4], statsMoy[8])
 
-            mConsoMoy = statsMoy[8]
-            aConsoMoy = statsMoy[4]
-            pct = round(100*(mConsoMoy-aConsoMoy)/mConsoMoy, 2)
-            title = "{} Pourcentage de gain agent : {} %".format(title, pct)
+                mConsoMoy = statsMoy[8]
+                aConsoMoy = statsMoy[4]
+                pct = round(100*(mConsoMoy-aConsoMoy)/mConsoMoy, 2)
+                title = "{} Pourcentage de gain agent : {} %".format(title, pct)
 
-            plt.figure(figsize=(20, 10))
-            ax1 = plt.subplot(311)
-            plt.title(title)
-            plt.plot(self._stats[:,1], color="blue", label='température moyenne occupation agent')
-            plt.plot(self._stats[:,5], color="red", label='température moyenne occupation modèle')
-            plt.legend()
+                plt.figure(figsize=(20, 10))
+                ax1 = plt.subplot(311)
+                plt.title(title)
+                plt.plot(self._stats[:,1], color="blue", label='température moyenne occupation agent')
+                plt.plot(self._stats[:,5], color="red", label='température moyenne occupation modèle')
+                plt.legend()
 
-            ax2 = plt.subplot(312, sharex=ax1)
-            plt.plot(self._stats[:,2], color="blue", label="nombre heures > {}°C agent".format(self._env._Tc + self._env._hh))
-            plt.plot(self._stats[:,6], color="red", label="nombre heures > {}°C modèle".format(self._env._Tc + self._env._hh))
-            plt.legend()
+                ax2 = plt.subplot(312, sharex=ax1)
+                plt.plot(self._stats[:,2], color="blue", label="nombre heures > {}°C agent".format(self._env._Tc + self._env._hh))
+                plt.plot(self._stats[:,6], color="red", label="nombre heures > {}°C modèle".format(self._env._Tc + self._env._hh))
+                plt.legend()
 
-            ax3 = plt.subplot(313, sharex=ax1)
-            plt.plot(self._stats[:,3], color="blue", label="nombre heures < {}°C agent".format(self._env._Tc - self._env._hh))
-            plt.plot(self._stats[:,7], color="red", label="nombre heures < {}°C modèle".format(self._env._Tc - self._env._hh))
-            plt.legend()
-            plt.show()
+                ax3 = plt.subplot(313, sharex=ax1)
+                plt.plot(self._stats[:,3], color="blue", label="nombre heures < {}°C agent".format(self._env._Tc - self._env._hh))
+                plt.plot(self._stats[:,7], color="red", label="nombre heures < {}°C modèle".format(self._env._Tc - self._env._hh))
+                plt.legend()
+                plt.show()
 
         else:
             print("training has stopped")

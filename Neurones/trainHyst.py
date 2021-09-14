@@ -18,7 +18,7 @@ import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 Cw = 1162.5 #Wh/m3/K
 max_power = 5 * Cw * 15
-circuit = {"Text":1, "dir": dir,
+circuit = {"Text":5, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize,
            "numAct": 2, "inputs_size": 4,
            "max_power": max_power, "Tc": 21, "hh": 1}
