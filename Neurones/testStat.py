@@ -1,4 +1,6 @@
 """
+Work in progress
+
 idée = fichier qui permet de lancer les tests play de manière automatique, en faisant varier :
     - R et C pour un même réseau
     - le nom du réseau
@@ -55,10 +57,13 @@ class PlayStat:
         """
         composantes de la matrice de stat :
         - nombre de lignes <--> nombre de couples (R,C) qu'on veut étudier
-        - 8 colonnes : (température moyenne en occupation, conso moyenne, nombre de points en luxe et en inconfort) resp. pour l'agent et le modèle
+        - 10 colonnes : couple (R,C) + (température moyenne en occupation, conso moyenne, nombre de points en luxe et en inconfort) resp. pour l'agent et le modèle
         """
         self._nbRun = len(self._RCdict)
-        self._matstat = np.zeros((self._nbRun, 8))
+        self._matstat = np.zeros((self._nbRun, 10))
+        for i in range(self._nbRun):
+            self._matstat[i][0] = self._RCdict[i]["R"]
+            self._matstat[i][1] = self._RCdict[i]["C"]
 
     def multiplePlay(self, agent, name, Text, agenda, _tss, _tse):
         for i in range(self._nbRun):
@@ -67,8 +72,12 @@ class PlayStat:
             sandbox = TrainingRC(name, "play", env, agent)
             sandbox.run(silent=True)
             mat = sandbox.close()
-            self._matstat[i, :] = mat
+            self._matstat[i, 2:] = mat[1:]
 
+    def closeall(self):
+        print("R | C | Tocc moy agent | luxe agent | inc agent | conso agent | Tocc moy modèle | luxe modèle | inc modèle | conso modèle \n")
+        for i in range(self._nbRun):
+            print("{}\n".format(self._matstat[i:,]))
 
 
 if __name__ == "__main__":
@@ -76,6 +85,7 @@ if __name__ == "__main__":
     from tools import getTruth, pickName
 
     playground = PlayStat(RC)
+    #print(playground._nbRun)
     name, savedModel = pickName()
 
     if savedModel == True:
@@ -86,3 +96,4 @@ if __name__ == "__main__":
 
         Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=False)
         playground.multiplePlay(agent, name, Text, agenda, _tss, _tse)
+        playground.closeall()

@@ -2,6 +2,7 @@ Neurones/réseaux*
 Neurones/RL*
 Neurones/assets*
 Neurones/todrop
+Neurones/tests
 *.pyc
 __pycache__/
 *.py[cod]
