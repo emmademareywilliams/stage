@@ -11,12 +11,12 @@ import numpy as np
 schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ])
 Cw = 1162.5 #Wh/m3/K
 max_power = 5 * Cw * 15
-circuit = {"Text":1, "dir": dir,
+circuit = {"Text":5, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize,
            "numAct": 2, "inputs_size": 4,
            "max_power": max_power, "Tc": 20, "hh": 1}
 
-k = 0.6
+k = 1
 
 class Retrain(Training):
     def reward(self, datas, i):
@@ -24,8 +24,19 @@ class Retrain(Training):
         reward = 0
         if datas[i,3] != 0:
            reward = - abs( datas[i,2] - self._env._Tc)
+            reward = - abs( datas[i,2] - self._env._Tc)
         else:
            reward = - k * datas[i,0] / self._env._max_power
+            reward = - datas[i,0] / self._env._max_power
+        if datas[i,3] != 0 and datas[i-1,3] == 0:
+            l1 = self._env._Tc - self._env._hh
+            l2 = self._env._Tc + self._env._hh
+            if datas[i,2] < l1:
+                reward -= 20
+            if l1 <= datas[i,2] <= l2 :
+                reward += 10
+            if self._env._Tc <= datas[i,2] <= l2 :
+                reward += 20
         return reward
 
 
