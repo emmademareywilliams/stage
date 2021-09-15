@@ -174,11 +174,18 @@ class Environnement:
         changes = np.where(datas[:,4] == datas[:,4].min())[0]
         for i in changes:
             if datas[i,3] == 0:
+                imin = i
+                break
+        for i in changes:
+            if datas[i,3] == 0:
                 if i < datas.shape[0]-1:
                     l = datas[i+1, 4]
                     h = Tmax - Tmin
                     w = l*self._interval
-                    v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
+                    if i == imin:
+                        v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
+                    else:
+                        v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
                     zonesOcc.append(v)
         return xr, zoneconfort, zonesOcc
 
