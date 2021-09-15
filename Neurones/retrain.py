@@ -37,6 +37,7 @@ if __name__ == "__main__":
 
     if savedModel == True:
         import tensorflow as tf
+        tf.config.set_visible_devices([], 'GPU')
         agent = tf.keras.models.load_model(name)
 
         visNN(agent)
