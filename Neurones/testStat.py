@@ -11,9 +11,10 @@ Premier mode : pour un réseau fixé --> on entre le dictionnaire des couples (R
     --> on garde les stats générales en mémoire dans une autre matrice
 """
 
-from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN
+from RLtoolbox import Training, visNN
 from play import EnvHystNocc
 import numpy as np
+from play import Tc, hh, mode
 
 
 # le circuit
@@ -28,9 +29,6 @@ max_power = 5 * Cw * 15
 circuit = {"Text":5, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize}
 
-# pour l'instant, Tc et hh sont déclarés en global :
-Tc = 20
-hh = 1
 
 RC = [{"R": 3.08814171e-04, "C": 8.63446560e+08}, {"R": 5e-4, "C": 2e9}, {"R": 1e-3, "C": 2e9}]
 MAX_EPISODES = 500
@@ -64,6 +62,7 @@ class PlayStat:
         for i in range(self._nbRun):
             self._matstat[i][0] = self._RCdict[i]["R"]
             self._matstat[i][1] = self._RCdict[i]["C"]
+        self._libelle = ["R", "C", "Tocc moy agent", "luxe agent", "inc agent", "conso agent", "Tocc moy modèle", "luxe modèle", "inc modèle", "conso modèle"]
 
     def multiplePlay(self, agent, name, Text, agenda, _tss, _tse):
         for i in range(self._nbRun):
@@ -71,13 +70,17 @@ class PlayStat:
             env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh)
             sandbox = TrainingRC(name, "play", env, agent)
             sandbox.run(silent=True)
-            mat = sandbox.close()
-            self._matstat[i, 2:] = mat[1:]
+            self._matstat[i, 2:] = sandbox.close()[1:]
 
     def closeall(self):
-        print("R | C | Tocc moy agent | luxe agent | inc agent | conso agent | Tocc moy modèle | luxe modèle | inc modèle | conso modèle \n")
-        for i in range(self._nbRun):
-            print("{}\n".format(self._matstat[i:,]))
+        print("**** RESULTATS STATS **** \n")
+        print("Pour Tc = {}, hh = {}, en mode {} \n".format(Tc, hh, mode))
+        for line in range(self._nbRun):
+            for col in range(len(self._libelle)):
+                label = self._libelle[col]
+                print("{} : {} ".format(label, self._matstat[line][col]))
+            print("********* \n")
+
 
 
 if __name__ == "__main__":
