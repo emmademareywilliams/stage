@@ -168,7 +168,18 @@ class Environnement:
         Tc = self._Tc
         hh = self._hh
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
-        return xr, zoneconfort
+
+        datas = self.buildEnv()
+        zonesOcc = []
+        changes = np.where(datas[:,4] == datas[:,4].min())[0]
+        for i in changes:
+            if datas[i,3] == 0:
+                l = datas[i+1, 4]
+                h = 8 # on suppose que la température intérieure est comprise entre 15 et 23
+                w = l*self._interval
+                v = Rectangle((xr[i], 15), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
+                zonesOcc.append(v)
+        return xr, zoneconfort, zoneOcc
 
     def sim(self, datas, i):
         """
@@ -361,7 +372,7 @@ class Training:
         self._stats[self._steps, :] = line
 
         if not silent:
-            xr, zoneconfort = self._env.xr()
+            xr, zoneconfort, zonesOcc = self._env.xr()
             title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
             title = "{}\n conso Modèle {} Agent {}".format(title, mConso, aConso)
             title = "{}\n Tocc moyenne modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy)
@@ -370,6 +381,8 @@ class Training:
             ax1 = plt.subplot(311)
             plt.title(title, fontsize=8)
             ax1.add_patch(zoneconfort)
+            for v in zonesOcc:
+                ax1.add_patch(v)
             plt.ylabel("Temp. intérieure °C")
             plt.plot(xr, mdatas[:,2], color="orange", label="TintMod")
             plt.plot(xr, adatas[:,2], color="black", label="TintAgent")
