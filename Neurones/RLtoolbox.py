@@ -160,7 +160,7 @@ class Environnement:
         print("condition initiale : Qc {:.2f} Text {:.2f} Tint {:.2f}".format(datas[0,0],datas[0,1],datas[0,2]))
         return datas
 
-    def xr(self):
+    def xr(self, Tmin, Tmax):
         """
         retourne le tableau des timestamps sur l'épisode et un objet pour matérialiser la zone de confort
         """
@@ -174,12 +174,13 @@ class Environnement:
         changes = np.where(datas[:,4] == datas[:,4].min())[0]
         for i in changes:
             if datas[i,3] == 0:
-                l = datas[i+1, 4]
-                h = 8 # on suppose que la température intérieure est comprise entre 15 et 23
-                w = l*self._interval
-                v = Rectangle((xr[i], 15), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
-                zonesOcc.append(v)
-        return xr, zoneconfort, zoneOcc
+                if i < datas.shape[0]-1:
+                    l = datas[i+1, 4]
+                    h = Tmax - Tmin
+                    w = l*self._interval
+                    v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
+                    zonesOcc.append(v)
+        return xr, zoneconfort, zonesOcc
 
     def sim(self, datas, i):
         """
@@ -372,7 +373,7 @@ class Training:
         self._stats[self._steps, :] = line
 
         if not silent:
-            xr, zoneconfort, zonesOcc = self._env.xr()
+            xr, zoneconfort, zonesOcc = self._env.xr(np.min(mdatas[:,2]), np.max(mdatas[:,2]))
             title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
             title = "{}\n conso Modèle {} Agent {}".format(title, mConso, aConso)
             title = "{}\n Tocc moyenne modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy)
