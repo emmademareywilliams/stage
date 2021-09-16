@@ -68,7 +68,7 @@ class EnvHystNocc(Environnement):
                 # pas d'occupation - calcul à la cible
                 Tint_sim = self.sim2Target(datas, i)
                 #print("i={} target {}".format(i, Tint_sim[-1]))
-                if Tint_sim[-1] < self._Tc - self._hh:
+                if Tint_sim[-1] < self._Tc :
                     datas[i,0] = self._max_power
 
             else:
@@ -105,6 +105,7 @@ if __name__ == "__main__":
 
         sandbox = Training(name, "play", env, agent)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
+        #sandbox.play(silent=False, ts=1610494340)
         #sandbox.play(silent=False, ts=1577269940)
         #sandbox.play(silent=False, ts=1589644200)
         #sandbox.play(silent=False, ts=1608928315)
