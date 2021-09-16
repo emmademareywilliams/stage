@@ -76,7 +76,7 @@ class EnvHystNocc(Environnement):
             else:
                 # en occupation
                 # hystérésis classique
-                if datas[i-1,2] > self._Tc or datas[i-1,2] < self._Tc:
+                if datas[i-1,2] > self._Tc + self._hh or datas[i-1,2] < self._Tc - self._hh:
                     action = datas[i-1,2] <= self._Tc
                     datas[i,0] = action * self._max_power
                 else:
