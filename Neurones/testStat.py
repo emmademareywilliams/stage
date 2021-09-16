@@ -67,7 +67,7 @@ class PlayStat:
     def multiplePlay(self, agent, name, Text, agenda, _tss, _tse):
         for i in range(self._nbRun):
             modelRC = self._RCdict[i]
-            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh)
+            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=self._RCdict[i]["R"], C=self._RCdict[i]["C"])
             sandbox = TrainingRC(name, "play", env, agent)
             sandbox.run(silent=True)
             self._matstat[i, 2:] = sandbox.close()[1:]
