@@ -24,10 +24,8 @@ class Retrain(Training):
         reward = 0
         if datas[i,3] != 0:
            reward = - abs( datas[i,2] - self._env._Tc)
-            reward = - abs( datas[i,2] - self._env._Tc)
         else:
            reward = - k * datas[i,0] / self._env._max_power
-            reward = - datas[i,0] / self._env._max_power
         if datas[i,3] != 0 and datas[i-1,3] == 0:
             l1 = self._env._Tc - self._env._hh
             l2 = self._env._Tc + self._env._hh
