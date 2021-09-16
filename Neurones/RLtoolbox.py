@@ -36,7 +36,8 @@ GAMMA = 0.9
 #GAMMA = 0.05
 
 # modèle par défault de type R1C1
-modelRC = {"R": 3.08814171e-04, "C": 8.63446560e+08}
+#modelRC = {"R": 3.08814171e-04, "C": 8.63446560e+08}
+modelRC = {"R": 2.54061406e-04, "C": 9.01650468e+08}
 
 
 import numpy as np
@@ -160,33 +161,33 @@ class Environnement:
         print("condition initiale : Qc {:.2f} Text {:.2f} Tint {:.2f}".format(datas[0,0],datas[0,1],datas[0,2]))
         return datas
 
-    def xr(self, Tmin, Tmax):
+    def covering(self, Tmin, Tmax):
         """
-        retourne le tableau des timestamps sur l'épisode et un objet pour matérialiser la zone de confort
+        permet l'habillage du graphique d'un épisode
+        retourne :
+        - le tableau des timestamps sur l'épisode
+        - des objets pour matérialiser zones de confort, d'occupation
         """
         xr = np.arange(self._tsvrai, self._tsvrai+self._wsize*self._interval, self._interval)
+        #xr = np.arange(self._wsize)
         Tc = self._Tc
         hh = self._hh
         zoneconfort = Rectangle((xr[0], Tc-hh), xr[-1]-xr[0], 2*hh, facecolor='g', alpha=0.5, edgecolor='None', label="zone de confort")
 
-        datas = self.buildEnv()
+        occupation = self._agenda[self._pos:self._pos+self._wsize+4*24*3600//self._interval]
+        changes = []
+        for i in range(self._wsize):
+            if occupation[i]==0 and occupation[i+1]!=0:
+                changes.append(i)
         zonesOcc = []
-        changes = np.where(datas[:,4] == datas[:,4].min())[0]
         for i in changes:
-            if datas[i,3] == 0:
-                imin = i
-                break
-        for i in changes:
-            if datas[i,3] == 0:
-                if i < datas.shape[0]-1:
-                    l = datas[i+1, 4]
-                    h = Tmax - Tmin
-                    w = l*self._interval
-                    if i == imin:
-                        v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None', label="periodes occupation")
-                    else:
-                        v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
-                    zonesOcc.append(v)
+            if i < self._wsize-1:
+                l = getLevelDuration(occupation, i+1)
+                h = Tmax - Tmin
+                w = l * (xr[1]-xr[0])
+                v = Rectangle((xr[i], Tmin), w, h, facecolor='orange', alpha=0.5, edgecolor='None')
+                zonesOcc.append(v)
+
         return xr, zoneconfort, zonesOcc
 
     def sim(self, datas, i):
@@ -380,7 +381,7 @@ class Training:
         self._stats[self._steps, :] = line
 
         if not silent:
-            xr, zoneconfort, zonesOcc = self._env.xr(np.min(mdatas[:,2]), np.max(mdatas[:,2]))
+            xr, zoneconfort, zonesOcc = self._env.covering(np.min(mdatas[:,2]), np.max(mdatas[:,2]))
             title = "épisode {} - {} {}".format(self._steps, self._env._tsvrai, tsToHuman(self._env._tsvrai))
             title = "{}\n conso Modèle {} Agent {}".format(title, mConso, aConso)
             title = "{}\n Tocc moyenne modèle : {} agent : {}".format(title, mTocc_moy, aTocc_moy)
