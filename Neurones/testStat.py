@@ -12,7 +12,7 @@ Premier mode : pour un réseau fixé --> on entre le dictionnaire des couples (R
 """
 
 from RLtoolbox import Training, visNN
-from play import EnvHystNocc, Environnement
+from play import EnvHystNocc, EnvIndus, EnvHyst, Environnement
 import numpy as np
 from play import Tc, hh, mode
 
@@ -67,9 +67,11 @@ class PlayStat:
     def multiplePlay(self, agent, name, Text, agenda, _tss, _tse):
         for i in range(self._nbRun):
             modelRC = self._RCdict[i]
-            if mode == 'classique':
+            if mode == 'occupation':
                 env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=self._RCdict[i]["R"], C=self._RCdict[i]["C"])
-            if mode == 'industriel':
+            elif mode == 'simple':
+                env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=self._RCdict[i]["R"], C=self._RCdict[i]["C"])
+            elif mode == 'industriel':
                 env = EnvIndus(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=self._RCdict[i]["R"], C=self._RCdict[i]["C"])
             sandbox = TrainingRC(name, "play", env, agent)
             sandbox.run(silent=True)
@@ -82,6 +84,9 @@ class PlayStat:
             for col in range(len(self._libelle)):
                 label = self._libelle[col]
                 print("{} : {} ".format(label, self._matstat[line][col]))
+            if mode == 'industriel':
+                pct = round(100*(self._matstat[line][9] - self._matstat[line][5])/self._matstat[line][9], 2)
+                print("% gain agent : {}".format(pct))
             print("********* \n")
 
 

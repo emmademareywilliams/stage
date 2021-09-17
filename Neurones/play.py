@@ -30,6 +30,9 @@ schedule = np.array([ [7,17], [7,17], [7,17], [7,17], [7,17], [-1,-1], [-1,-1] ]
 Cw = 1162.5 #Wh/m3/K
 max_power = 5 * Cw * 15
 
+# paramètre de réglage de l'intensité de chauffe hors-gel en mode industriel :
+reduit = 0.4
+
 # circuit = {"Text":1, "dir": dir, "schedule": schedule, "interval": interval, "wsize": wsize}
 
 circuit = {"Text":5, "dir": dir,
@@ -94,20 +97,22 @@ class EnvIndus(Environnement):
         - préchauffage avant l'occupation
         - contrôle hystérésis pendant l'occupation
         """
-        power = np.ones(datas.shape[0]) * self._max_power
         for i in range(1, datas.shape[0]):
-            action = datas[i,3]
+            # par défaut, l'action correspond à l'occupation / la non occupation
+            action = datas[i,3]/self._Tc
             if datas[i,3] == 0:
+                # en période de non occupation, s'il fait trop froid dehors :
                 if datas[i,1] < 10:
                     action = 0.4
+                # on commence à chauffer 3h avant l'ouverture des locaux :
                 if datas[i,4] <= 3:
                     action = 1
             else:
+                # en occupation, hystérésis classique :
                 if datas[i-1,2] > self._Tc + self._hh or datas[i-1,2] < self._Tc - self._hh :
                     action = datas[i-1,2] <= self._Tc
-            datas[i,0] = action * power[i]
+            datas[i,0] = action * self._max_power
             datas[i,2] = self.sim(datas, i)
-        #print(datas[:,0])
         return datas
 
 
