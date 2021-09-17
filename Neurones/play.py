@@ -16,6 +16,7 @@ cf https://palletsprojects.com/
 import click
 silent = click.prompt('silent mode ? ', type=bool)
 Tc = click.prompt('temperature de consigne ', type=int)
+N = click.prompt('nombre d\'épisodes à jouer ', type=int)
 hh = 1
 modes = ["occupation", "simple"]
 mode = click.prompt('hysteresys simple ou en mode occupation ? ', type=click.Choice(modes))
@@ -103,7 +104,7 @@ if __name__ == "__main__":
         elif mode == "occupation":
             env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
 
-        sandbox = Training(name, "play", env, agent)
+        sandbox = Training(name, "play", env, agent, N=N)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
         #sandbox.play(silent=False, ts=1610494340)
         #sandbox.play(silent=False, ts=1577269940)

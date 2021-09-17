@@ -110,7 +110,6 @@ class Environnement:
         self._Tc = Tc
         self._hh = hh
         print("environnement initialisé avec Tc={}, hh={}".format(self._Tc, self._hh))
-        input("press a key")
         self._model = modelRC
         if model:
             self._model = model
@@ -282,7 +281,11 @@ class Training:
     """
     boite à outil de simulation pour l'entrainement du réseau neurone par renforcement
     """
-    def __init__(self, name, mode, env, agent):
+    def __init__(self, name, mode, env, agent, **params):
+        self._N = MAX_EPISODES
+        if "N" in  params:
+            self._N = params["N"]
+        print("on va jouer {} épisodes".format(self._N))
         self._name = name
         self._mode = mode
         self._env = env
@@ -309,9 +312,9 @@ class Training:
         - 2 à 10 : Text min, moy et max, puis la même chose pour Tint et Tint en période d'occupation
         """
         if mode == "play":
-            self._stats = np.zeros((MAX_EPISODES, 9))
+            self._stats = np.zeros((self._N, 9))
         else :
-            self._stats = np.zeros((MAX_EPISODES, 11))
+            self._stats = np.zeros((self._N, 11))
 
     def getConfig(self):
         """
@@ -556,8 +559,8 @@ class Training:
 
         # Until asked to stop
         while not self._exit:
-            if MAX_EPISODES:
-                if self._steps >= MAX_EPISODES-1:
+            if self._N:
+                if self._steps >= self._N - 1:
                     self._exit = True
 
             if self._mode == "play":
@@ -568,7 +571,7 @@ class Training:
 
             time.sleep(0.1)
 
-    def close(self):
+    def close(self, suffix="trained"):
         """
         à la fermeture, si on vient de procéder à un entrainement :
         - on enregistre le réseau
@@ -606,7 +609,7 @@ class Training:
         else:
             print("training has stopped")
 
-            name = saveNN(self._agent, self._name, "trained")
+            name = saveNN(self._agent, self._name, suffix)
 
             d = int(time.time()) - self._ts
 
@@ -628,10 +631,6 @@ class Training:
             plt.plot(self._stats[:,1])
             # enregistrement des indicateurs qualité de l'entrainement
             plt.savefig("{}".format(name[0:-3]))
-            ax1.set_xlim(0, 200)
-            plt.savefig("{}_begin".format(name[0:-3]))
-            ax1.set_xlim(MAX_EPISODES-200, MAX_EPISODES-1)
-            plt.savefig("{}_end".format(name[0:-3]))
             header = "ts,reward"
             for t in ["Text","Tint","Tintocc"]:
                 header = "{0},{1}_min,{1}_moy,{1}_max".format(header,t)

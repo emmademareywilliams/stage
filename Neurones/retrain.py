@@ -16,35 +16,36 @@ circuit = {"Text":1, "dir": dir,
            "numAct": 2, "inputs_size": 4,
            "max_power": max_power, "Tc": 20, "hh": 1}
 
-k = 0.6
+import argparse
+parser = argparse.ArgumentParser(description='retraining...')
+parser.add_argument("--N", action="store", help="nombre d\'épisodes", default=900, type=int)
+parser.add_argument("--k", action="store", help="paramètre k", default=0.6, type=float)
+args = parser.parse_args()
 
 class Retrain(Training):
     def reward(self, datas, i):
-        #prise en compte de la température ET de l'énergie via le facteur de pondération
-        reward = 0
         if datas[i,3] != 0:
-           reward = - abs( datas[i,2] - self._env._Tc)
+            reward = - abs( datas[i,2] - self._env._Tc)
         else:
-           reward = - k * datas[i,0] / self._env._max_power
+            reward = - args.k * datas[i,0] / self._env._max_power
         return reward
-
 
 if __name__ == "__main__":
 
-    from tools import getTruth, pickName
+    from tools import getTruth
 
-    name, savedModel = pickName()
-
-    if savedModel == True:
+    name = "hys20.h5"
+    import os
+    if os.path.isfile(name):
         import tensorflow as tf
         tf.config.set_visible_devices([], 'GPU')
         agent = tf.keras.models.load_model(name)
 
-        visNN(agent)
-
-        Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=True)
+        Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=False)
         env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"], circuit["max_power"], circuit["Tc"], circuit["hh"])
 
-        sandbox = Retrain(name, "train", env, agent)
+        sandbox = Retrain(name, "train", env, agent, N=args.N)
         sandbox.run()
-        sandbox.close()
+        sandbox.close(suffix="{}_retrained_k{}".format(name[:-3],str(args.k).replace(".","dot")))
+    else:
+        print("agent initial {} introuvable - impossible de continuer".format(name))
