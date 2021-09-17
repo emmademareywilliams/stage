@@ -577,15 +577,16 @@ class Training:
         - on enregistre le réseau
         - on produit les graphiques qualité
         """
+
+        statsMoy = np.mean(self._stats, axis = 0).round(1)
+
         if self._mode == "play":
             print("leaving the game")
 
             title = "nombre d'épisodes joués : {} \n".format(self._steps)
-            aConsoMoy = round(np.mean(self._stats[:,4]),0)
-            mConsoMoy = round(np.mean(self._stats[:,8]),0)
-            title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, aConsoMoy, mConsoMoy)
+            title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, statsMoy[4], statsMoy[8])
 
-            pct = round(100*(mConsoMoy-aConsoMoy)/mConsoMoy, 2)
+            pct = round(100*(statsMoy[8]-statsMoy[4])/statsMoy[8], 2)
             title = "{} Pourcentage de gain agent : {} %".format(title, pct)
 
             plt.figure(figsize=(20, 10))
@@ -604,7 +605,17 @@ class Training:
             plt.plot(self._stats[:,3], color="blue", label="nombre heures < {}°C agent".format(self._env._Tc - self._env._hh))
             plt.plot(self._stats[:,7], color="red", label="nombre heures < {}°C modèle".format(self._env._Tc - self._env._hh))
             plt.legend()
-            plt.show()
+            # enregistrement des statistiques du jeu
+            # uniquement si on est allé au bout des épisodes - pas la peine de sauver des figures vides
+            if self._steps == self._N :
+                ts = time.time()
+                now = tsToHuman(ts, fmt="%Y_%m_%d_%H_%M_%S")
+                name = "{}_played_{}".format(self._name[0:-3],now)
+                plt.savefig(name)
+                header = "ts"
+                for w in ["agent","modèle"]:
+                    header = "{0},{1}_Tintmoy,{1}_nbpts_luxe,{1}_nbpts_inconfort,{1}_conso".format(header,w)
+                np.savetxt('{}.csv'.format(name), self._stats, delimiter=',', header=header)
 
         else:
             print("training has stopped")
@@ -630,9 +641,12 @@ class Training:
             plt.subplot(212, sharex=ax1)
             plt.plot(self._stats[:,1])
             # enregistrement des indicateurs qualité de l'entrainement
+            # on enregistre même qd on ne va pas au bout de l'entrainement
             plt.savefig("{}".format(name[0:-3]))
             header = "ts,reward"
             for t in ["Text","Tint","Tintocc"]:
                 header = "{0},{1}_min,{1}_moy,{1}_max".format(header,t)
             np.savetxt('{}.csv'.format(name[0:-3]), self._stats, delimiter=',', header=header)
         plt.close()
+
+        return statsMoy

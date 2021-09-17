@@ -6,7 +6,7 @@ do
     for i in 1 2
     do
       echo "simulation k=$k stage $i"
-      python3 retrain.py --N=10 --k=$k
+      python3 retrain.py --N=400 --k=$k
     done
 done
 mkdir assets
