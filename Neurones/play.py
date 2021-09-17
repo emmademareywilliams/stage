@@ -17,8 +17,8 @@ import click
 silent = click.prompt('silent mode ? ', type=bool)
 Tc = click.prompt('temperature de consigne ', type=int)
 hh = 1
-modes = ["occupation", "simple"]
-mode = click.prompt('hysteresys simple ou en mode occupation ? ', type=click.Choice(modes))
+modes = ["occupation", "simple", "industriel"]
+mode = click.prompt('hysteresys simple, en mode occupation ou stratégie industrielle ? ', type=click.Choice(modes))
 
 # le circuit
 interval = 3600
@@ -86,6 +86,31 @@ class EnvHystNocc(Environnement):
 
         return datas
 
+class EnvIndus(Environnement):
+    def play(self, datas):
+        """
+        simulation d'un pilotage industriel sur la base d'un agenda :
+        - réduit nuit / weekend
+        - préchauffage avant l'occupation
+        - contrôle hystérésis pendant l'occupation
+        """
+        power = np.ones(datas.shape[0]) * self._max_power
+        for i in range(1, datas.shape[0]):
+            action = datas[i,3]
+            if datas[i,3] == 0:
+                if datas[i,1] < 10:
+                    action = 0.4
+                if datas[i,4] <= 3:
+                    action = 1
+            else:
+                if datas[i-1,2] > self._Tc + self._hh or datas[i-1,2] < self._Tc - self._hh :
+                    action = datas[i-1,2] <= self._Tc
+            datas[i,0] = action * power[i]
+            datas[i,2] = self.sim(datas, i)
+        #print(datas[:,0])
+        return datas
+
+
 if __name__ == "__main__":
 
     from tools import getTruth, pickName
@@ -104,6 +129,8 @@ if __name__ == "__main__":
             env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
         elif mode == "occupation":
             env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
+        elif mode == "industriel":
+            env = EnvIndus(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
 
         sandbox = Training(name, "play", env, agent)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
