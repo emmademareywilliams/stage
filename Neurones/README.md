@@ -7,7 +7,7 @@ ou pour upgrader :
 ```
 python3 -m pip install --upgrade PyFina
 ```
-Pour nettoyer les valeurs aberrantes :
+Pour nettoyer les valeurs aberrantes sur le flux 1 :
 
 ```
 from PyFina import *
