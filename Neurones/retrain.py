@@ -22,13 +22,56 @@ parser.add_argument("--N", action="store", help="nombre d\'épisodes", default=9
 parser.add_argument("--k", action="store", help="paramètre k", default=0.6, type=float)
 args = parser.parse_args()
 
-class Retrain(Training):
+class Train(Training):
     def reward(self, datas, i):
         if datas[i,3] != 0:
             reward = - abs( datas[i,2] - self._env._Tc)
         else:
             reward = - args.k * datas[i,0] / self._env._max_power
         return reward
+
+class TrainWvote(Training):
+    def reward(self, datas, i):
+          l0 = self._env._Tc - 5 * self._env._hh
+          l1 = self._env._Tc - 3 * self._env._hh
+          l2 = self._env._Tc - self._env._hh
+          l3 = self._env._Tc + self._env._hh
+          if datas[i,3] != 0:
+              reward = - abs( datas[i,2] - self._env._Tc)
+              if datas[i-1,3] == 0:
+                  if datas[i,2] < l0:
+                      reward -= 30
+                  if datas[i,2] < l1:
+                      reward -= 30
+                  if datas[i,2] < l2:
+                      reward -= 20
+                  # vu qu'on est en récompense négative, ces 2 lignes sont probablement surperflues
+                  # et viennent peut-être brouiller la convergence
+                  if l2 <= datas[i,2] <= l3 :
+                      reward += 10
+                  if self._env._Tc <= datas[i,2] <= l3 :
+                      reward += 20
+          else:
+              reward = -  args.k * datas[i,0] / self._env._max_power
+          return reward
+
+class TrainWvote2(Training):
+    def reward(self, datas, i):
+          l0 = self._env._Tc - self._env._hh
+          l1 = self._env._Tc + self._env._hh
+          reward = 0
+          if datas[i,3] != 0:
+              if abs( datas[i,2] - self._env._Tc ) < self._env._hh:
+                  reward += 1
+              if datas[i-1,3] == 0:
+                  if l0 <= datas[i,2] < self._env._Tc :
+                      reward += 100
+                  if self._env._Tc <= datas[i,2] <= l1 :
+                      reward += 60
+          else:
+              if datas[i,0] == 0:
+                  reward += args.k
+          return reward
 
 if __name__ == "__main__":
 
@@ -44,7 +87,7 @@ if __name__ == "__main__":
         Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=False)
         env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"], circuit["max_power"], circuit["Tc"], circuit["hh"])
 
-        sandbox = Retrain(name, "train", env, agent, N=args.N)
+        sandbox = TrainWvote2(name, "train", env, agent, N=args.N)
         sandbox.run()
         sandbox.close(suffix="{}_retrained_k{}".format(name[:-3],str(args.k).replace(".","dot")))
     else:
