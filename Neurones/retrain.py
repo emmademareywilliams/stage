@@ -35,7 +35,7 @@ class TrainWvote(Training):
           l0 = self._env._Tc - 5 * self._env._hh
           l1 = self._env._Tc - 3 * self._env._hh
           l2 = self._env._Tc - self._env._hh
-          l3 = self._env._Tc + self._env._hh
+          #l3 = self._env._Tc + self._env._hh
           if datas[i,3] != 0:
               reward = - abs( datas[i,2] - self._env._Tc)
               if datas[i-1,3] == 0:
@@ -47,10 +47,12 @@ class TrainWvote(Training):
                       reward -= 20
                   # vu qu'on est en récompense négative, ces 2 lignes sont probablement surperflues
                   # et viennent peut-être brouiller la convergence
+                  """
                   if l2 <= datas[i,2] <= l3 :
                       reward += 10
                   if self._env._Tc <= datas[i,2] <= l3 :
                       reward += 20
+                  """
           else:
               reward = -  args.k * datas[i,0] / self._env._max_power
           return reward
@@ -87,7 +89,7 @@ if __name__ == "__main__":
         Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=False)
         env = Environnement(Text, agenda, _tss, _tse, circuit["interval"], circuit["wsize"], circuit["max_power"], circuit["Tc"], circuit["hh"])
 
-        sandbox = TrainWvote2(name, "train", env, agent, N=args.N)
+        sandbox = TrainWvote(name, "train", env, agent, N=args.N)
         sandbox.run()
         sandbox.close(suffix="{}_retrained_k{}".format(name[:-3],str(args.k).replace(".","dot")))
     else:
