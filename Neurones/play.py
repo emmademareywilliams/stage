@@ -9,17 +9,6 @@ joue des épisodes
 
 from RLtoolbox import Training, Environnement, initializeNN, visNN, saveNN
 
-"""
-à installer par python3 -m pip install click
-cf https://palletsprojects.com/
-"""
-import click
-silent = click.prompt('silent mode ? ', type=bool)
-Tc = click.prompt('temperature de consigne ', type=int)
-N = click.prompt('nombre d\'épisodes à jouer ', type=int)
-hh = 1
-modes = ["occupation", "simple"]
-mode = click.prompt('hysteresys simple ou en mode occupation ? ', type=click.Choice(modes))
 
 # le circuit
 interval = 3600
@@ -85,26 +74,50 @@ class EnvHystNocc(Environnement):
 
         return datas
 
-if __name__ == "__main__":
+"""
+si pas présent, à installer par python3 -m pip install click
+cf https://palletsprojects.com/
+"""
+import click
+#silent = click.prompt('silent mode ? ', type=bool)
+#Tc = click.prompt('temperature de consigne ', type=int)
+#N = click.prompt('nombre d\'épisodes à jouer ', type=int)
+hh = 1
+modes = ["occupation", "simple"]
+#mode = click.prompt('hysteresys simple ou en mode occupation ? ', type=click.Choice(modes))
+
+@click.command()
+@click.option('--agent_name', type=str)
+@click.option('--silent', type=bool, prompt='silent mode = sans montrer les replays des épisodes ?')
+@click.option('--tc', type=int, prompt='température de consigne en °C')
+@click.option('--n', type=int, prompt='nombre d\'épisodes à jouer ')
+@click.option('--mode', type=click.Choice(modes), prompt=True, help='hysteresys simple ou en mode occupation ? ')
+def play(agent_name, silent, tc, n, mode):
+    print(silent, tc, n, mode, agent_name)
 
     from tools import getTruth, pickName
+    saved = False
+    if agent_name:
+        import os
+        if os.path.isfile(agent_name):
+            saved = True
+    else:
+        agent_name, saved = pickName()
 
-    name, savedModel = pickName()
-
-    if savedModel == True:
+    if saved == True:
         import tensorflow as tf
-        agent = tf.keras.models.load_model(name)
+        agent = tf.keras.models.load_model(agent_name)
 
         visNN(agent)
 
-        Text, agenda, _tss, _tse = getTruth(circuit, visualCheck=True)
+        Text, agenda, _tss, _tse = getTruth(circuit, visualCheck = not silent)
 
         if mode == "simple":
-            env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
+            env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=R, C=C)
         elif mode == "occupation":
-            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, Tc, hh, R=R, C=C)
+            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=R, C=C)
 
-        sandbox = Training(name, "play", env, agent, N=N)
+        sandbox = Training(agent_name, "play", env, agent, N=n)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
         #sandbox.play(silent=False, ts=1610494340)
         #sandbox.play(silent=False, ts=1577269940)
@@ -112,3 +125,6 @@ if __name__ == "__main__":
         #sandbox.play(silent=False, ts=1608928315)
         sandbox.run(silent=silent)
         sandbox.close()
+
+if __name__ == "__main__":
+    play()
