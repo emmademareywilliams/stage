@@ -91,7 +91,7 @@ modes = ["occupation", "simple"]
 @click.option('--silent', type=bool, prompt='silent mode = sans montrer les replays des épisodes ?')
 @click.option('--tc', type=int, prompt='température de consigne en °C')
 @click.option('--n', type=int, prompt='nombre d\'épisodes à jouer ')
-@click.option('--mode', type=click.Choice(modes), prompt=True, help='hysteresys simple ou en mode occupation ? ')
+@click.option('--mode', type=click.Choice(modes), prompt='hysteresys simple ou en mode occupation ?')
 def play(agent_name, silent, tc, n, mode):
     print(silent, tc, n, mode, agent_name)
 
