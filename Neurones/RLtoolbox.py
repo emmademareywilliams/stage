@@ -571,7 +571,7 @@ class Training:
 
             time.sleep(0.1)
 
-    def close(self, suffix="trained"):
+    def close(self, suffix="trained", RC=None):
         """
         à la fermeture, si on vient de procéder à un entrainement :
         - on enregistre le réseau
@@ -588,6 +588,8 @@ class Training:
 
             pct = round(100*(statsMoy[8]-statsMoy[4])/statsMoy[8], 2)
             title = "{} Pourcentage de gain agent : {} %".format(title, pct)
+            if RC is not None:
+                title = "{} Valeur de R: {} et de C : {}".format(title, RC["R"], RC["C"])
 
             plt.figure(figsize=(20, 10))
             ax1 = plt.subplot(311)

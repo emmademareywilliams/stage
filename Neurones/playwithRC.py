@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
-joue des épisodes
-
-- demande à l'utilisateur de charger un réseau (fonction pickName)
-- en initialise un aléatoirement si l'utilisateur ne donne pas d'indication ou un nom de fichier qui n'existe pas
+joue des épisodes avec des valeurs de (R,C) qui varient
 
 """
 
@@ -23,6 +20,7 @@ max_power = 5 * Cw * 15
 circuit = {"Text":5, "dir": dir,
            "schedule": schedule, "interval": interval, "wsize": wsize}
 
+"""
 Rfamily = [2e-4, 5e-4, 1e-3, 1e-1]
 Cfamily = [2e8,  2e9,  2e9,  2e9]
 # à changer selon la famille (R,C) qu'on veut utiliser :
@@ -31,6 +29,7 @@ R = Rfamily[i]
 C = Cfamily[i]
 R= 3.08814171e-04
 C= 8.63446560e+08
+"""
 
 
 class EnvHyst(Environnement):
@@ -119,6 +118,13 @@ modes = ["occupation", "simple", "industriel"]
 @click.option('--n', type=int, prompt='nombre d\'épisodes à jouer ')
 @click.option('--mode', type=click.Choice(modes), prompt='hysteresys simple ou en mode occupation ?')
 
+import argparse
+parser = argparse.ArgumentParser(description='playing with R and C')
+parser.add_argument("--R", action="store", help="valeur de R", default=3.08814171e-04, type=float)
+parser.add_argument("--C", action="store", help="valeur de C", default=8.63446560e+08, type=float)
+args = parser.parse_args()
+
+
 def play(agent_name, silent, tc, n, mode):
     print(silent, tc, n, mode, agent_name)
 
@@ -140,11 +146,11 @@ def play(agent_name, silent, tc, n, mode):
         Text, agenda, _tss, _tse = getTruth(circuit, visualCheck = not silent)
 
         if mode == "simple":
-            env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=R, C=C)
+            env = EnvHyst(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=args.R, C=args.C)
         elif mode == "occupation":
-            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=R, C=C)
+            env = EnvHystNocc(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=args.R, C=args.C)
         elif mode == "industriel":
-            env = EnvIndus(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=R, C=C)
+            env = EnvIndus(Text, agenda, _tss, _tse, interval, wsize, max_power, tc, hh, R=args.R, C=args.C)
 
         sandbox = Training(agent_name, "play", env, agent, N=n)
         # timestamp pour lequel le modèle ne chauffe pas assez avec un débit de 5 et la famille 1 (R,C) :
@@ -153,7 +159,8 @@ def play(agent_name, silent, tc, n, mode):
         #sandbox.play(silent=False, ts=1589644200)
         #sandbox.play(silent=False, ts=1608928315)
         sandbox.run(silent=silent)
-        sandbox.close()
+        RC = {"R": args.R, "C": args.C}
+        sandbox.close(RC)
 
 if __name__ == "__main__":
     play()
