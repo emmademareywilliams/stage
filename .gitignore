@@ -3,6 +3,7 @@ Neurones/archives*
 Neurones/RL*
 Neurones/assets*
 Neurones/todrop
+Neurones/entrainement_a_la_chaine
 *.pyc
 __pycache__/
 *.py[cod]
