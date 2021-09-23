@@ -6,7 +6,7 @@ reinforcement learning toolbox
 # pour jouer à l'infini, mettre MAX_EPISODES = None
 # dans le cas d'un entrainement à l'infini, attention dans ce cas à la mémoire vive
 # à surveiller via la commande `watch -n 1 free`
-MAX_EPISODES = 900
+MAX_EPISODES = 500
 
 # taille d'un batch d'entrainement
 BATCH_SIZE = 50
@@ -571,7 +571,7 @@ class Training:
 
             time.sleep(0.1)
 
-    def close(self, suffix="trained", RC=None):
+    def close(self, RC, suffix="trained"):
         """
         à la fermeture, si on vient de procéder à un entrainement :
         - on enregistre le réseau
@@ -587,7 +587,7 @@ class Training:
             title = "{} Conso moyenne agent : {} / Conso moyenne modèle : {} \n".format(title, statsMoy[4], statsMoy[8])
 
             pct = round(100*(statsMoy[8]-statsMoy[4])/statsMoy[8], 2)
-            title = "{} Pourcentage de gain agent : {} %".format(title, pct)
+            title = "{} Pourcentage de gain agent : {} %\n".format(title, pct)
             if RC is not None:
                 title = "{} Valeur de R: {} et de C : {}".format(title, RC["R"], RC["C"])
 
