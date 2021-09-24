@@ -77,14 +77,7 @@ hh = 1
 modes = ["occupation", "simple", "industriel"]
 mode = click.prompt('hysteresys simple ou en mode occupation ? ', type=click.Choice(modes))
 
-"""
-@click.command()
-@click.option('--agent_name', type=str)
-@click.option('--silent', type=bool, prompt='silent mode = sans montrer les replays des épisodes ?')
-@click.option('--tc', type=int, prompt='température de consigne en °C')
-@click.option('--n', type=int, prompt='nombre d\'épisodes à jouer ')
-@click.option('--mode', type=click.Choice(modes), prompt='hysteresys simple ou en mode occupation ?')
-"""
+
 
 if __name__ == "__main__":
 
